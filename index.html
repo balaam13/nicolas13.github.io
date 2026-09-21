@@ -26,7 +26,8 @@
         }
     </script>
     <style>
-        body { background-color: #1A1D24; color: #E4E6EB; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { background-color: #1A1D24; color: #F3F4F6; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
         .industrial-border { border: 1.5px solid rgba(255, 255, 255, 0.18); }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #1A1D24; }
@@ -37,44 +38,44 @@
 
     <!-- MODAL DE INICIO (CONTEXTO OPERATIVO) -->
     <div id="setup-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-ind-panel industrial-border rounded-lg max-w-md w-full p-6 shadow-2xl">
-            <div class="flex flex-col items-center text-center mb-5 border-b border-[rgba(255,255,255,0.18)] pb-4">
-                <!-- LOGO COMPLETO Y NÍTIDO EN LOGIN -->
-                <div class="w-48 h-20 bg-[#1A1D24] industrial-border rounded-lg overflow-hidden flex items-center justify-center p-2 mb-3 shadow-inner">
-                    <img src="imagen(162).jpg" alt="EMPAQPLAST S.A." class="w-full h-full object-contain" onerror="this.src='https://placehold.co/180x60/0066cc/ffffff?text=EMPAQPLAST'">
+        <div class="bg-ind-panel industrial-border rounded-xl max-w-md w-full p-7 shadow-2xl">
+            <div class="flex flex-col items-center text-center mb-6 border-b border-[rgba(255,255,255,0.18)] pb-5">
+                <!-- LOGO COMPLETO Y AJUSTADO EN LOGIN -->
+                <div class="w-full h-24 bg-[#1A1D24] industrial-border rounded-lg overflow-hidden flex items-center justify-center p-2 mb-3 shadow-inner">
+                    <img src="imagen(162).jpg" alt="EMPAQPLAST S.A." class="w-full h-full object-fill rounded" onerror="this.src='https://placehold.co/200x80/0066cc/ffffff?text=EMPAQPLAST'">
                 </div>
-                <h2 class="text-xs font-bold text-ind-light uppercase tracking-widest">Prevenir hoy, producir mañana</h2>
-                <p class="text-[11px] text-slate-400 mt-0.5">Mantenimiento Autónomo (TPM) · Sistema ABE</p>
+                <h2 class="text-base font-extrabold text-white tracking-wider uppercase">EMPAQPLAST S.A.</h2>
+                <p class="text-xs text-slate-400 mt-1 font-medium">Mantenimiento Autónomo (TPM) · Sistema ABE</p>
             </div>
             
             <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Estación / Equipo:</label>
-                    <select id="select-maquina" class="w-full bg-[#1A1D24] industrial-border rounded px-3 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent">
+                    <label class="block font-semibold text-slate-300 mb-1.5">Estación / Equipo:</label>
+                    <select id="select-maquina" class="w-full bg-[#1A1D24] industrial-border rounded-lg px-3.5 py-3 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                         <option value="bole2600">Bole 2600 EK-2 (Producción)</option>
                         <option value="haitian">Inyectora Haitian</option>
                         <option value="sipa">SIPA Sopladora</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Nombre del operador:</label>
-                    <input type="text" id="operator-name" placeholder="Ej. Nicolas Espinosa" class="w-full bg-[#1A1D24] industrial-border rounded px-3 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent">
+                    <label class="block font-semibold text-slate-300 mb-1.5">Nombre del operador:</label>
+                    <input type="text" id="operator-name" placeholder="Ej. Nicolas Espinosa" class="w-full bg-[#1A1D24] industrial-border rounded-lg px-3.5 py-3 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                 </div>
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Seleccione el turno:</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="setTurno(1)" id="btn-turno-1" class="py-2.5 px-3 rounded text-xs font-bold border border-ind-accent bg-ind-accent text-white transition">TURNO 1</button>
-                        <button type="button" onclick="setTurno(2)" id="btn-turno-2" class="py-2.5 px-3 rounded text-xs font-bold industrial-border bg-[#1A1D24] text-slate-400 transition hover:border-slate-400">TURNO 2</button>
+                    <label class="block font-semibold text-slate-300 mb-1.5">Seleccione el turno:</label>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button type="button" onclick="setTurno(1)" id="btn-turno-1" class="py-3 px-3 rounded-lg text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow">TURNO 1</button>
+                        <button type="button" onclick="setTurno(2)" id="btn-turno-2" class="py-3 px-3 rounded-lg text-xs font-bold industrial-border bg-[#1A1D24] text-slate-400 transition hover:border-slate-400">TURNO 2</button>
                     </div>
                 </div>
-                <button onclick="iniciarSesion()" class="w-full mt-2 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3 rounded text-xs tracking-wider uppercase transition shadow">Iniciar sesión de turno</button>
+                <button onclick="iniciarSesion()" class="w-full mt-2 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-lg text-xs tracking-wider uppercase transition shadow-lg">Iniciar sesión de turno</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL INDUSTRIAL: REPORTAR ANOMALÍA -->
     <div id="anomalia-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-ind-panel industrial-border rounded-lg max-w-lg w-full p-6 shadow-2xl">
+        <div class="bg-ind-panel industrial-border rounded-xl max-w-lg w-full p-6 shadow-2xl">
             <div class="flex items-center space-x-3 mb-4 border-b border-[rgba(255,255,255,0.18)] pb-3">
                 <div class="w-8 h-8 rounded bg-rose-500/25 border border-rose-500/50 flex items-center justify-center text-rose-400 font-bold">⚠</div>
                 <div>
@@ -85,8 +86,8 @@
 
             <div class="space-y-3.5 text-xs">
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Tipo de anomalía:</label>
-                    <select id="tipo-anomalia-select" class="w-full bg-[#1A1D24] industrial-border rounded px-3 py-2 text-white focus:outline-none focus:border-ind-accent">
+                    <label class="block font-semibold text-slate-300 mb-1">Tipo de anomalía:</label>
+                    <select id="tipo-anomalia-select" class="w-full bg-[#1A1D24] industrial-border rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-ind-accent">
                         <option value="Contaminación">Contaminación de material</option>
                         <option value="Desgaste / Falla física">Desgaste mecánico / Fisura</option>
                         <option value="Fuga / Ruido">Fuga de aire / Ruido anormal</option>
@@ -95,14 +96,14 @@
                 </div>
 
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Descripción detallada:</label>
-                    <textarea id="texto-anomalia" rows="2" placeholder="Describa el problema encontrado..." class="w-full bg-[#1A1D24] industrial-border rounded p-2.5 text-white focus:outline-none focus:border-ind-accent"></textarea>
+                    <label class="block font-semibold text-slate-300 mb-1">Descripción detallada:</label>
+                    <textarea id="texto-anomalia" rows="2" placeholder="Describa el problema encontrado..." class="w-full bg-[#1A1D24] industrial-border rounded-lg p-3 text-white focus:outline-none focus:border-ind-accent"></textarea>
                 </div>
 
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Evidencia fotográfica (Opcional):</label>
+                    <label class="block font-semibold text-slate-300 mb-1">Evidencia fotográfica (Opcional):</label>
                     <div class="flex items-center space-x-3">
-                        <label class="flex-1 bg-[#1A1D24] hover:bg-[#323743] industrial-border rounded px-3 py-2 text-center cursor-pointer transition text-slate-300 text-xs font-medium">
+                        <label class="flex-1 bg-[#1A1D24] hover:bg-[#323743] industrial-border rounded-lg px-3 py-2.5 text-center cursor-pointer transition text-slate-300 text-xs font-medium">
                             <span>📷 + Agregar fotografía</span>
                             <input type="file" id="foto-anomalia" accept="image/*" class="hidden" onchange="mostrarNombreArchivo(this)">
                         </label>
@@ -111,58 +112,57 @@
                 </div>
 
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Observación para mantenimiento:</label>
-                    <input type="text" id="observacion-mantenimiento" placeholder="Ej. Requiere revisión de técnico de turno" class="w-full bg-[#1A1D24] industrial-border rounded px-3 py-2 text-white focus:outline-none focus:border-ind-accent">
+                    <label class="block font-semibold text-slate-300 mb-1">Observación para mantenimiento:</label>
+                    <input type="text" id="observacion-mantenimiento" placeholder="Ej. Requiere revisión de técnico de turno" class="w-full bg-[#1A1D24] industrial-border rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-ind-accent">
                 </div>
 
                 <div class="flex space-x-3 pt-2">
-                    <button onclick="guardarAnomalia()" class="flex-1 bg-rose-700 hover:bg-rose-600 text-white font-bold py-2.5 rounded text-xs uppercase tracking-wider transition">Registrar</button>
-                    <button onclick="cerrarModalAnomalia()" class="bg-[#1A1D24] hover:bg-[#323743] text-slate-300 px-4 py-2.5 rounded text-xs uppercase tracking-wider transition industrial-border">Cancelar</button>
+                    <button onclick="guardarAnomalia()" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 rounded-lg text-xs uppercase tracking-wider transition shadow">Registrar</button>
+                    <button onclick="cerrarModalAnomalia()" class="bg-[#1A1D24] hover:bg-[#323743] text-slate-300 px-5 py-3 rounded-lg text-xs uppercase tracking-wider transition industrial-border">Cancelar</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ENCABEZADO INDUSTRIAL PRINCIPAL -->
-    <header class="bg-ind-panel border-b border-[rgba(255,255,255,0.18)] px-6 py-3.5 flex items-center justify-between shadow-md">
+    <header class="bg-ind-panel border-b border-[rgba(255,255,255,0.18)] px-6 py-4 flex items-center justify-between shadow-md">
         <div class="flex items-center space-x-5">
             <!-- LOGO COMPLETO Y NÍTIDO EN HEADER -->
-            <div class="w-32 h-10 bg-[#1A1D24] industrial-border rounded overflow-hidden flex items-center justify-center p-1">
-                <img src="imagen(162).jpg" alt="Logo" class="w-full h-full object-contain">
+            <div class="w-36 h-11 bg-[#1A1D24] industrial-border rounded-lg overflow-hidden flex items-center justify-center p-1 shadow-inner">
+                <img src="imagen(162).jpg" alt="Logo" class="w-full h-full object-fill rounded">
             </div>
             <div class="border-l border-[rgba(255,255,255,0.18)] pl-4">
-                <!-- MÁQUINA COMO ELEMENTO MÁS GRANDE E IZQUIERDA -->
-                <h1 id="header-maq-title" class="text-base font-black text-white tracking-tight">BOLE 2600 EK-2</h1>
-                <p class="text-[10px] text-ind-light font-bold tracking-wider uppercase mt-[-2px]">Prevenir hoy, producir mañana · TPM</p>
+                <h1 id="header-maq-title" class="text-lg font-extrabold text-white tracking-tight">BOLE 2600 EK-2</h1>
+                <p class="text-[11px] text-slate-400 font-semibold tracking-wide mt-[-2px]">EMPAQPLAST S.A. — Mantenimiento Autónomo</p>
             </div>
         </div>
         <div class="flex items-center space-x-4">
-            <div class="text-right bg-[#1A1D24] px-3 py-1.5 rounded industrial-border">
+            <div class="text-right bg-[#1A1D24] px-3.5 py-2 rounded-lg industrial-border shadow-inner">
                 <span id="display-operator" class="block text-xs font-bold text-slate-200">Operador: --</span>
-                <span id="display-turno" class="block text-[10px] text-slate-400 font-mono">TURNO 1 · ACTIVO</span>
+                <span id="display-turno" class="block text-[10px] text-slate-400 font-mono uppercase">TURNO 1 · ACTIVO</span>
             </div>
-            <button onclick="cambiarOperador()" class="text-xs bg-[#1A1D24] hover:bg-[#323743] text-slate-300 px-3 py-2 rounded industrial-border transition font-medium">Cambiar</button>
+            <button onclick="cambiarOperador()" class="text-xs bg-[#1A1D24] hover:bg-[#323743] text-slate-300 px-3.5 py-2.5 rounded-lg industrial-border transition font-semibold shadow-sm">Cambiar</button>
         </div>
     </header>
 
     <!-- BARRA DE CONTEXTO OPERATIVO Y PROGRESO -->
-    <section class="bg-ind-panel/40 border-b border-[rgba(255,255,255,0.18)] px-6 py-2.5">
+    <section class="bg-ind-panel/40 border-b border-[rgba(255,255,255,0.18)] px-6 py-3">
         <div class="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="flex items-center space-x-6">
                 <div>
-                    <span class="text-[10px] text-slate-400 font-medium block">Modo de operación</span>
+                    <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Modo de operación</span>
                     <span class="text-xs font-bold text-white">Inspección de limpieza / TPM</span>
                 </div>
                 <div class="flex space-x-2">
-                    <button onclick="cambiarModo('limpieza')" id="tab-limpieza" class="px-3 py-1.5 rounded text-xs font-bold bg-ind-accent text-white transition shadow">Limpieza (16)</button>
-                    <button onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-3 py-1.5 rounded text-xs font-bold bg-[#1A1D24] text-slate-400 hover:text-white transition industrial-border">Monitoreo (22)</button>
+                    <button onclick="cambiarModo('limpieza')" id="tab-limpieza" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-ind-accent text-white transition shadow">Limpieza (16)</button>
+                    <button onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-[#1A1D24] text-slate-400 hover:text-white transition industrial-border font-medium">Monitoreo (22)</button>
                 </div>
             </div>
             <div class="flex items-center space-x-4 w-full md:w-auto">
                 <div class="text-right">
-                    <span id="texto-progreso-num" class="text-xs font-bold text-slate-300 font-mono">0 de 16 puntos · 0%</span>
+                    <span id="texto-progreso-num" class="text-xs font-bold text-slate-200 font-mono">0 de 16 puntos · 0%</span>
                 </div>
-                <div class="w-48 bg-[#1A1D24] h-2 rounded-full overflow-hidden industrial-border">
+                <div class="w-48 bg-[#1A1D24] h-2.5 rounded-full overflow-hidden industrial-border">
                     <div id="barra-progreso-fill" class="bg-ind-accent h-full transition-all duration-300" style="width: 0%;"></div>
                 </div>
             </div>
@@ -175,101 +175,99 @@
         <!-- COLUMNA IZQUIERDA: 3D INDUSTRIAL + LISTA DE PUNTOS -->
         <div class="w-full md:w-5/12 flex flex-col gap-4">
             <!-- VISOR 3D ESTILO INDUSTRIAL -->
-            <div class="relative bg-ind-panel industrial-border rounded-lg overflow-hidden shadow-md h-[280px] flex items-center justify-center">
+            <div class="relative bg-ind-panel industrial-border rounded-xl overflow-hidden shadow-md h-[280px] flex items-center justify-center">
                 <div id="canvas-container" class="absolute inset-0"></div>
                 <!-- Indicador flotante 3D -->
-                <div class="absolute top-3 left-3 bg-[#1A1D24]/90 backdrop-blur px-3 py-1 rounded industrial-border text-[11px] font-mono text-slate-200 shadow flex items-center space-x-2 pointer-events-none">
+                <div class="absolute top-3 left-3 bg-[#1A1D24]/90 backdrop-blur px-3 py-1.5 rounded-lg industrial-border text-[11px] font-mono text-slate-200 shadow flex items-center space-x-2 pointer-events-none">
                     <span class="w-2 h-2 rounded-full bg-ind-accent animate-pulse"></span>
                     <span id="indicador-3d-texto">L-001 · Punto seleccionado</span>
                 </div>
-                <div class="absolute bottom-3 right-3 bg-black/50 px-2.5 py-1 rounded industrial-border text-[10px] text-slate-400 pointer-events-none font-mono">
+                <div class="absolute bottom-3 right-3 bg-black/50 px-3 py-1 rounded-lg industrial-border text-[10px] text-slate-400 pointer-events-none font-mono">
                     Rotar: Click + Arrastrar | Zoom: Rueda
                 </div>
             </div>
 
             <!-- LISTA DE INSPECCIÓN REAL (TIPO TABLA) -->
-            <div class="bg-ind-panel industrial-border rounded-lg p-4 flex-1 flex flex-col shadow-md">
-                <div class="flex items-center justify-between mb-2.5 border-b border-[rgba(255,255,255,0.18)] pb-2">
-                    <h3 class="text-xs font-bold text-slate-300 tracking-wider">Puntos de verificación</h3>
-                    <span class="text-[10px] text-slate-400 font-mono">Estado actual</span>
+            <div class="bg-ind-panel industrial-border rounded-xl p-4 flex-1 flex flex-col shadow-md">
+                <div class="flex items-center justify-between mb-3 border-b border-[rgba(255,255,255,0.18)] pb-2.5">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Puntos de verificación</h3>
+                    <span class="text-[10px] text-slate-400 font-mono uppercase">Estado actual</span>
                 </div>
-                <div id="puntos-grid" class="flex flex-col space-y-1.5 overflow-y-auto max-h-[310px] custom-scrollbar pr-1">
+                <div id="puntos-grid" class="flex flex-col space-y-2 overflow-y-auto max-h-[310px] custom-scrollbar pr-1">
                     <!-- Generado por JS -->
                 </div>
             </div>
         </div>
 
         <!-- COLUMNA DERECHA: PANELES PLANOS Y LÍNEAS DIVISORIAS -->
-        <div class="w-full md:w-7/12 bg-ind-panel industrial-border rounded-lg p-6 shadow-md flex flex-col justify-between">
+        <div class="w-full md:w-7/12 bg-ind-panel industrial-border rounded-xl p-6 shadow-md flex flex-col justify-between">
             <div id="ficha-content">
                 <!-- ENCABEZADO COMPACTO INDUSTRIAL -->
-                <div class="border-b border-[rgba(255,255,255,0.18)] pb-3 mb-4">
+                <div class="border-b border-[rgba(255,255,255,0.18)] pb-3.5 mb-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="text-xs font-mono text-ind-accent font-bold" id="ficha-codigo">L-001</span>
+                            <span class="text-xs font-mono text-ind-accent font-extrabold" id="ficha-codigo">L-001</span>
                             <span class="text-xs text-slate-500 mx-2">|</span>
-                            <span class="text-xs font-bold text-white tracking-wide" id="ficha-componente">TOLVA DE ALIMENTACIÓN</span>
+                            <span class="text-sm font-extrabold text-white tracking-wide" id="ficha-componente">TOLVA DE ALIMENTACIÓN</span>
                         </div>
-                        <span class="text-[10px] font-mono bg-[#1A1D24] industrial-border px-2.5 py-1 rounded text-slate-300" id="ficha-sistema-badge">ALIMENTACIÓN DE MATERIAL</span>
+                        <span class="text-[10px] font-mono bg-[#1A1D24] industrial-border px-3 py-1 rounded-lg text-slate-300 uppercase font-semibold" id="ficha-sistema-badge">ALIMENTACIÓN DE MATERIAL</span>
                     </div>
-                    <p class="text-[11px] text-slate-400 mt-1">Punto de verificación · Limpieza TPM</p>
+                    <p class="text-[11px] text-slate-400 mt-1 font-medium">Punto de verificación · Limpieza TPM</p>
                 </div>
 
                 <!-- DOS FOTOS LADO A LADO CON DIFERENCIACIÓN VISUAL DE ESTADO ACTIVO -->
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div id="card-foto-1" class="bg-[#1A1D24] border-[1.5px] border-ind-accent rounded-lg overflow-hidden flex flex-col transition-all shadow-sm">
+                <div class="grid grid-cols-2 gap-3.5 mb-5">
+                    <div id="card-foto-1" class="bg-[#1A1D24] border-[1.5px] border-ind-accent rounded-xl overflow-hidden flex flex-col transition-all shadow-sm">
                         <div class="h-32 bg-[#1A1D24] relative">
                             <img id="ficha-imagen-1" src="" alt="Foto 1" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/1A1D24/38bdf8?text=Vista+Externa'">
                         </div>
-                        <div class="p-1.5 bg-[#1A1D24] border-t border-ind-accent text-[10px] font-medium text-slate-200 text-center truncate flex items-center justify-center space-x-1.5">
+                        <div class="p-2 bg-[#1A1D24] border-t border-ind-accent text-[11px] font-semibold text-slate-200 text-center truncate flex items-center justify-center space-x-1.5">
                             <span class="w-1.5 h-1.5 rounded-full bg-ind-accent animate-pulse"></span>
                             <span id="ficha-label-1">Así se ve tu tolva</span>
                         </div>
                     </div>
-                    <div id="card-foto-2" class="bg-[#1A1D24] industrial-border rounded-lg overflow-hidden flex flex-col transition-all opacity-80">
+                    <div id="card-foto-2" class="bg-[#1A1D24] industrial-border rounded-xl overflow-hidden flex flex-col transition-all opacity-80">
                         <div class="h-32 bg-[#1A1D24] relative">
                             <img id="ficha-imagen-2" src="" alt="Foto 2" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/1A1D24/38bdf8?text=Vista+Interna'">
                         </div>
-                        <div class="p-1.5 bg-[#1A1D24] border-t border-[rgba(255,255,255,0.18)] text-[10px] font-medium text-slate-400 text-center truncate" id="ficha-label-2">Por dentro, con pellets</div>
+                        <div class="p-2 bg-[#1A1D24] border-t border-[rgba(255,255,255,0.18)] text-[11px] font-medium text-slate-400 text-center truncate" id="ficha-label-2">Por dentro, con pellets</div>
                     </div>
                 </div>
 
                 <!-- SECCIÓN DE ESPECIFICACIONES TÉCNICAS PLANAS -->
                 <div class="space-y-4 text-xs border-t border-[rgba(255,255,255,0.18)] pt-4">
                     <div>
-                        <span class="text-[10px] font-bold text-slate-400 block mb-1">Estándar de ejecución (qué hacer)</span>
-                        <p class="text-slate-200 bg-[#1A1D24] p-3 rounded industrial-border leading-relaxed" id="ficha-estandar">-</p>
+                        <span class="text-[11px] font-bold text-slate-400 block mb-1 uppercase tracking-wider">Estándar de ejecución (qué hacer)</span>
+                        <p class="text-slate-200 bg-[#1A1D24] p-3.5 rounded-xl industrial-border leading-relaxed font-normal text-sm" id="ficha-estandar">-</p>
                     </div>
 
                     <div>
-                        <span class="text-[10px] font-bold text-slate-400 block mb-1">Condición anormal a reportar ("ojo con esto")</span>
-                        <div class="bg-amber-950/20 border border-amber-600/40 p-3 rounded text-amber-200 font-medium leading-relaxed" id="ficha-anormal">-</div>
+                        <span class="text-[11px] font-bold text-slate-400 block mb-1 uppercase tracking-wider">Condición anormal a reportar ("ojo con esto")</span>
+                        <div class="bg-amber-950/20 border border-amber-600/40 p-3.5 rounded-xl text-amber-200 font-medium leading-relaxed text-sm" id="ficha-anormal">-</div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3 pt-1">
-                        <div class="bg-[#1A1D24] p-2.5 rounded industrial-border">
-                            <span class="text-[10px] text-slate-400 block font-medium">Material / herramienta</span>
-                            <span class="text-slate-200 font-medium text-xs mt-0.5 block" id="ficha-material">-</span>
+                    <div class="grid grid-cols-2 gap-3.5 pt-1">
+                        <div class="bg-[#1A1D24] p-3 rounded-xl industrial-border">
+                            <span class="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">Material / herramienta</span>
+                            <span class="text-slate-200 font-semibold text-xs mt-1 block" id="ficha-material">-</span>
                         </div>
-                        <div class="bg-[#1A1D24] p-2.5 rounded industrial-border">
-                            <span class="text-[10px] text-slate-400 block font-medium">Tiempo estimado</span>
-                            <span class="text-slate-200 font-medium text-xs mt-0.5 block font-mono" id="ficha-tiempo">5 min</span>
+                        <div class="bg-[#1A1D24] p-3 rounded-xl industrial-border">
+                            <span class="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">Tiempo estimado</span>
+                            <span class="text-slate-200 font-semibold text-xs mt-1 block font-mono" id="ficha-tiempo">5 min</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- BOTONES DE ACCIÓN INDUSTRIALES (VERDE Y ROJO SÓLIDO, MISMO TEMA) -->
+            <!-- BOTONES DE ACCIÓN INDUSTRIALES SIN EMOJIS (VERDE Y ROJO SÓLIDO) -->
             <div class="mt-6 pt-4 border-t border-[rgba(255,255,255,0.18)] flex items-center justify-between">
-                <span id="trazabilidad-estado" class="text-[11px] text-slate-400 font-mono">Estado: Pendiente de verificación</span>
+                <span id="trazabilidad-estado" class="text-xs text-slate-400 font-mono font-medium">Estado: Pendiente de verificación</span>
                 <div class="flex space-x-3">
-                    <button onclick="marcarEstado('listo')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2.5 px-4 rounded text-xs uppercase tracking-wider transition shadow flex items-center space-x-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        <span>Verificación realizada</span>
+                    <button onclick="marcarEstado('listo')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg">
+                        VERIFICACIÓN REALIZADA
                     </button>
-                    <button onclick="abrirModalAnomalia()" class="bg-rose-700 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded text-xs uppercase tracking-wider transition shadow flex items-center space-x-1.5">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        <span>Reportar anomalía</span>
+                    <button onclick="abrirModalAnomalia()" class="bg-rose-700 hover:bg-rose-600 text-white font-bold py-3 px-5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg">
+                        REPORTAR ANOMALÍA
                     </button>
                 </div>
             </div>
@@ -332,11 +330,11 @@
         function setTurno(t) {
             turnoActual = t;
             if(t === 1) {
-                document.getElementById('btn-turno-1').className = "py-2.5 px-3 rounded text-xs font-bold border border-ind-accent bg-ind-accent text-white transition";
-                document.getElementById('btn-turno-2').className = "py-2.5 px-3 rounded text-xs font-bold industrial-border bg-[#1A1D24] text-slate-400 transition hover:border-slate-400";
+                document.getElementById('btn-turno-1').className = "py-3 px-3 rounded-lg text-xs font-bold border border-ind-accent bg-ind-accent text-white transition";
+                document.getElementById('btn-turno-2').className = "py-3 px-3 rounded-lg text-xs font-bold industrial-border bg-[#1A1D24] text-slate-400 transition hover:border-slate-400";
             } else {
-                document.getElementById('btn-turno-2').className = "py-2.5 px-3 rounded text-xs font-bold border border-ind-accent bg-ind-accent text-white transition";
-                document.getElementById('btn-turno-1').className = "py-2.5 px-3 rounded text-xs font-bold industrial-border bg-[#1A1D24] text-slate-400 transition hover:border-slate-400";
+                document.getElementById('btn-turno-2').className = "py-3 px-3 rounded-lg text-xs font-bold border border-ind-accent bg-ind-accent text-white transition";
+                document.getElementById('btn-turno-1').className = "py-3 px-3 rounded-lg text-xs font-bold industrial-border bg-[#1A1D24] text-slate-400 transition hover:border-slate-400";
             }
         }
 
@@ -367,11 +365,11 @@
             modoActual = modo;
             puntoSeleccionadoIdx = 0;
             if(modo === 'limpieza') {
-                document.getElementById('tab-limpieza').className = "px-3 py-1.5 rounded text-xs font-bold bg-ind-accent text-white transition shadow";
-                document.getElementById('tab-monitoreo').className = "px-3 py-1.5 rounded text-xs font-bold bg-[#1A1D24] text-slate-400 hover:text-white transition industrial-border";
+                document.getElementById('tab-limpieza').className = "px-3.5 py-2 rounded-lg text-xs font-bold bg-ind-accent text-white transition shadow";
+                document.getElementById('tab-monitoreo').className = "px-3.5 py-2 rounded-lg text-xs font-bold bg-[#1A1D24] text-slate-400 hover:text-white transition industrial-border font-medium";
             } else {
-                document.getElementById('tab-monitoreo').className = "px-3 py-1.5 rounded text-xs font-bold bg-ind-accent text-white transition shadow";
-                document.getElementById('tab-limpieza').className = "px-3 py-1.5 rounded text-xs font-bold bg-[#1A1D24] text-slate-400 hover:text-white transition industrial-border";
+                document.getElementById('tab-monitoreo').className = "px-3.5 py-2 rounded-lg text-xs font-bold bg-ind-accent text-white transition shadow";
+                document.getElementById('tab-limpieza').className = "px-3.5 py-2 rounded-lg text-xs font-bold bg-[#1A1D24] text-slate-400 hover:text-white transition industrial-border font-medium";
             }
             actualizarInterfaz();
         }
@@ -407,14 +405,14 @@
                 }
 
                 const div = document.createElement('div');
-                div.className = `px-3 py-2 rounded border-[1.5px] cursor-pointer transition flex items-center justify-between text-xs font-mono ${colorClass}`;
+                div.className = `px-3.5 py-2.5 rounded-lg border-[1.5px] cursor-pointer transition flex items-center justify-between text-xs font-mono ${colorClass}`;
                 div.innerHTML = `
-                    <div class="flex items-center space-x-2.5 truncate">
+                    <div class="flex items-center space-x-3 truncate">
                         <span class="font-bold w-4 text-center">${icon}</span>
                         <span class="font-bold text-white">${item.codigo}</span>
-                        <span class="text-slate-300 truncate font-sans">${item.componente}</span>
+                        <span class="text-slate-300 truncate font-sans font-medium">${item.componente}</span>
                     </div>
-                    <span class="text-[10px] uppercase font-sans tracking-wider px-1.5 py-0.5 rounded bg-[#1A1D24] industrial-border">${textState}</span>
+                    <span class="text-[10px] uppercase font-sans tracking-wider px-2 py-0.5 rounded bg-[#1A1D24] industrial-border font-semibold">${textState}</span>
                 `;
                 div.onclick = () => seleccionarPunto(idx);
                 grid.appendChild(div);
@@ -456,7 +454,7 @@
                 img1.src = `https://placehold.co/300x200/1A1D24/38bdf8?text=${item.codigo}+-+Externa`;
             }
             lbl1.innerText = item.label1 || "Vista general";
-            card1.className = "bg-[#1A1D24] border-[1.5px] border-ind-accent rounded-lg overflow-hidden flex flex-col transition-all shadow-sm";
+            card1.className = "bg-[#1A1D24] border-[1.5px] border-ind-accent rounded-xl overflow-hidden flex flex-col transition-all shadow-sm";
 
             // FOTO 2 (INACTIVA)
             const img2 = document.getElementById('ficha-imagen-2');
@@ -468,20 +466,20 @@
                 img2.src = `https://placehold.co/300x200/1A1D24/38bdf8?text=${item.codigo}+-+Detalle`;
             }
             lbl2.innerText = item.label2 || "Detalle / Interna";
-            card2.className = "bg-[#1A1D24] industrial-border rounded-lg overflow-hidden flex flex-col transition-all opacity-80";
+            card2.className = "bg-[#1A1D24] industrial-border rounded-xl overflow-hidden flex flex-col transition-all opacity-80";
 
             const estadoKey = `${modoActual}_${puntoSeleccionadoIdx}`;
             const dataEstado = estadosPuntos[estadoKey];
             const trazabilidadElem = document.getElementById('trazabilidad-estado');
             if(dataEstado && dataEstado.status === 'listo') {
                 trazabilidadElem.innerHTML = `✓ Verificación registrada · ${operadorActual || 'Operador'}`;
-                trazabilidadElem.className = "text-[11px] text-emerald-400 font-mono font-medium";
+                trazabilidadElem.className = "text-xs text-emerald-400 font-mono font-bold";
             } else if(dataEstado && dataEstado.status === 'anomalia') {
                 trazabilidadElem.innerHTML = `⚠ Anomalía reportada · ${dataEstado.tipo || 'General'}`;
-                trazabilidadElem.className = "text-[11px] text-rose-400 font-mono font-medium";
+                trazabilidadElem.className = "text-xs text-rose-400 font-mono font-bold";
             } else {
                 trazabilidadElem.innerHTML = `Estado: Pendiente de inspección`;
-                trazabilidadElem.className = "text-[11px] text-slate-400 font-mono";
+                trazabilidadElem.className = "text-xs text-slate-400 font-mono font-medium";
             }
         }
 
@@ -570,7 +568,7 @@
         machineGroup.add(baseMesh);
 
         const bodyGeo = new THREE.CylinderGeometry(0.9, 0.7, 2.2, 32);
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, metalness: 0.5, roughness: 0.3 });
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0066cc, metalness: 0.5, roughness: 0.3 });
         const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
         bodyMesh.position.set(0, 1.4, 0);
         bodyMesh.castShadow = true;
