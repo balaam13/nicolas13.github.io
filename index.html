@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMPAQPLAST S.A. - Guía ABE Interactiva: Bole 2600 EK-2</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js para el modelo 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        empaqplast: {
+                            dark: '#0f172a',
+                            navy: '#1e293b',
+                            blue: '#0066cc',
+                            light: '#e0f2fe',
+                            accent: '#38bdf8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0b1120; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- MODAL DE INICIO (NOMBRE Y TURNO) -->
+    <div id="setup-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-empaqplast-navy border border-empaqplast-blue/40 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-empaqplast-blue/20 text-empaqplast-accent mb-3 text-2xl font-bold border border-empaqplast-blue/50">e</div>
+                <h2 class="text-xl font-bold text-white">EMPAQPLAST S.A.</h2>
+                <p class="text-xs text-slate-400 mt-1">Mantenimiento Autónomo - Bole 2600 EK-2</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Nombre del Operador:</label>
+                    <input type="text" id="operator-name" placeholder="Ej. Nicolas Espinosa" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-empaqplast-accent">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Seleccione el Turno:</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" onclick="setTurno(1)" id="btn-turno-1" class="py-2.5 px-4 rounded-lg text-sm font-semibold border border-empaqplast-blue bg-empaqplast-blue text-white transition-all shadow-md">Turno 1</button>
+                        <button type="button" onclick="setTurno(2)" id="btn-turno-2" class="py-2.5 px-4 rounded-lg text-sm font-semibold border border-slate-700 bg-slate-900 text-slate-400 transition-all">Turno 2</button>
+                    </div>
+                </div>
+                <button onclick="iniciarSesion()" class="w-full mt-2 bg-empaqplast-blue hover:bg-blue-600 text-white font-semibold py-3 rounded-lg text-sm transition-all shadow-lg shadow-blue-900/30">Comenzar Ronda ABE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ENCABEZADO CORPORATIVO -->
+    <header class="bg-empaqplast-navy border-b border-slate-800 px-4 py-3 flex items-center justify-between shadow-md">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-lg bg-empaqplast-blue flex items-center justify-center font-bold text-white shadow-inner">e</div>
+            <div>
+                <h1 class="text-sm font-bold text-white tracking-wide">EMPAQPLAST S.A. <span class="text-xs font-normal text-empaqplast-accent">| Damos forma a tus ideas</span></h1>
+                <p class="text-xs text-slate-400">Bole 2600 EK-2 — Guía ABE Interactiva</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3">
+            <div class="text-right hidden sm:block">
+                <span id="display-operator" class="block text-xs font-semibold text-white">Operador: --</span>
+                <span id="display-turno" class="block text-[10px] text-empaqplast-accent font-medium">Turno: --</span>
+            </div>
+            <button onclick="cambiarOperador()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">Cambiar</button>
+        </div>
+    </header>
+
+    <!-- PESTAÑAS DE MODOS -->
+    <nav class="bg-slate-900 border-b border-slate-800 px-4 py-2 flex justify-center space-x-4">
+        <button onclick="cambiarModo('limpieza')" id="tab-limpieza" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-empaqplast-blue text-white shadow transition">Actividades de Limpieza (16)</button>
+        <button onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 transition">Actividades de Monitoreo (22)</button>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 flex flex-col md:flex-row p-4 gap-4 max-w-7xl mx-auto w-full">
+        
+        <!-- VISOR 3D Y LISTA DE PUNTOS -->
+        <div class="w-full md:w-1/2 flex flex-col gap-4">
+            <div class="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl h-[320px] sm:h-[380px] flex items-center justify-center">
+                <div id="canvas-container" class="absolute inset-0"></div>
+                <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-[11px] text-slate-300 pointer-events-none">
+                    Arrastra para girar 3D | Rueda para zoom
+                </div>
+            </div>
+
+            <!-- TARJETAS DE ACCESO RÁPIDO -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 flex-1 overflow-y-auto max-h-[250px]">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Puntos de la Estación</h3>
+                <div id="puntos-grid" class="grid grid-cols-2 gap-2">
+                    <!-- Generado por JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DE FICHA TÉCNICA ABE -->
+        <div class="w-full md:w-1/2 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+            <div id="ficha-content">
+                <div class="flex items-start justify-between border-b border-slate-800 pb-3 mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-red-600 text-white font-black px-2.5 py-1 rounded text-sm tracking-wider" id="ficha-codigo">L-001</div>
+                        <div>
+                            <h2 class="text-sm font-bold text-white" id="ficha-sistema">ALIMENTACIÓN DE MATERIAL</h2>
+                            <p class="text-xs text-empaqplast-accent font-medium" id="ficha-componente">Tolva de alimentación</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 text-xs">
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Estándar de Ejecución TPM</span>
+                        <p class="text-slate-200 bg-slate-950/60 p-2.5 rounded-lg border border-slate-800" id="ficha-estandar">Retirar polvo, pellets contaminados y residuos visibles del interior y borde superior de la tolva.</p>
+                    </div>
+
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Condición Anormal a Reportar ("Ojo con esto")</span>
+                        <div class="bg-amber-950/30 border border-amber-600/40 p-2.5 rounded-lg text-amber-200" id="ficha-anormal">
+                            Material contaminado, fisuras o deformación.
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-slate-950/40 p-2 rounded border border-slate-800">
+                            <span class="text-[10px] text-slate-400 block font-semibold">Material / Herramienta</span>
+                            <span class="text-slate-200 font-medium" id="ficha-material">Paño industrial / Brocha</span>
+                        </div>
+                        <div class="bg-slate-950/40 p-2 rounded border border-slate-800">
+                            <span class="text-[10px] text-slate-400 block font-semibold">Tiempo Estimado</span>
+                            <span class="text-slate-200 font-medium" id="ficha-tiempo">Standar 5 min</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTONES DE ESTADO -->
+            <div class="mt-5 pt-4 border-t border-slate-800 flex flex-col gap-3">
+                <div id="estado-mensaje" class="text-xs text-center text-slate-400 font-medium">Seleccione una acción para este punto:</div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="marcarEstado('listo')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center space-x-1 shadow-lg shadow-emerald-900/20">
+                        <span>✓ Listo, lo hice</span>
+                    </button>
+                    <button onclick="marcarEstado('anomalia')" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center space-x-1 shadow-lg shadow-rose-900/20">
+                        <span>⚠ Encontré algo</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- SCRIPT DE LÓGICA Y 3D -->
+    <script>
+        let turnoActual = 1;
+        let operadorActual = "";
+        let modoActual = 'limpieza';
+        let puntoSeleccionadoIdx = 0;
+        let estadosPuntos = {};
+
+        // DATOS DE LIMPIEZA (L-001 a L-016)
+        const datosLimpieza = [
+            {codigo: "L-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Tolva de alimentación", estandar: "Retirar polvo, pellets contaminados y residuos visibles del interior y borde superior de la tolva.", anormal: "Material contaminado, fisuras o deformación.", material: "Paño industrial / Brocha", tiempo: "5 min"},
+            {codigo: "L-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", estandar: "Limpiar superficie externa y verificar libre de suciedad.", anormal: "Ruido anormal o baja succión.", material: "Paño industrial", tiempo: "5 min"},
+            {codigo: "L-003", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Filtro de succionador", estandar: "Limpiar filtro para asegurar flujo de aire.", anormal: "Filtro saturado, roto o deformado.", material: "Pistola de aire", tiempo: "5 min"},
+            {codigo: "L-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zona de boquilla", estandar: "Retirar residuos y material carbonizado.", anormal: "Fugas o material quemado.", material: "Cepillo de bronce", tiempo: "5 min"},
+            {codigo: "L-005", sistema: "SISTEMA EXPULSOR", componente: "Área de expulsión", estandar: "Eliminar rebabas, piezas atrapadas y residuos plásticos.", anormal: "Obstrucciones o acumulación de material.", material: "Brocha", tiempo: "5 min"},
+            {codigo: "L-006", sistema: "SISTEMA DE CIERRE", componente: "Platina fija", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", tiempo: "5 min"},
+            {codigo: "L-007", sistema: "SISTEMA DE CIERRE", componente: "Platina móvil", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", tiempo: "5 min"},
+            {codigo: "L-008", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras y distribuidor de agua", estandar: "Limpiar polvo exterior y verificar que no existan dobleces o estrangulamientos.", anormal: "Fugas de aire audibles, mangueras cuarteadas o acoples sueltos.", material: "Ninguna", tiempo: "5 min"},
+            {codigo: "L-009", sistema: "SISTEMA NEUMÁTICO", componente: "Unidad de mantenimiento (FRL)", estandar: "Retirar polvo exterior de los manómetros y limpiar externamente los vasos transparentes.", anormal: "Vasos opacos/rotos, acumulación excesiva de agua en el filtro o fugas en el regulador.", material: "Ninguna", tiempo: "5 min"},
+            {codigo: "L-010", sistema: "SISTEMA HIDRÁULICO", componente: "Mangueras hidráulicas visibles", estandar: "Limpiar aceite superficial para facilitar detección de fugas.", anormal: "Acumulación de aceite y polvo", material: "Paño industrial", tiempo: "5 min"},
+            {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", tiempo: "5 min"},
+            {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", tiempo: "5 min"},
+            {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", tiempo: "5 min"},
+            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", tiempo: "5 min"},
+            {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", tiempo: "5 min"},
+            {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", tiempo: "5 min"}
+        ];
+
+        // DATOS DE MONITOREO (I-001 a I-022)
+        const datosMonitoreo = [
+            {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", tiempo: "3 min"},
+            {codigo: "I-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Manguera de succión", estandar: "Verificar integridad y conexión.", anormal: "Roturas, fugas o desgaste.", material: "Visual", tiempo: "3 min"},
+            {codigo: "I-003", sistema: "SISTEMA DE INYECCIÓN", componente: "Boquilla", estandar: "Verificar fugas y estado físico.", anormal: "Goteo o desgaste.", material: "HMI", time: "3 min"},
+            {codigo: "I-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zonas 1-2-3-4 de tornillo y cilindro", estandar: "Comparar temperatura real versus objetivo del proceso.", anormal: "Alarmas, fallas de calidad en PT.", material: "Visual", time: "3 min"},
+            {codigo: "I-005", sistema: "SISTEMA EXPULSOR", componente: "Expulsor", estandar: "Verificar recorrido completo de avance y retorno.", anormal: "Atascamiento o retorno incompleto.", material: "Visual", time: "3 min"},
+            {codigo: "I-006", sistema: "SISTEMA EXPULSOR", componente: "Área expulsión", estandar: "Verificar ausencia de piezas atrapadas.", anormal: "Rebaba acumulada / Componentes mecánicos obstruidos", material: "N/A", time: "3 min"},
+            {codigo: "I-007", sistema: "SISTEMA EXPULSOR", componente: "Placas expulsoras", estandar: "Verificar golpes o ruido anormal.", anormal: "Atascamiento, fisuras o grietas / Movimiento errático", material: "N/A", time: "3 min"},
+            {codigo: "I-008", sistema: "SISTEMA HIDRÁULICO", componente: "Nivel aceite hidráulico", estandar: "Verificar nivel y apariencia.", anormal: "Nivel bajo o contaminación.", material: "Visual", time: "3 min"},
+            {codigo: "I-009", sistema: "SISTEMA HIDRÁULICO", componente: "Fugas de aceite", estandar: "Inspeccionar mangueras, válvulas y conexiones.", anormal: "Goteos o fugas activas.", material: "Linterna", time: "3 min"},
+            {codigo: "I-010", sistema: "SISTEMA HIDRÁULICO", componente: "Bombas", estandar: "Verificar ruido, vibración y funcionamiento.", anormal: "Ruido anormal o pérdida de desempeño.", material: "Visual", time: "3 min"},
+            {codigo: "I-011", sistema: "SISTEMA HIDRÁULICO", componente: "Válvulas", estandar: "Verificar ruido, vibración y funcionamiento.", anormal: "Ruido anormal o pérdida de desempeño.", material: "Visual", time: "3 min"},
+            {codigo: "I-012", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras de agua", estandar: "Verificar conexión firme y ausencia de estrangulamientos.", anormal: "Mangueras dobladas, acoples mal encajados", material: "Visual", time: "3 min"},
+            {codigo: "I-013", sistema: "HOT RUNNER", componente: "Controlador de temperatura", estandar: "Verificar que la temperatura real (PV) coincida con la objetivo (SV).", anormal: "Alarmas activas, módulo apagado.", material: "Visual", time: "3 min"},
+            {codigo: "I-014", sistema: "SISTEMA ELÉCTRICO", componente: "Cableado visible", estandar: "Verificar integridad de cables y conectores.", anormal: "Cables rotos, quemados o sueltos.", material: "Visual", time: "3 min"},
+            {codigo: "I-015", sistema: "SISTEMA ELÉCTRICO", componente: "Sensores accesibles", estandar: "Verificar fijación y estado.", anormal: "Sensor dañado o desalineado.", material: "Visual", time: "3 min"},
+            {codigo: "I-016", sistema: "SISTEMA DE CIERRE", componente: "Platina móvil", estandar: "Detectar vibraciones anormales.", anormal: "Cabeceo durante el avance o retroceso", material: "N/A", time: "3 min"},
+            {codigo: "I-017", sistema: "SISTEMA DE CIERRE", componente: "Platina fija", estandar: "Detectar ruidos anormales durante el cierre.", anormal: "Chirridos agudos continuos / Golpes secos", material: "N/A", time: "3 min"},
+            {codigo: "I-018", sistema: "SISTEMA DE CIERRE", componente: "Tornillería accesible", estandar: "Verificar pernos presentes y ajustados.", anormal: "Pernos flojos, rotos o faltantes.", material: "N/A", time: "3 min"},
+            {codigo: "I-019", sistema: "SISTEMA DE LUBRICACIÓN", componente: "Presión del sistema", estandar: "Verificar manómetro de bomba dentro del rango verde.", anormal: "Presión cero / Aguja fuera de rango", material: "Visual", time: "3 min"},
+            {codigo: "I-020", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Puertas de seguridad", estandar: "Verificar apertura, cierre e interbloqueos.", anormal: "Puertas trabadas o dispositivos defectuosos.", material: "Paño industrial", time: "3 min"},
+            {codigo: "I-021", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Guardas de protección", estandar: "Verificar presencia y fijación adecuada.", anormal: "Guardas faltantes o deterioradas.", material: "Brocha", time: "3 min"},
+            {codigo: "I-022", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Señalética y etiquetas", estandar: "Verificar legibilidad y existencia.", anormal: "Etiquetas ilegibles o faltantes.", material: "Ninguna", time: "3 min"}
+        ];
+
+        function setTurno(t) {
+            turnoActual = t;
+            if(t === 1) {
+                document.getElementById('btn-turno-1').className = "py-2.5 px-4 rounded-lg text-sm font-semibold border border-empaqplast-blue bg-empaqplast-blue text-white shadow-md";
+                document.getElementById('btn-turno-2').className = "py-2.5 px-4 rounded-lg text-sm font-semibold border border-slate-700 bg-slate-900 text-slate-400";
+            } else {
+                document.getElementById('btn-turno-2').className = "py-2.5 px-4 rounded-lg text-sm font-semibold border border-empaqplast-blue bg-empaqplast-blue text-white shadow-md";
+                document.getElementById('btn-turno-1').className = "py-2.5 px-4 rounded-lg text-sm font-semibold border border-slate-700 bg-slate-900 text-slate-400";
+            }
+        }
+
+        function iniciarSesion() {
+            const nombre = document.getElementById('operator-name').value.trim();
+            if(!nombre) {
+                alert("Por favor ingrese el nombre del operador.");
+                return;
+            }
+            operadorActual = nombre;
+            document.getElementById('display-operator').innerText = "Operador: " + operadorActual;
+            document.getElementById('display-turno').innerText = "Turno: " + turnoActual;
+            document.getElementById('setup-modal').style.display = 'none';
+        }
+
+        function cambiarOperador() {
+            document.getElementById('setup-modal').style.display = 'flex';
+        }
+
+        function cambiarModo(modo) {
+            modoActual = modo;
+            puntoSeleccionadoIdx = 0;
+            if(modo === 'limpieza') {
+                document.getElementById('tab-limpieza').className = "px-4 py-1.5 rounded-lg text-xs font-semibold bg-empaqplast-blue text-white shadow transition";
+                document.getElementById('tab-monitoreo').className = "px-4 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 transition";
+            } else {
+                document.getElementById('tab-monitoreo').className = "px-4 py-1.5 rounded-lg text-xs font-semibold bg-empaqplast-blue text-white shadow transition";
+                document.getElementById('tab-limpieza').className = "px-4 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 transition";
+            }
+            actualizarInterfaz();
+        }
+
+        function actualizarInterfaz() {
+            const lista = modoActual === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const grid = document.getElementById('puntos-grid');
+            grid.innerHTML = '';
+
+            lista.forEach((item, idx) => {
+                const estadoKey = `${modoActual}_${idx}`;
+                const status = estadosPuntos[estadoKey];
+                let badge = '';
+                if(status === 'listo') badge = '<span class="text-emerald-400 text-[10px]">✓ Listo</span>';
+                if(status === 'anomalia') badge = '<span class="text-rose-400 text-[10px]">⚠ Anomalía</span>';
+
+                const div = document.createElement('div');
+                div.className = `p-2.5 rounded-lg border cursor-pointer transition flex items-center justify-between ${idx === puntoSeleccionadoIdx ? 'bg-empaqplast-blue/20 border-empaqplast-blue' : 'bg-slate-950/40 border-slate-800 hover:border-slate-700'}`;
+                div.innerHTML = `
+                    <div>
+                        <span class="text-xs font-bold text-empaqplast-accent">${item.codigo}</span>
+                        <p class="text-[11px] text-slate-300 truncate max-w-[130px]">${item.componente}</p>
+                    </div>
+                    ${badge}
+                `;
+                div.onclick = () => seleccionarPunto(idx);
+                grid.appendChild(div);
+            });
+
+            mostrarFicha(puntoSeleccionadoIdx);
+        }
+
+        function seleccionarPunto(idx) {
+            puntoSeleccionadoIdx = idx;
+            actualizarInterfaz();
+        }
+
+        function mostrarFicha(idx) {
+            const lista = modoActual === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const item = lista[idx];
+
+            document.getElementById('ficha-codigo').innerText = item.codigo;
+            document.getElementById('ficha-sistema').innerText = item.sistema;
+            document.getElementById('ficha-componente').innerText = item.componente;
+            document.getElementById('ficha-estandar').innerText = item.estandar;
+            document.getElementById('ficha-anormal').innerText = item.anormal;
+            document.getElementById('ficha-material').innerText = item.material || 'Ninguna';
+            document.getElementById('ficha-tiempo').innerText = item.tiempo || '3 min';
+        }
+
+        function marcarEstado(estado) {
+            const estadoKey = `${modoActual}_${puntoSeleccionadoIdx}`;
+            estadosPuntos[estadoKey] = estado;
+            actualizarInterfaz();
+            
+            // Avanzar al siguiente punto automáticamente si es posible
+            const lista = modoActual === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            if(puntoSeleccionadoIdx < lista.length - 1) {
+                puntoSeleccionadoIdx++;
+                actualizarInterfaz();
+            }
+        }
+
+        // Three.js Visor 3D Inicial
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7);
+        scene.add(directionalLight);
+
+        // Modelo silueta de máquina base
+        const machineGroup = new THREE.Group();
+        const baseGeo = new THREE.BoxGeometry(3, 0.5, 1.5);
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
+        const base = new THREE.Mesh(baseGeo, baseMat);
+        machineGroup.add(base);
+
+        const bodyGeo = new THREE.CylinderGeometry(0.8, 0.8, 2, 32);
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0066cc, roughness: 0.3 });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        body.position.set(0, 1.25, 0);
+        machineGroup.add(body);
+        scene.add(machineGroup);
+
+        camera.position.set(0, 2.5, 5);
+        camera.lookAt(0, 1, 0);
+
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        container.addEventListener('mousedown', (e) => { isDragging = true; previousMousePosition = { x: e.clientX, y: e.clientY }; });
+        container.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const deltaX = e.clientX - previousMousePosition.x;
+            machineGroup.rotation.y += deltaX * 0.01;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.onload = () => {
+            actualizarInterfaz();
+        };
+    </script>
+</body>
+</html>
