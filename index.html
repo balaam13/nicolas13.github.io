@@ -14,11 +14,11 @@
                 extend: {
                     colors: {
                         ind: {
-                            dark: '#0b0f17',
-                            panel: '#111827',
-                            border: '#1f2937',
+                            base: '#1A1D24',
+                            panel: '#2A2E38',
+                            border: '#3F4452',
                             accent: '#0066cc',
-                            light: '#38bdf8'
+                            accentHover: '#0052a3'
                         }
                     }
                 }
@@ -26,67 +26,67 @@
         }
     </script>
     <style>
-        body { background-color: #0b0f17; color: #f3f4f6; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #1A1D24; color: #E4E6EB; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #111827; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 2px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1A1D24; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3F4452; border-radius: 2px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
 
     <!-- MODAL DE INICIO (CONTEXTO OPERATIVO) -->
-    <div id="setup-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="bg-ind-panel border border-ind-border rounded-xl max-w-md w-full p-6 shadow-2xl">
+    <div id="setup-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-ind-panel border border-ind-border rounded-lg max-w-md w-full p-6 shadow-2xl">
             <div class="flex items-center space-x-3 mb-5 border-b border-ind-border pb-4">
-                <div class="w-12 h-12 rounded bg-slate-900 overflow-hidden border border-slate-700 flex items-center justify-center">
+                <div class="w-12 h-10 rounded bg-[#1A1D24] overflow-hidden border border-ind-border flex items-center justify-center">
                     <img src="imagen(162).jpg" alt="Logo" class="w-full h-full object-fill" onerror="this.src='https://placehold.co/50x50/0066cc/ffffff?text=EP'">
                 </div>
                 <div>
-                    <h2 class="text-sm font-bold text-white tracking-wide">EMPAQPLAST S.A.</h2>
-                    <p class="text-xs text-ind-light">Sistema de Mantenimiento Autónomo (TPM)</p>
+                    <h2 class="text-xs text-slate-400 font-medium">EMPAQPLAST S.A.</h2>
+                    <p class="text-sm font-bold text-white">Sistema de Mantenimiento Autónomo (TPM)</p>
                 </div>
             </div>
             
             <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Estación / Equipo:</label>
-                    <select id="select-maquina" class="w-full bg-slate-900 border border-ind-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-ind-light">
+                    <label class="block font-medium text-slate-300 mb-1">Estación / Equipo:</label>
+                    <select id="select-maquina" class="w-full bg-[#1A1D24] border border-ind-border rounded px-3 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent">
                         <option value="bole2600">Bole 2600 EK-2 (Producción)</option>
                         <option value="haitian">Inyectora Haitian</option>
                         <option value="sipa">SIPA Sopladora</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Nombre del Operador:</label>
-                    <input type="text" id="operator-name" placeholder="Ej. Nicolas Espinosa" class="w-full bg-slate-900 border border-ind-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-ind-light">
+                    <label class="block font-medium text-slate-300 mb-1">Nombre del operador:</label>
+                    <input type="text" id="operator-name" placeholder="Ej. Nicolas Espinosa" class="w-full bg-[#1A1D24] border border-ind-border rounded px-3 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Seleccione el Turno:</label>
+                    <label class="block font-medium text-slate-300 mb-1">Seleccione el turno:</label>
                     <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="setTurno(1)" id="btn-turno-1" class="py-2.5 px-3 rounded-lg text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow">TURNO 1</button>
-                        <button type="button" onclick="setTurno(2)" id="btn-turno-2" class="py-2.5 px-3 rounded-lg text-xs font-bold border border-ind-border bg-slate-900 text-slate-400 transition hover:border-slate-700">TURNO 2</button>
+                        <button type="button" onclick="setTurno(1)" id="btn-turno-1" class="py-2.5 px-3 rounded text-xs font-bold border border-ind-accent bg-ind-accent text-white transition">TURNO 1</button>
+                        <button type="button" onclick="setTurno(2)" id="btn-turno-2" class="py-2.5 px-3 rounded text-xs font-bold border border-ind-border bg-[#1A1D24] text-slate-400 transition hover:border-slate-500">TURNO 2</button>
                     </div>
                 </div>
-                <button onclick="iniciarSesion()" class="w-full mt-2 bg-ind-accent hover:bg-blue-600 text-white font-bold py-3 rounded-lg text-xs tracking-wider uppercase transition shadow-lg">Iniciar Sesión de Turno</button>
+                <button onclick="iniciarSesion()" class="w-full mt-2 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3 rounded text-xs tracking-wider uppercase transition">Iniciar sesión de turno</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL INDUSTRIAL: REPORTAR ANOMALÍA -->
-    <div id="anomalia-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
-        <div class="bg-ind-panel border border-rose-600/60 rounded-xl max-w-lg w-full p-6 shadow-2xl">
+    <div id="anomalia-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-ind-panel border border-ind-border rounded-lg max-w-lg w-full p-6 shadow-2xl">
             <div class="flex items-center space-x-3 mb-4 border-b border-ind-border pb-3">
                 <div class="w-8 h-8 rounded bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 font-bold">⚠</div>
                 <div>
-                    <h3 class="text-xs font-bold text-white uppercase tracking-wider">Reportar Anomalía de Equipo</h3>
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wider">Reportar anomalía de equipo</h3>
                     <p class="text-[11px] text-rose-400 font-mono" id="modal-anomalia-info">L-001 | Tolva de alimentación</p>
                 </div>
             </div>
 
             <div class="space-y-3.5 text-xs">
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Tipo de anomalía:</label>
-                    <select id="tipo-anomalia-select" class="w-full bg-slate-900 border border-ind-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-rose-500">
+                    <label class="block font-medium text-slate-300 mb-1">Tipo de anomalía:</label>
+                    <select id="tipo-anomalia-select" class="w-full bg-[#1A1D24] border border-ind-border rounded px-3 py-2 text-white focus:outline-none focus:border-ind-accent">
                         <option value="Contaminación">Contaminación de material</option>
                         <option value="Desgaste / Falla física">Desgaste mecánico / Fisura</option>
                         <option value="Fuga / Ruido">Fuga de aire / Ruido anormal</option>
@@ -95,14 +95,14 @@
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Descripción detallada:</label>
-                    <textarea id="texto-anomalia" rows="2" placeholder="Describa el problema encontrado..." class="w-full bg-slate-900 border border-ind-border rounded-lg p-2.5 text-white focus:outline-none focus:border-rose-500"></textarea>
+                    <label class="block font-medium text-slate-300 mb-1">Descripción detallada:</label>
+                    <textarea id="texto-anomalia" rows="2" placeholder="Describa el problema encontrado..." class="w-full bg-[#1A1D24] border border-ind-border rounded p-2.5 text-white focus:outline-none focus:border-ind-accent"></textarea>
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Evidencia fotográfica (Opcional):</label>
+                    <label class="block font-medium text-slate-300 mb-1">Evidencia fotográfica (Opcional):</label>
                     <div class="flex items-center space-x-3">
-                        <label class="flex-1 bg-slate-900 hover:bg-slate-800 border border-ind-border rounded-lg px-3 py-2 text-center cursor-pointer transition text-slate-300 text-xs font-medium">
+                        <label class="flex-1 bg-[#1A1D24] hover:bg-[#323743] border border-ind-border rounded px-3 py-2 text-center cursor-pointer transition text-slate-300 text-xs font-medium">
                             <span>📷 + Agregar fotografía</span>
                             <input type="file" id="foto-anomalia" accept="image/*" class="hidden" onchange="mostrarNombreArchivo(this)">
                         </label>
@@ -111,57 +111,58 @@
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Observación para Mantenimiento:</label>
-                    <input type="text" id="observacion-mantenimiento" placeholder="Ej. Requiere revisión de técnico de turno" class="w-full bg-slate-900 border border-ind-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-rose-500">
+                    <label class="block font-medium text-slate-300 mb-1">Observación para mantenimiento:</label>
+                    <input type="text" id="observacion-mantenimiento" placeholder="Ej. Requiere revisión de técnico de turno" class="w-full bg-[#1A1D24] border border-ind-border rounded px-3 py-2 text-white focus:outline-none focus:border-ind-accent">
                 </div>
 
                 <div class="flex space-x-3 pt-2">
-                    <button onclick="guardarAnomalia()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-lg text-xs uppercase tracking-wider transition shadow">Registrar</button>
-                    <button onclick="cerrarModalAnomalia()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-lg text-xs uppercase tracking-wider transition border border-ind-border">Cancelar</button>
+                    <button onclick="guardarAnomalia()" class="flex-1 bg-rose-700 hover:bg-rose-600 text-white font-bold py-2.5 rounded text-xs uppercase tracking-wider transition">Registrar</button>
+                    <button onclick="cerrarModalAnomalia()" class="bg-[#1A1D24] hover:bg-[#323743] text-slate-300 px-4 py-2.5 rounded text-xs uppercase tracking-wider transition border border-ind-border">Cancelar</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ENCABEZADO INDUSTRIAL PRINCIPAL -->
-    <header class="bg-ind-panel border-b border-ind-border px-6 py-3 flex items-center justify-between shadow-md">
-        <div class="flex items-center space-x-4">
-            <div class="w-14 h-8 rounded bg-slate-900 flex items-center justify-center border border-slate-700 overflow-hidden">
+    <header class="bg-ind-panel border-b border-ind-border px-6 py-3.5 flex items-center justify-between shadow-md">
+        <div class="flex items-center space-x-5">
+            <div class="w-14 h-10 rounded bg-[#1A1D24] flex items-center justify-center border border-ind-border overflow-hidden">
                 <img src="imagen(162).jpg" alt="Logo" class="w-full h-full object-fill">
             </div>
-            <div class="border-l border-ind-border pl-4">
-                <h1 class="text-xs font-bold text-white tracking-widest uppercase">EMPAQPLAST S.A.</h1>
-                <p id="header-maq-title" class="text-[11px] text-ind-light font-medium">BOLE 2600 EK-2 — Producción</p>
+            <div>
+                <!-- MÁQUINA COMO ELEMENTO MÁS GRANDE E IZQUIERDA -->
+                <h1 id="header-maq-title" class="text-lg font-black text-white tracking-tight">BOLE 2600 EK-2</h1>
+                <p class="text-[11px] text-slate-400 font-medium tracking-wide mt-[-2px]">EMPAQPLAST S.A. — Mantenimiento Autónomo</p>
             </div>
         </div>
         <div class="flex items-center space-x-4">
-            <div class="text-right bg-slate-900/80 px-3 py-1 rounded border border-ind-border">
+            <div class="text-right bg-[#1A1D24] px-3 py-1.5 rounded border border-ind-border">
                 <span id="display-operator" class="block text-xs font-bold text-slate-200">Operador: --</span>
-                <span id="display-turno" class="block text-[10px] text-ind-light font-mono">TURNO 1 · ACTIVO</span>
+                <span id="display-turno" class="block text-[10px] text-slate-400 font-mono">TURNO 1 · ACTIVO</span>
             </div>
-            <button onclick="cambiarOperador()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded border border-ind-border transition font-medium">Cambiar</button>
+            <button onclick="cambiarOperador()" class="text-xs bg-[#1A1D24] hover:bg-[#323743] text-slate-300 px-3 py-2 rounded border border-ind-border transition font-medium">Cambiar</button>
         </div>
     </header>
 
     <!-- BARRA DE CONTEXTO OPERATIVO Y PROGRESO -->
-    <section class="bg-ind-panel/60 border-b border-ind-border px-6 py-3">
+    <section class="bg-ind-panel/40 border-b border-ind-border px-6 py-2.5">
         <div class="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="flex items-center space-x-6">
                 <div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">MODO DE OPERACIÓN</span>
-                    <span class="text-xs font-bold text-white uppercase tracking-wide">INSPECCIÓN DE LIMPIEZA / TPM</span>
+                    <span class="text-[10px] text-slate-400 font-medium block">Modo de operación</span>
+                    <span class="text-xs font-bold text-white">Inspección de limpieza / TPM</span>
                 </div>
                 <div class="flex space-x-2">
-                    <button onclick="cambiarModo('limpieza')" id="tab-limpieza" class="px-3 py-1 rounded text-xs font-bold bg-ind-accent text-white transition shadow">LIMPIEZA (16)</button>
-                    <button onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-3 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white transition border border-ind-border">MONITOREO (22)</button>
+                    <button onclick="cambiarModo('limpieza')" id="tab-limpieza" class="px-3 py-1.5 rounded text-xs font-bold bg-ind-accent text-white transition shadow">Limpieza (16)</button>
+                    <button onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-3 py-1.5 rounded text-xs font-bold bg-[#1A1D24] text-slate-400 hover:text-white transition border border-ind-border">Monitoreo (22)</button>
                 </div>
             </div>
             <div class="flex items-center space-x-4 w-full md:w-auto">
                 <div class="text-right">
-                    <span id="texto-progreso-num" class="text-xs font-bold text-white font-mono">0 de 16 puntos · 0%</span>
+                    <span id="texto-progreso-num" class="text-xs font-bold text-slate-300 font-mono">0 de 16 puntos · 0%</span>
                 </div>
-                <div class="w-48 bg-slate-900 h-2.5 rounded-full overflow-hidden border border-ind-border">
-                    <div id="barra-progreso-fill" class="bg-ind-light h-full transition-all duration-300" style="width: 0%;"></div>
+                <div class="w-48 bg-[#1A1D24] h-2 rounded-full overflow-hidden border border-ind-border">
+                    <div id="barra-progreso-fill" class="bg-ind-accent h-full transition-all duration-300" style="width: 0%;"></div>
                 </div>
             </div>
         </div>
@@ -173,23 +174,23 @@
         <!-- COLUMNA IZQUIERDA: 3D INDUSTRIAL + LISTA DE PUNTOS -->
         <div class="w-full md:w-5/12 flex flex-col gap-4">
             <!-- VISOR 3D ESTILO INDUSTRIAL -->
-            <div class="relative bg-ind-panel border border-ind-border rounded-xl overflow-hidden shadow-xl h-[280px] flex items-center justify-center">
+            <div class="relative bg-ind-panel border border-ind-border rounded-lg overflow-hidden shadow-md h-[280px] flex items-center justify-center">
                 <div id="canvas-container" class="absolute inset-0"></div>
                 <!-- Indicador flotante 3D -->
-                <div class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur px-3 py-1 rounded border border-ind-border text-[11px] font-mono text-ind-light shadow flex items-center space-x-2 pointer-events-none">
-                    <span class="w-2 h-2 rounded-full bg-ind-light animate-pulse"></span>
+                <div class="absolute top-3 left-3 bg-[#1A1D24]/90 backdrop-blur px-3 py-1 rounded border border-ind-border text-[11px] font-mono text-slate-200 shadow flex items-center space-x-2 pointer-events-none">
+                    <span class="w-2 h-2 rounded-full bg-ind-accent animate-pulse"></span>
                     <span id="indicador-3d-texto">L-001 · Punto seleccionado</span>
                 </div>
-                <div class="absolute bottom-3 right-3 bg-black/60 px-2.5 py-1 rounded border border-white/10 text-[10px] text-slate-400 pointer-events-none font-mono">
+                <div class="absolute bottom-3 right-3 bg-black/50 px-2.5 py-1 rounded border border-white/10 text-[10px] text-slate-400 pointer-events-none font-mono">
                     Rotar: Click + Arrastrar | Zoom: Rueda
                 </div>
             </div>
 
             <!-- LISTA DE INSPECCIÓN REAL (TIPO TABLA) -->
-            <div class="bg-ind-panel border border-ind-border rounded-xl p-4 flex-1 flex flex-col shadow-xl">
+            <div class="bg-ind-panel border border-ind-border rounded-lg p-4 flex-1 flex flex-col shadow-md">
                 <div class="flex items-center justify-between mb-2.5 border-b border-ind-border pb-2">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">PUNTOS DE VERIFICACIÓN (LISTA DE INSPECCIÓN)</h3>
-                    <span class="text-[10px] text-slate-400 font-mono">ESTADO ACTUAL</span>
+                    <h3 class="text-xs font-bold text-slate-300 tracking-wider">Puntos de verificación</h3>
+                    <span class="text-[10px] text-slate-400 font-mono">Estado actual</span>
                 </div>
                 <div id="puntos-grid" class="flex flex-col space-y-1.5 overflow-y-auto max-h-[310px] custom-scrollbar pr-1">
                     <!-- Generado por JS -->
@@ -198,71 +199,78 @@
         </div>
 
         <!-- COLUMNA DERECHA: PANELES PLANOS Y LÍNEAS DIVISORIAS -->
-        <div class="w-full md:w-7/12 bg-ind-panel border border-ind-border rounded-xl p-6 shadow-2xl flex flex-col justify-between">
+        <div class="w-full md:w-7/12 bg-ind-panel border border-ind-border rounded-lg p-6 shadow-md flex flex-col justify-between">
             <div id="ficha-content">
                 <!-- ENCABEZADO COMPACTO INDUSTRIAL -->
                 <div class="border-b border-ind-border pb-3 mb-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="text-[11px] font-mono text-ind-light font-bold" id="ficha-codigo">L-001</span>
-                            <span class="text-xs text-slate-400 mx-2">|</span>
-                            <span class="text-xs font-bold text-white uppercase tracking-wide" id="ficha-componente">TOLVA DE ALIMENTACIÓN</span>
+                            <span class="text-xs font-mono text-ind-accent font-bold" id="ficha-codigo">L-001</span>
+                            <span class="text-xs text-slate-500 mx-2">|</span>
+                            <span class="text-xs font-bold text-white tracking-wide" id="ficha-componente">TOLVA DE ALIMENTACIÓN</span>
                         </div>
-                        <span class="text-[10px] font-mono bg-slate-900 border border-ind-border px-2.5 py-1 rounded text-slate-300" id="ficha-sistema-badge">ALIMENTACIÓN DE MATERIAL</span>
+                        <span class="text-[10px] font-mono bg-[#1A1D24] border border-ind-border px-2.5 py-1 rounded text-slate-300" id="ficha-sistema-badge">ALIMENTACIÓN DE MATERIAL</span>
                     </div>
                     <p class="text-[11px] text-slate-400 mt-1">Punto de verificación · Limpieza TPM</p>
                 </div>
 
-                <!-- DOS FOTOS LADO A LADO -->
+                <!-- DOS FOTOS LADO A LADO CON DIFERENCIACIÓN VISUAL DE ESTADO ACTIVO -->
                 <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div class="bg-slate-950 border border-ind-border rounded-lg overflow-hidden flex flex-col">
-                        <div class="h-32 bg-slate-900 relative">
-                            <img id="ficha-imagen-1" src="" alt="Foto 1" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/111827/38bdf8?text=Vista+Externa'">
+                    <div id="card-foto-1" class="bg-[#1A1D24] border border-ind-accent rounded-lg overflow-hidden flex flex-col transition-all shadow-sm">
+                        <div class="h-32 bg-[#1A1D24] relative">
+                            <img id="ficha-imagen-1" src="" alt="Foto 1" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/1A1D24/38bdf8?text=Vista+Externa'">
                         </div>
-                        <div class="p-1.5 bg-slate-900 border-t border-ind-border text-[10px] font-medium text-slate-300 text-center truncate" id="ficha-label-1">Así se ve tu tolva</div>
+                        <div class="p-1.5 bg-[#1A1D24] border-t border-ind-accent text-[10px] font-medium text-slate-200 text-center truncate flex items-center justify-center space-x-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-ind-accent animate-pulse"></span>
+                            <span id="ficha-label-1">Así se ve tu tolva</span>
+                        </div>
                     </div>
-                    <div class="bg-slate-950 border border-ind-border rounded-lg overflow-hidden flex flex-col">
-                        <div class="h-32 bg-slate-900 relative">
-                            <img id="ficha-imagen-2" src="" alt="Foto 2" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/111827/38bdf8?text=Vista+Interna'">
+                    <div id="card-foto-2" class="bg-[#1A1D24] border border-ind-border rounded-lg overflow-hidden flex flex-col transition-all opacity-80">
+                        <div class="h-32 bg-[#1A1D24] relative">
+                            <img id="ficha-imagen-2" src="" alt="Foto 2" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/1A1D24/38bdf8?text=Vista+Interna'">
                         </div>
-                        <div class="p-1.5 bg-slate-900 border-t border-ind-border text-[10px] font-medium text-slate-300 text-center truncate" id="ficha-label-2">Por dentro, con pellets</div>
+                        <div class="p-1.5 bg-[#1A1D24] border-t border-ind-border text-[10px] font-medium text-slate-400 text-center truncate" id="ficha-label-2">Por dentro, con pellets</div>
                     </div>
                 </div>
 
                 <!-- SECCIÓN DE ESPECIFICACIONES TÉCNICAS PLANAS -->
                 <div class="space-y-4 text-xs border-t border-ind-border pt-4">
                     <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">ESTÁNDAR DE EJECUCIÓN (QUÉ HACER)</span>
-                        <p class="text-slate-200 bg-slate-900/60 p-3 rounded border border-ind-border leading-relaxed" id="ficha-estandar">-</p>
+                        <span class="text-[10px] font-bold text-slate-400 block mb-1">Estándar de ejecución (qué hacer)</span>
+                        <p class="text-slate-200 bg-[#1A1D24] p-3 rounded border border-ind-border leading-relaxed" id="ficha-estandar">-</p>
                     </div>
 
                     <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">CONDICIÓN ANORMAL A REPORTAR ("OJO CON ESTO")</span>
+                        <span class="text-[10px] font-bold text-slate-400 block mb-1">Condición anormal a reportar ("ojo con esto")</span>
                         <div class="bg-amber-950/20 border border-amber-600/40 p-3 rounded text-amber-200 font-medium leading-relaxed" id="ficha-anormal">-</div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 pt-1">
-                        <div class="bg-slate-900/60 p-2.5 rounded border border-ind-border">
-                            <span class="text-[10px] text-slate-400 block font-semibold uppercase">MATERIAL / HERRAMIENTA</span>
+                        <div class="bg-[#1A1D24] p-2.5 rounded border border-ind-border">
+                            <span class="text-[10px] text-slate-400 block font-medium">Material / herramienta</span>
                             <span class="text-slate-200 font-medium text-xs mt-0.5 block" id="ficha-material">-</span>
                         </div>
-                        <div class="bg-slate-900/60 p-2.5 rounded border border-ind-border">
-                            <span class="text-[10px] text-slate-400 block font-semibold uppercase">TIEMPO ESTIMADO</span>
+                        <div class="bg-[#1A1D24] p-2.5 rounded border border-ind-border">
+                            <span class="text-[10px] text-slate-400 block font-medium">Tiempo estimado</span>
                             <span class="text-slate-200 font-medium text-xs mt-0.5 block font-mono" id="ficha-tiempo">5 min</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- BOTONES DE ACCIÓN INDUSTRIALES -->
+            <!-- BOTONES DE ACCIÓN INDUSTRIALES (ICÓNOS DE LÍNEA Y JERARQUÍA DIFERENCIADA) -->
             <div class="mt-6 pt-4 border-t border-ind-border flex items-center justify-between">
                 <span id="trazabilidad-estado" class="text-[11px] text-slate-400 font-mono">Estado: Pendiente de verificación</span>
                 <div class="flex space-x-3">
-                    <button onclick="marcarEstado('listo')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2.5 px-4 rounded text-xs uppercase tracking-wider transition shadow flex items-center space-x-1.5">
-                        <span>✓ Verificación realizada</span>
+                    <!-- Botón principal con mayor peso visual y check outline -->
+                    <button onclick="marcarEstado('listo')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2.5 px-4 rounded text-xs uppercase tracking-wider transition shadow flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        <span>Verificación realizada</span>
                     </button>
-                    <button onclick="abrirModalAnomalia()" class="bg-rose-700 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded text-xs uppercase tracking-wider transition shadow flex items-center space-x-1.5">
-                        <span>⚠ Reportar anomalía</span>
+                    <!-- Botón secundario con menor peso visual (outline/estilo secundario) y alerta outline -->
+                    <button onclick="abrirModalAnomalia()" class="bg-[#1A1D24] hover:bg-[#323743] text-rose-400 border border-rose-600/60 font-bold py-2.5 px-3.5 rounded text-xs uppercase tracking-wider transition flex items-center space-x-1.5 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span>Reportar anomalía</span>
                     </button>
                 </div>
             </div>
@@ -325,11 +333,11 @@
         function setTurno(t) {
             turnoActual = t;
             if(t === 1) {
-                document.getElementById('btn-turno-1').className = "py-2.5 px-3 rounded-lg text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow";
-                document.getElementById('btn-turno-2').className = "py-2.5 px-3 rounded-lg text-xs font-bold border border-ind-border bg-slate-900 text-slate-400 transition hover:border-slate-700";
+                document.getElementById('btn-turno-1').className = "py-2.5 px-3 rounded text-xs font-bold border border-ind-accent bg-ind-accent text-white transition";
+                document.getElementById('btn-turno-2').className = "py-2.5 px-3 rounded text-xs font-bold border border-ind-border bg-[#1A1D24] text-slate-400 transition hover:border-slate-500";
             } else {
-                document.getElementById('btn-turno-2').className = "py-2.5 px-3 rounded-lg text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow";
-                document.getElementById('btn-turno-1').className = "py-2.5 px-3 rounded-lg text-xs font-bold border border-ind-border bg-slate-900 text-slate-400 transition hover:border-slate-700";
+                document.getElementById('btn-turno-2').className = "py-2.5 px-3 rounded text-xs font-bold border border-ind-accent bg-ind-accent text-white transition";
+                document.getElementById('btn-turno-1').className = "py-2.5 px-3 rounded text-xs font-bold border border-ind-border bg-[#1A1D24] text-slate-400 transition hover:border-slate-500";
             }
         }
 
@@ -348,7 +356,7 @@
 
             document.getElementById('display-operator').innerText = "Operador: " + operadorActual;
             document.getElementById('display-turno').innerText = `TURNO ${turnoActual} · ACTIVO`;
-            document.getElementById('header-maq-title').innerText = `${maqNombre} — Producción`;
+            document.getElementById('header-maq-title').innerText = maqNombre;
             document.getElementById('setup-modal').style.display = 'none';
         }
 
@@ -360,11 +368,11 @@
             modoActual = modo;
             puntoSeleccionadoIdx = 0;
             if(modo === 'limpieza') {
-                document.getElementById('tab-limpieza').className = "px-3 py-1 rounded text-xs font-bold bg-ind-accent text-white transition shadow";
-                document.getElementById('tab-monitoreo').className = "px-3 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white transition border border-ind-border";
+                document.getElementById('tab-limpieza').className = "px-3 py-1.5 rounded text-xs font-bold bg-ind-accent text-white transition shadow";
+                document.getElementById('tab-monitoreo').className = "px-3 py-1.5 rounded text-xs font-bold bg-[#1A1D24] text-slate-400 hover:text-white transition border border-ind-border";
             } else {
-                document.getElementById('tab-monitoreo').className = "px-3 py-1 rounded text-xs font-bold bg-ind-accent text-white transition shadow";
-                document.getElementById('tab-limpieza').className = "px-3 py-1 rounded text-xs font-bold bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white transition border border-ind-border";
+                document.getElementById('tab-monitoreo').className = "px-3 py-1.5 rounded text-xs font-bold bg-ind-accent text-white transition shadow";
+                document.getElementById('tab-limpieza').className = "px-3 py-1.5 rounded text-xs font-bold bg-[#1A1D24] text-slate-400 hover:text-white transition border border-ind-border";
             }
             actualizarInterfaz();
         }
@@ -380,7 +388,7 @@
                 const dataEstado = estadosPuntos[estadoKey];
                 
                 let icon = '○';
-                let colorClass = "text-slate-400 bg-slate-900/40 border-ind-border hover:border-slate-700";
+                let colorClass = "text-slate-400 bg-[#1A1D24]/40 border-ind-border hover:border-slate-500";
                 let textState = "Pendiente";
 
                 if(dataEstado && dataEstado.status === 'listo') {
@@ -396,7 +404,7 @@
                 }
 
                 if(idx === puntoSeleccionadoIdx) {
-                    colorClass += " ring-1 ring-ind-light border-ind-light";
+                    colorClass += " border-ind-accent bg-ind-accent/10";
                 }
 
                 const div = document.createElement('div');
@@ -407,13 +415,12 @@
                         <span class="font-bold text-white">${item.codigo}</span>
                         <span class="text-slate-300 truncate font-sans">${item.componente}</span>
                     </div>
-                    <span class="text-[10px] uppercase font-sans tracking-wider px-1.5 py-0.5 rounded bg-slate-900">${textState}</span>
+                    <span class="text-[10px] uppercase font-sans tracking-wider px-1.5 py-0.5 rounded bg-[#1A1D24]">${textState}</span>
                 `;
                 div.onclick = () => seleccionarPunto(idx);
                 grid.appendChild(div);
             });
 
-            // Actualizar barra de progreso
             const porcentaje = Math.round((completados / lista.length) * 100);
             document.getElementById('texto-progreso-num').innerText = `${completados} de ${lista.length} puntos · ${porcentaje}%`;
             document.getElementById('barra-progreso-fill').style.width = `${porcentaje}%`;
@@ -438,30 +445,28 @@
             document.getElementById('ficha-material').innerText = item.material || 'Ninguna';
             document.getElementById('ficha-tiempo').innerText = item.tiempo || '3 min';
             
-            // Actualizar indicador 3D
             document.getElementById('indicador-3d-texto').innerText = `${item.codigo} · ${item.componente}`;
 
-            // FOTO 1
+            // FOTO 1 (ACTIVA)
             const img1 = document.getElementById('ficha-imagen-1');
             const lbl1 = document.getElementById('ficha-label-1');
             if(item.img1 && item.img1 !== "") {
                 img1.src = item.img1;
             } else {
-                img1.src = `https://placehold.co/300x200/111827/38bdf8?text=${item.codigo}+-+Externa`;
+                img1.src = `https://placehold.co/300x200/1A1D24/38bdf8?text=${item.codigo}+-+Externa`;
             }
             lbl1.innerText = item.label1 || "Vista general";
 
-            // FOTO 2
+            // FOTO 2 (INACTIVA)
             const img2 = document.getElementById('ficha-imagen-2');
             const lbl2 = document.getElementById('ficha-label-2');
             if(item.img2 && item.img2 !== "") {
                 img2.src = item.img2;
             } else {
-                img2.src = `https://placehold.co/300x200/111827/38bdf8?text=${item.codigo}+-+Detalle`;
+                img2.src = `https://placehold.co/300x200/1A1D24/38bdf8?text=${item.codigo}+-+Detalle`;
             }
             lbl2.innerText = item.label2 || "Detalle / Interna";
 
-            // Trazabilidad estado
             const estadoKey = `${modoActual}_${puntoSeleccionadoIdx}`;
             const dataEstado = estadosPuntos[estadoKey];
             const trazabilidadElem = document.getElementById('trazabilidad-estado');
@@ -534,7 +539,7 @@
             }
         }
 
-        // Three.js Visor 3D Estilo Industrial Metálico
+        // Three.js Visor 3D Estilo Industrial Neutro
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -544,7 +549,6 @@
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
-        // Iluminación de planta industrial
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
         scene.add(ambientLight);
 
@@ -553,14 +557,8 @@
         dirLight.castShadow = true;
         scene.add(dirLight);
 
-        const pointLight = new THREE.PointLight(0x38bdf8, 1, 50);
-        pointLight.position.set(-5, 10, -5);
-        scene.add(pointLight);
-
-        // Grupo principal de la máquina con aspecto metálico
         const machineGroup = new THREE.Group();
 
-        // Base de la máquina (Estructura gris acero)
         const baseGeo = new THREE.BoxGeometry(3.2, 0.6, 1.8);
         const baseMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.3 });
         const baseMesh = new THREE.Mesh(baseGeo, baseMat);
@@ -568,17 +566,15 @@
         baseMesh.receiveShadow = true;
         machineGroup.add(baseMesh);
 
-        // Tolva / Cuerpo principal (Cilindro metálico con acabado industrial)
         const bodyGeo = new THREE.CylinderGeometry(0.9, 0.7, 2.2, 32);
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.6, roughness: 0.2 });
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, metalness: 0.5, roughness: 0.3 });
         const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
         bodyMesh.position.set(0, 1.4, 0);
         bodyMesh.castShadow = true;
         machineGroup.add(bodyMesh);
 
-        // Tapa superior de tolva
         const capGeo = new THREE.CylinderGeometry(0.95, 0.95, 0.2, 32);
-        const capMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.1 });
+        const capMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.1 });
         const capMesh = new THREE.Mesh(capGeo, capMat);
         capMesh.position.set(0, 2.6, 0);
         machineGroup.add(capMesh);
@@ -588,7 +584,6 @@
         camera.position.set(0, 3, 6.5);
         camera.lookAt(0, 1, 0);
 
-        // Controles de rotación con mouse
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
 
@@ -601,7 +596,6 @@
         });
         window.addEventListener('mouseup', () => { isDragging = false; });
 
-        // Soporte táctil para celulares en planta
         container.addEventListener('touchstart', (e) => { isDragging = true; previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY }; });
         container.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
