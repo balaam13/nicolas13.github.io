@@ -36,18 +36,22 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
 
-    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL) -->
+    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL CON LOGO) -->
     <div id="setup-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-8 shadow-2xl">
-            <div class="flex flex-col items-center text-center mb-6 border-b border-[rgba(255,255,255,0.15)] pb-6">
-                <h1 class="text-xl font-black text-white tracking-widest uppercase mb-1">EMPAQPLAST S.A.</h1>
-                <p class="text-xs text-ind-accent font-semibold tracking-wide uppercase">Sistema de Mantenimiento Autónomo TPM</p>
+        <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 shadow-2xl">
+            <div class="flex flex-col items-center text-center mb-5 border-b border-[rgba(255,255,255,0.15)] pb-5">
+                <!-- LOGO EMPAQPLAST S.A. EN LOGIN -->
+                <div class="w-full h-20 bg-[#141821] industrial-border rounded-xl overflow-hidden flex items-center justify-center p-2 mb-3 shadow-inner">
+                    <img src="imagen(162).jpg" alt="EMPAQPLAST S.A." class="w-full h-full object-fill rounded-lg" onerror="this.src='https://placehold.co/200x80/0066cc/ffffff?text=EMPAQPLAST'">
+                </div>
+                <h1 class="text-base font-black text-white tracking-wider uppercase">EMPAQPLAST S.A.</h1>
+                <p class="text-[11px] text-ind-accent font-semibold tracking-wide uppercase mt-0.5">Sistema de Mantenimiento Autónomo TPM</p>
             </div>
             
-            <div class="space-y-4 text-xs">
+            <div class="space-y-3.5 text-xs">
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Área:</label>
-                    <select id="select-area" onchange="actualizarMaquinas()" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
+                    <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Área:</label>
+                    <select id="select-area" onchange="actualizarMaquinas()" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                         <option value="Inyeccion Convencional">Inyección Convencional</option>
                         <option value="Inyeccion Pet">Inyección PET</option>
                         <option value="Soplado Pet">Soplado PET</option>
@@ -55,8 +59,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Máquina:</label>
-                    <select id="select-maquina" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
+                    <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Máquina:</label>
+                    <select id="select-maquina" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                         <option value="Bole 2600 EK-2">Bole 2600 EK-2</option>
                         <option value="Haitian General">Haitian General</option>
                         <option value="SIPA Unit">SIPA Unit</option>
@@ -64,40 +68,40 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Código operador:</label>
-                        <input type="text" id="operator-code" placeholder="Ej. OP-402" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
+                        <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Código operador:</label>
+                        <input type="text" id="operator-code" placeholder="Ej. op11" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Contraseña:</label>
-                        <input type="password" id="operator-pass" placeholder="••••" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
+                        <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Contraseña:</label>
+                        <input type="password" id="operator-pass" placeholder="••••" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Turno:</label>
+                    <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Turno:</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button type="button" onclick="setTurno(1)" id="btn-turno-1" class="py-3 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow">TURNO 1</button>
-                        <button type="button" onclick="setTurno(2)" id="btn-turno-2" class="py-3 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400">TURNO 2</button>
+                        <button type="button" onclick="setTurno(1)" id="btn-turno-1" class="py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow">TURNO 1</button>
+                        <button type="button" onclick="setTurno(2)" id="btn-turno-2" class="py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400">TURNO 2</button>
                     </div>
                 </div>
-                <button onclick="iniciarSesion()" class="w-full mt-3 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-4 rounded-xl text-xs tracking-widest uppercase transition shadow-xl">Iniciar mantenimiento autónomo</button>
+                <button onclick="iniciarSesion()" class="w-full mt-2 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs tracking-widest uppercase transition shadow-xl">Iniciar mantenimiento autónomo</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE REPORTAR ANOMALÍA (AUTOMATIZADO POR SISTEMA) -->
-    <div id="anomalia-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm hidden items-center justify-center p-4">
+    <!-- MODAL DE REPORTAR ANOMALÍA -->
+    <div id="anomalia-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 shadow-2xl">
             <div class="flex items-center space-x-3 mb-5 border-b border-[rgba(255,255,255,0.15)] pb-4">
                 <div class="w-9 h-9 rounded-xl bg-rose-500/25 border border-rose-500/50 flex items-center justify-center text-rose-400 font-bold">⚠</div>
                 <div>
                     <h3 class="text-xs font-bold text-white uppercase tracking-wider">Reportar anomalía de equipo</h3>
-                    <p class="text-[11px] text-rose-400 font-mono mt-0.5" id="modal-anomalia-info">Sistema Expulsor · L-005</p>
+                    <p class="text-[11px] text-rose-400 font-mono mt-0.5" id="modal-anomalia-info">Sistema · L-001</p>
                 </div>
             </div>
 
             <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Tipo de anomalía (Asignado automáticamente al sistema):</label>
+                    <label class="block font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Tipo de anomalía (Sistema automático):</label>
                     <input type="text" id="tipo-anomalia-auto" readonly class="w-full bg-[#141821]/80 industrial-border rounded-xl px-3.5 py-3 text-sm text-ind-accent font-mono font-bold">
                 </div>
 
@@ -125,11 +129,11 @@
         </div>
     </div>
 
-    <!-- ENCABEZADO INDUSTRIAL PRINCIPAL -->
+    <!-- ENCABEZADO INDUSTRIAL PRINCIPAL CON LOGO -->
     <header class="bg-ind-panel border-b border-[rgba(255,255,255,0.15)] px-6 py-4 flex items-center justify-between shadow-lg">
         <div class="flex items-center space-x-5">
-            <div class="w-40 h-12 bg-[#141821] industrial-border rounded-xl overflow-hidden flex items-center justify-center p-1.5 shadow-inner">
-                <img src="imagen(162).jpg" alt="Logo" class="w-full h-full object-fill rounded">
+            <div class="w-36 h-12 bg-[#141821] industrial-border rounded-xl overflow-hidden flex items-center justify-center p-1.5 shadow-inner">
+                <img src="imagen(162).jpg" alt="EMPAQPLAST S.A." class="w-full h-full object-fill rounded-lg">
             </div>
             <div class="border-l border-[rgba(255,255,255,0.15)] pl-5">
                 <h1 id="header-maq-title" class="text-lg font-black text-white tracking-tight">BOLE 2600 EK-2</h1>
@@ -141,11 +145,15 @@
                 <span id="display-operator" class="block text-xs font-bold text-slate-200">Operador: --</span>
                 <span id="display-turno" class="block text-[10px] text-slate-400 font-mono uppercase">TURNO 1 · ACTIVO</span>
             </div>
-            <button onclick="cambiarOperador()" class="text-xs bg-[#141821] hover:bg-[#2A3142] text-slate-300 px-4 py-3 rounded-xl industrial-border transition font-bold shadow-sm">Cambiar</button>
+            <div class="hidden xl:block text-right bg-[#141821] px-4 py-2 rounded-xl industrial-border">
+                <span id="display-fecha" class="block text-xs font-bold text-ind-accent font-mono">--/--/----</span>
+                <span class="block text-[10px] text-slate-400 font-mono">FECHA ACTUAL</span>
+            </div>
+            <button onclick="cambiarOperador()" class="text-xs bg-[#141821] hover:bg-[#323743] text-slate-300 px-4 py-3 rounded-xl industrial-border transition font-bold shadow-sm">Cambiar</button>
         </div>
     </header>
 
-    <!-- BARRA DE CONTEXTO OPERATIVO Y FILTROS POR SISTEMAS -->
+    <!-- BARRA DE CONTEXTO Y FILTROS -->
     <section class="bg-ind-panel/40 border-b border-[rgba(255,255,255,0.15)] px-6 py-3.5">
         <div class="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
@@ -154,8 +162,7 @@
                     <button onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold">Monitoreo (22)</button>
                 </div>
                 <div class="h-6 w-px bg-[rgba(255,255,255,0.15)] hidden md:block"></div>
-                <!-- FILTRO POR SISTEMAS -->
-                <div class="flex items-center space-x-2 overflow-x-auto py-1">
+                <div class="flex items-center space-x-2">
                     <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Sistema:</span>
                     <select id="select-sistema-filtro" onchange="filtrarPorSistema()" class="bg-[#141821] industrial-border text-xs text-white px-3 py-2 rounded-xl font-semibold focus:outline-none focus:border-ind-accent">
                         <option value="TODOS">-- Todos los sistemas --</option>
@@ -176,9 +183,8 @@
     <!-- CONTENIDO PRINCIPAL INDUSTRIAL -->
     <main class="flex-1 flex flex-col md:flex-row p-5 gap-5 max-w-[1700px] mx-auto w-full">
         
-        <!-- COLUMNA IZQUIERDA: 3D INDUSTRIAL + LISTA DE PUNTOS -->
+        <!-- COLUMNA IZQUIERDA: 3D + LISTA DE PUNTOS -->
         <div class="w-full md:w-5/12 flex flex-col gap-4">
-            <!-- VISOR 3D ESTILO INDUSTRIAL -->
             <div class="relative bg-ind-panel industrial-border rounded-2xl overflow-hidden shadow-md h-[280px] flex items-center justify-center">
                 <div id="canvas-container" class="absolute inset-0"></div>
                 <div class="absolute top-3 left-3 bg-[#141821]/90 backdrop-blur px-3 py-1.5 rounded-xl industrial-border text-[11px] font-mono text-slate-200 shadow flex items-center space-x-2 pointer-events-none">
@@ -190,7 +196,6 @@
                 </div>
             </div>
 
-            <!-- LISTA DE INSPECCIÓN REAL (AGRUPADA POR SISTEMAS) -->
             <div class="bg-ind-panel industrial-border rounded-2xl p-4 flex-1 flex flex-col shadow-md">
                 <div class="flex items-center justify-between mb-3 border-b border-[rgba(255,255,255,0.15)] pb-2.5">
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Puntos de verificación</h3>
@@ -202,10 +207,9 @@
             </div>
         </div>
 
-        <!-- COLUMNA DERECHA: PANEL DE DETALLE Y FOTOS -->
+        <!-- COLUMNA DERECHA: FICHA TÉCNICA -->
         <div class="w-full md:w-7/12 bg-ind-panel industrial-border rounded-2xl p-6 shadow-md flex flex-col justify-between">
             <div id="ficha-content">
-                <!-- ENCABEZADO COMPACTO INDUSTRIAL CON FRECUENCIA Y PERIODICIDAD -->
                 <div class="border-b border-[rgba(255,255,255,0.15)] pb-3.5 mb-4">
                     <div class="flex items-center justify-between">
                         <div>
@@ -217,11 +221,10 @@
                     </div>
                     <div class="flex items-center justify-between mt-1.5">
                         <p class="text-[11px] text-slate-400 font-medium">Punto de verificación · Limpieza TPM</p>
-                        <span class="text-[11px] font-bold text-ind-accent font-mono bg-ind-accent/10 px-2.5 py-0.5 rounded border border-ind-accent/30" id="ficha-periodicidad">Frecuencia: Diario (Turno)</span>
+                        <span id="ficha-periodicidad-badge" class="text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border">Frecuencia: Diario</span>
                     </div>
                 </div>
 
-                <!-- DOS FOTOS LADO A LADO -->
                 <div class="grid grid-cols-2 gap-3.5 mb-5">
                     <div id="card-foto-1" class="bg-[#141821] border-[1.5px] border-ind-accent rounded-xl overflow-hidden flex flex-col transition-all shadow-sm">
                         <div class="h-32 bg-[#141821] relative">
@@ -240,7 +243,6 @@
                     </div>
                 </div>
 
-                <!-- ESPECIFICACIONES TÉCNICAS -->
                 <div class="space-y-4 text-xs border-t border-[rgba(255,255,255,0.15)] pt-4">
                     <div>
                         <span class="text-[11px] font-bold text-slate-400 block mb-1 uppercase tracking-wider">Estándar de ejecución (qué hacer)</span>
@@ -258,8 +260,8 @@
                             <span class="text-slate-200 font-semibold text-xs mt-1 block" id="ficha-material">-</span>
                         </div>
                         <div class="bg-[#141821] p-3 rounded-xl industrial-border">
-                            <span class="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">Tiempo estimado</span>
-                            <span class="text-slate-200 font-semibold text-xs mt-1 block font-mono" id="ficha-tiempo">5 min</span>
+                            <span class="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">Contador de ejecuciones / tiempo</span>
+                            <span class="text-ind-accent font-bold text-xs mt-1 block font-mono" id="ficha-contador">0 veces realizadas · 0 min</span>
                         </div>
                     </div>
                 </div>
@@ -311,20 +313,20 @@
         }
 
         const datosLimpieza = [
-            {codigo: "L-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Tolva de alimentación", periodicidad: "Diaria · Cada turno", estandar: "Retirar polvo, pellets contaminados y residuos visibles del interior y borde superior de la tolva.", anormal: "Material contaminado, fisuras o deformación.", material: "Paño industrial / Brocha", tiempo: "5 min", img1: "", label1: "Así se ve tu tolva", img2: "", label2: "Por dentro, con pellets"},
-            {codigo: "L-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria · Cada turno", estandar: "Limpiar superficie externa y verificar libre de suciedad.", anormal: "Ruido anormal o baja succión.", material: "Paño industrial", tiempo: "5 min", img1: "", label1: "Vista externa", img2: "", label2: "Estado general"},
+            {codigo: "L-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Tolva de alimentación", periodicidad: "Diaria", estandar: "Retirar polvo, pellets contaminados y residuos visibles del interior y borde superior de la tolva.", anormal: "Material contaminado, fisuras o deformación.", material: "Paño industrial / Brocha", tiempo: "5 min", img1: "", label1: "Así se ve tu tolva", img2: "", label2: "Por dentro, con pellets"},
+            {codigo: "L-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Limpiar superficie externa y verificar libre de suciedad.", anormal: "Ruido anormal o baja succión.", material: "Paño industrial", tiempo: "5 min", img1: "", label1: "Vista externa", img2: "", label2: "Estado general"},
             {codigo: "L-003", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Filtro de succionador", periodicidad: "Semanal", estandar: "Limpiar filtro para asegurar flujo de aire.", anormal: "Filtro saturado, roto o deformado.", material: "Pistola de aire", tiempo: "5 min", img1: "", label1: "Filtro instalado", img2: "", label2: "Malla de filtrado"},
-            {codigo: "L-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zona de boquilla", periodicidad: "Diaria · Cada turno", estandar: "Retirar residuos y material carbonizado.", anormal: "Fugas o material quemado.", material: "Cepillo de bronce", tiempo: "5 min", img1: "", label1: "Boquilla principal", img2: "", label2: "Área de contacto"},
-            {codigo: "L-005", sistema: "SISTEMA EXPULSOR", componente: "Área de expulsión", periodicidad: "Diaria · Cada turno", estandar: "Eliminar rebabas, piezas atrapadas y residuos plásticos.", anormal: "Obstrucciones o acumulación de material.", material: "Brocha", tiempo: "5 min", img1: "", label1: "Zona de expulsión", img2: "", label2: "Detalle mecánico"},
+            {codigo: "L-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zona de boquilla", periodicidad: "Diaria", estandar: "Retirar residuos y material carbonizado.", anormal: "Fugas o material quemado.", material: "Cepillo de bronce", tiempo: "5 min", img1: "", label1: "Boquilla principal", img2: "", label2: "Área de contacto"},
+            {codigo: "L-005", sistema: "SISTEMA EXPULSOR", componente: "Área de expulsión", periodicidad: "Diaria", estandar: "Eliminar rebabas, piezas atrapadas y residuos plásticos.", anormal: "Obstrucciones o acumulación de material.", material: "Brocha", tiempo: "5 min", img1: "", label1: "Zona de expulsión", img2: "", label2: "Detalle mecánico"},
             {codigo: "L-006", sistema: "SISTEMA DE CIERRE", componente: "Platina fija", periodicidad: "Semanal", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", tiempo: "5 min", img1: "", label1: "Platina fija", img2: "", label2: "Superficie de apoyo"},
             {codigo: "L-007", sistema: "SISTEMA DE CIERRE", componente: "Platina móvil", periodicidad: "Semanal", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", tiempo: "5 min", img1: "", label1: "Platina móvil", img2: "", label2: "Guías de deslizamiento"},
             {codigo: "L-008", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras y distribuidor de agua", periodicidad: "Mensual", estandar: "Limpiar polvo exterior y verificar que no existan dobleces o estrangulamientos.", anormal: "Fugas de aire audibles, mangueras cuarteadas o acoples sueltos.", material: "Ninguna", tiempo: "5 min", img1: "", label1: "Distribuidor de agua", img2: "", label2: "Mangueras visibles"},
             {codigo: "L-009", sistema: "SISTEMA NEUMÁTICO", componente: "Unidad de mantenimiento (FRL)", periodicidad: "Semanal", estandar: "Retirar polvo exterior de los manómetros y limpiar externamente los vasos transparentes.", anormal: "Vasos opacos/rotos, acumulación excesiva de agua en el filtro o fugas en el regulador.", material: "Ninguna", tiempo: "5 min", img1: "", label1: "Unidad FRL", img2: "", label2: "Manómetros"},
             {codigo: "L-010", sistema: "SISTEMA HIDRÁULICO", componente: "Mangueras hidráulicas visibles", periodicidad: "Mensual", estandar: "Limpiar aceite superficial para facilitar detección de fugas.", anormal: "Acumulación de aceite y polvo", material: "Paño industrial", tiempo: "5 min", img1: "", label1: "Líneas hidráulicas", img2: "", label2: "Conexiones"},
             {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", tiempo: "5 min", img1: "", label1: "Controlador", img2: "", label2: "Panel y rejillas"},
-            {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", estandar: "Limpiar pantalla y marco externo.", periodicidad: "Diaria", anormal: "Acumulación externa polvo", material: "Paño absorbente", tiempo: "5 min", img1: "", label1: "Pantalla HMI", img2: "", label2: "Marco exterior"},
+            {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", periodicidad: "Diaria", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", tiempo: "5 min", img1: "", label1: "Pantalla HMI", img2: "", label2: "Marco exterior"},
             {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", periodicidad: "Semanal", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", tiempo: "5 min", img1: "", label1: "Tablero eléctrico", img2: "", label2: "Rejillas de ventilación"},
-            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", estandar: "Cambiar los filtros de ventilación", periodicidad: "Mensual", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", tiempo: "5 min", img1: "", label1: "Filtro de tablero", img2: "", label2: "Acceso lateral"},
+            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", tiempo: "5 min", img1: "", label1: "Filtro de tablero", img2: "", label2: "Acceso lateral"},
             {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", tiempo: "5 min", img1: "", label1: "Estructura externa", img2: "", label2: "Chasis general"},
             {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", tiempo: "5 min", img1: "", label1: "Piso perimetral", img2: "", label2: "Área de trabajo"}
         ];
@@ -359,7 +361,6 @@
             const sistemasUnicos = [...new Set(lista.map(item => item.sistema))];
             const selectFiltro = document.getElementById('select-sistema-filtro');
             
-            // Guardar selección actual si existe
             const valorActual = selectFiltro.value;
             selectFiltro.innerHTML = '<option value="TODOS">-- Todos los sistemas --</option>';
             
@@ -375,17 +376,16 @@
         function setTurno(t) {
             turnoActual = t;
             if(t === 1) {
-                document.getElementById('btn-turno-1').className = "py-3 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition";
-                document.getElementById('btn-turno-2').className = "py-3 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400";
+                document.getElementById('btn-turno-1').className = "py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition";
+                document.getElementById('btn-turno-2').className = "py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400";
             } else {
-                document.getElementById('btn-turno-2').className = "py-3 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition";
-                document.getElementById('btn-turno-1').className = "py-3 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400";
+                document.getElementById('btn-turno-2').className = "py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition";
+                document.getElementById('btn-turno-1').className = "py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400";
             }
         }
 
         function iniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
-            const passOp = document.getElementById('operator-pass').value.trim();
             if(!codigoOp) {
                 alert("Por favor ingrese el código del operador.");
                 return;
@@ -448,28 +448,31 @@
             }
 
             listaFiltrada.forEach((item) => {
-                // Encontrar el índice real en la lista original
                 const idxReal = listaOriginal.findIndex(el => el.codigo === item.codigo);
                 const estadoKey = `${modoActual}_${idxReal}`;
                 const dataEstado = estadosPuntos[estadoKey];
                 
                 let icon = '○';
                 let colorClass = "text-slate-400 bg-[#141821]/40 industrial-border hover:border-slate-400";
-                let textState = "Pendiente";
+                let textState = "PENDIENTE";
 
                 if(dataEstado && dataEstado.status === 'listo') {
                     icon = '✓';
                     colorClass = "text-emerald-400 bg-emerald-950/25 border-emerald-700/60";
-                    textState = "Realizado";
+                    textState = "REALIZADO";
                 } else if(dataEstado && dataEstado.status === 'anomalia') {
                     icon = '!';
                     colorClass = "text-rose-400 bg-rose-950/25 border-rose-700/60";
-                    textState = "Anomalía";
+                    textState = "ANOMALÍA";
                 }
 
                 if(idxReal === puntoSeleccionadoIdx) {
                     colorClass += " border-ind-accent bg-ind-accent/15";
                 }
+
+                let badgeFreqColor = "text-blue-400 bg-blue-950/30 border-blue-800/40";
+                if(item.periodicidad === "Semanal") badgeFreqColor = "text-amber-400 bg-amber-950/30 border-amber-800/40";
+                if(item.periodicidad === "Mensual") badgeFreqColor = "text-purple-400 bg-purple-950/30 border-purple-800/40";
 
                 const div = document.createElement('div');
                 div.className = `px-3.5 py-2.5 rounded-xl border-[1.5px] cursor-pointer transition flex items-center justify-between text-xs font-mono ${colorClass}`;
@@ -479,9 +482,15 @@
                         <span class="font-bold text-white">${item.codigo}</span>
                         <span class="text-slate-300 truncate font-sans font-medium">${item.componente}</span>
                     </div>
-                    <span class="text-[10px] uppercase font-sans tracking-wider px-2 py-0.5 rounded bg-[#141821] industrial-border font-semibold">${textState}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded border ${badgeFreqColor}">${item.periodicidad}</span>
+                        <span class="text-[10px] uppercase font-sans tracking-wider px-2 py-0.5 rounded bg-[#141821] industrial-border font-semibold">${textState}</span>
+                    </div>
                 `;
-                div.onclick = () => seleccionarPunto(idxReal);
+                div.onclick = () => {
+                    puntoSeleccionadoIdx = idxReal;
+                    actualizarInterfaz();
+                };
                 grid.appendChild(div);
             });
 
@@ -508,12 +517,15 @@
             document.getElementById('ficha-estandar').innerText = item.estandar;
             document.getElementById('ficha-anormal').innerText = item.anormal;
             document.getElementById('ficha-material').innerText = item.material || 'Ninguna';
-            document.getElementById('ficha-tiempo').innerText = item.tiempo || '3 min';
-            document.getElementById('ficha-periodicidad').innerText = `Frecuencia: ${item.periodicidad}`;
             
+            const freqBadge = document.getElementById('ficha-periodicidad-badge');
+            freqBadge.innerText = `Frecuencia: ${item.periodicidad}`;
+            if(item.periodicidad === "Diaria") freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-blue-400 bg-blue-950/40 border-blue-800/60";
+            else if(item.periodicidad === "Semanal") freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-amber-400 bg-amber-950/40 border-amber-800/60";
+            else freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-purple-400 bg-purple-950/40 border-purple-800/60";
+
             document.getElementById('indicador-3d-texto').innerText = `${item.codigo} · ${item.componente}`;
 
-            // FOTOS
             const img1 = document.getElementById('ficha-imagen-1');
             const lbl1 = document.getElementById('ficha-label-1');
             img1.src = (item.img1 && item.img1 !== "") ? item.img1 : `https://placehold.co/300x200/141821/38bdf8?text=${item.codigo}+-+Externa`;
@@ -526,6 +538,14 @@
 
             const estadoKey = `${modoActual}_${idx}`;
             const dataEstado = estadosPuntos[estadoKey];
+            const contadorElem = document.getElementById('ficha-contador');
+            
+            if(dataEstado && dataEstado.ejecuciones) {
+                contadorElem.innerText = `${dataEstado.ejecuciones} vez(ces) realizadas · Último: ${dataEstado.ultimoTiempo || 'Turno activo'}`;
+            } else {
+                contadorElem.innerText = `0 ejecuciones registradas · 0 min`;
+            }
+
             const trazabilidadElem = document.getElementById('trazabilidad-estado');
             if(dataEstado && dataEstado.status === 'listo') {
                 trazabilidadElem.innerHTML = `✓ Verificación registrada · ${operadorActual || 'Operador'}`;
@@ -541,7 +561,18 @@
 
         function marcarEstado(estado) {
             const estadoKey = `${modoActual}_${puntoSeleccionadoIdx}`;
-            estadosPuntos[estadoKey] = { status: estado, tipo: 'Normal', com: '', foto: null };
+            const anterior = estadosPuntos[estadoKey] ? (estadosPuntos[estadoKey].ejecuciones || 0) : 0;
+            const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            estadosPuntos[estadoKey] = { 
+                status: estado, 
+                tipo: 'Normal', 
+                ejecuciones: anterior + 1, 
+                ultimoTiempo: horaActual,
+                com: '', 
+                foto: null 
+            };
+            
             actualizarInterfaz();
             
             const listaOriginal = modoActual === 'limpieza' ? datosLimpieza : datosMonitoreo;
@@ -555,7 +586,6 @@
             const listaOriginal = modoActual === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const item = listaOriginal[puntoSeleccionadoIdx];
             
-            // AUTOCOMPLETAR TIPO DE ANOMALÍA SEGÚN EL SISTEMA ACTUAL
             document.getElementById('modal-anomalia-info').innerText = `${item.sistema} · ${item.codigo}`;
             document.getElementById('tipo-anomalia-auto').value = `${item.sistema} - ${item.componente}`;
             document.getElementById('texto-anomalia').value = '';
@@ -581,6 +611,7 @@
             const item = listaOriginal[puntoSeleccionadoIdx];
             const tipoAuto = `${item.sistema} - ${item.componente}`;
             const com = document.getElementById('texto-anomalia').value.trim();
+            const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
             if(!com) {
                 alert("Por favor ingrese una descripción detallada de la anomalía.");
@@ -590,7 +621,16 @@
             let fotoNombre = fileInput.files.length > 0 ? fileInput.files[0].name : null;
 
             const estadoKey = `${modoActual}_${puntoSeleccionadoIdx}`;
-            estadosPuntos[estadoKey] = { status: 'anomalia', tipo: tipoAuto, com: com, foto: fotoNombre };
+            const anterior = estadosPuntos[estadoKey] ? (estadosPuntos[estadoKey].ejecuciones || 0) : 0;
+
+            estadosPuntos[estadoKey] = { 
+                status: 'anomalia', 
+                tipo: tipoAuto, 
+                ejecuciones: anterior + 1,
+                ultimoTiempo: horaActual,
+                com: com, 
+                foto: fotoNombre 
+            };
             cerrarModalAnomalia();
             actualizarInterfaz();
 
@@ -598,6 +638,13 @@
                 puntoSeleccionadoIdx++;
                 actualizarInterfaz();
             }
+        }
+
+        function actualizarFechaActual() {
+            const opciones = { year: 'numeric', month: '2-digit', day: '2-digit' };
+            const fechaStr = new Date().toLocaleDateString('es-EC', opciones);
+            const elem = document.getElementById('display-fecha');
+            if(elem) elem.innerText = fechaStr;
         }
 
         // Three.js Visor 3D Estilo Industrial
@@ -675,6 +722,7 @@
         window.onload = () => {
             actualizarMaquinas();
             poblarFiltroSistemas();
+            actualizarFechaActual();
             actualizarInterfaz();
         };
     </script>
