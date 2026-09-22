@@ -183,7 +183,7 @@
     <!-- CONTENIDO PRINCIPAL INDUSTRIAL -->
     <main class="flex-1 flex flex-col md:flex-row p-5 gap-5 max-w-[1700px] mx-auto w-full">
         
-        <!-- COLUMNA IZQUIERDA: 3D REAL (.glb) + LISTA DE PUNTOS -->
+        <!-- COLUMNA IZQUIERDA: 3D + LISTA DE PUNTOS -->
         <div class="w-full md:w-5/12 flex flex-col gap-4">
             <div class="relative bg-ind-panel industrial-border rounded-2xl overflow-hidden shadow-md h-[280px] flex items-center justify-center">
                 <div id="canvas-container" class="absolute inset-0"></div>
@@ -207,7 +207,7 @@
             </div>
         </div>
 
-        <!-- COLUMNA DERECHA: FICHA TÉCNICA CON FOTOS REALES DE GITHUB -->
+        <!-- COLUMNA DERECHA: FICHA TÉCNICA (FOTOS CON SEPARACIÓN ADECUADA) -->
         <div class="w-full md:w-7/12 bg-ind-panel industrial-border rounded-2xl p-6 shadow-md flex flex-col justify-between">
             <div id="ficha-content">
                 <div class="border-b border-[rgba(255,255,255,0.15)] pb-3.5 mb-4">
@@ -225,22 +225,22 @@
                     </div>
                 </div>
 
-                <!-- DOS FOTOS REALES ENLAZADAS DESDE GITHUB -->
-                <div class="grid grid-cols-2 gap-3.5 mb-5">
-                    <div id="card-foto-1" class="bg-[#141821] border-[1.5px] border-ind-accent rounded-xl overflow-hidden flex flex-col transition-all shadow-sm">
-                        <div class="h-32 bg-[#141821] relative">
-                            <img id="ficha-imagen-1" src="" alt="Foto Externa" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/141821/38bdf8?text=Vista+Externa'">
+                <!-- FOTOS BIEN SEPARADAS Y CON BUEN ESPACIO -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                    <div id="card-foto-1" class="bg-[#141821] border-[1.5px] border-ind-accent rounded-xl overflow-hidden flex flex-col transition-all shadow-md">
+                        <div class="h-40 bg-[#141821] relative flex items-center justify-center p-2">
+                            <img id="ficha-imagen-1" src="" alt="Foto Externa" class="max-h-full max-w-full object-contain rounded-lg" onerror="this.src='https://placehold.co/300x200/141821/38bdf8?text=Vista+Externa'">
                         </div>
-                        <div class="p-2 bg-[#141821] border-t border-ind-accent text-[11px] font-semibold text-slate-200 text-center truncate flex items-center justify-center space-x-1.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-ind-accent animate-pulse"></span>
+                        <div class="p-2.5 bg-[#141821] border-t border-ind-accent text-xs font-semibold text-slate-200 text-center truncate flex items-center justify-center space-x-2">
+                            <span class="w-2 h-2 rounded-full bg-ind-accent animate-pulse"></span>
                             <span id="ficha-label-1">Vista externa</span>
                         </div>
                     </div>
-                    <div id="card-foto-2" class="bg-[#141821] industrial-border rounded-xl overflow-hidden flex flex-col transition-all opacity-80">
-                        <div class="h-32 bg-[#141821] relative">
-                            <img id="ficha-imagen-2" src="" alt="Foto Detalle" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/141821/38bdf8?text=Vista+Detalle'">
+                    <div id="card-foto-2" class="bg-[#141821] industrial-border rounded-xl overflow-hidden flex flex-col transition-all opacity-90 shadow-md">
+                        <div class="h-40 bg-[#141821] relative flex items-center justify-center p-2">
+                            <img id="ficha-imagen-2" src="" alt="Foto Detalle" class="max-h-full max-w-full object-contain rounded-lg" onerror="this.src='https://placehold.co/300x200/141821/38bdf8?text=Vista+Detalle'">
                         </div>
-                        <div class="p-2 bg-[#141821] border-t border-[rgba(255,255,255,0.15)] text-[11px] font-medium text-slate-400 text-center truncate" id="ficha-label-2">Vista en detalle</div>
+                        <div class="p-2.5 bg-[#141821] border-t border-[rgba(255,255,255,0.15)] text-xs font-medium text-slate-300 text-center truncate" id="ficha-label-2">Vista en detalle</div>
                     </div>
                 </div>
 
@@ -283,7 +283,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT DE LÓGICA, FOTOS REALES Y MODELO GLB -->
+    <!-- SCRIPT DE LÓGICA Y 3D INDUSTRIAL (ZOOM AJUSTADO) -->
     <script>
         let turnoActual = 1;
         let operadorActual = "";
@@ -313,7 +313,6 @@
             });
         }
 
-        // DATOS DE LIMPIEZA CON LAS FOTOS EXACTAS QUE SUBISTE A GITHUB
         const datosLimpieza = [
             {codigo: "L-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Tolva de alimentación", periodicidad: "Diaria", estandar: "Retirar polvo, pellets contaminados y residuos visibles del interior y borde superior de la tolva.", anormal: "Material contaminado, fisuras o deformación.", material: "Paño industrial / Brocha", tiempo: "5 min", img1: "imagen(166).jpg", label1: "Tolva Externa", img2: "imagen(167).jpg", label2: "Tolva Detalle"},
             {codigo: "L-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Limpiar superficie externa y verificar libre de suciedad.", anormal: "Ruido anormal o baja succión.", material: "Paño industrial", tiempo: "5 min", img1: "Succionador Externo.jpg", label1: "Succionador Externo", img2: "Succionador Detalle.jpg", label2: "Succionador Detalle"},
@@ -333,7 +332,6 @@
             {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", tiempo: "5 min", img1: "Estructura Externa.jpg", label1: "Piso Externa", img2: "Estructura Detalle.jpg", label2: "Piso Detalle"}
         ];
 
-        // DATOS DE MONITOREO (USAN LAS MISMAS FOTOS BASE DE REFERENCIA)
         const datosMonitoreo = [
             {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación"},
             {codigo: "I-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Manguera de succión", periodicidad: "Diaria", estandar: "Verificar integridad y conexión.", anormal: "Roturas, fugas o desgaste.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Manguera", img2: "Succionador Detalle.jpg", label2: "Conexión"},
@@ -545,7 +543,6 @@
 
             document.getElementById('indicador-3d-texto').innerText = `${item.codigo} · ${item.componente}`;
 
-            // FOTOS REALES ENLAZADAS DESDE GITHUB
             const img1 = document.getElementById('ficha-imagen-1');
             const lbl1 = document.getElementById('ficha-label-1');
             img1.src = item.img1;
@@ -667,7 +664,7 @@
             if(elem) elem.innerText = fechaStr;
         }
 
-        // CARGADOR 3D DE MÁQUINA REAL (.glb)
+        // CARGADOR 3D CON ZOOM ACERCADO CORRECTO AL MODELO GLB
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -680,24 +677,34 @@
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
         dirLight.position.set(10, 20, 15);
         dirLight.castShadow = true;
         scene.add(dirLight);
 
-        // CARGAR EL ARCHIVO MÁQUINA.GLB DESDE GITHUB
+        // CARGAR MÁQUINA.GLB Y AJUSTAR ZOOM DE CÁMARA
         const loader = new THREE.GLTFLoader();
         loader.load('máquina.glb', function (gltf) {
             const modelo3D = gltf.scene;
-            modelo3D.position.set(0, 0, 0);
-            modelo3D.scale.set(1, 1, 1);
+            
+            // Centrar modelo automáticamente
+            const box = new THREE.Box3().setFromObject(modelo3D);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            
+            modelo3D.position.x = -center.x;
+            modelo3D.position.y = -center.y;
+            modelo3D.position.z = -center.z;
+            
             scene.add(modelo3D);
+
+            // Ajustar cámara para hacer un zoom perfecto al modelo real
+            const maxDim = Math.max(size.x, size.y, size.z);
+            camera.position.set(0, maxDim * 0.8, maxDim * 1.8);
+            camera.lookAt(0, 0, 0);
         }, undefined, function (error) {
             console.error('Error al cargar la máquina 3D:', error);
         });
-
-        camera.position.set(0, 2, 5);
-        camera.lookAt(0, 0, 0);
 
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
