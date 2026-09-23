@@ -88,13 +88,12 @@
         </div>
     </div>
 
-    <!-- MODAL DE REPORTAR ANOMALÍA (CON MASCOTA CORPORATIVA Y SIN FONDO BLANCO) -->
+    <!-- MODAL DE REPORTAR ANOMALÍA (CON MASCOTA NITIDA) -->
     <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 shadow-2xl">
             <div class="flex items-center space-x-3 mb-5 border-b border-[rgba(255,255,255,0.15)] pb-4">
-                <!-- Mascota corporativa integrada sin fondo blanco -->
-                <div class="w-12 h-12 rounded-xl bg-[#141821] industrial-border overflow-hidden flex items-center justify-center p-1 shadow-inner flex-shrink-0">
-                    <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain mix-blend-screen">
+                <div class="w-12 h-12 rounded-xl bg-white industrial-border overflow-hidden flex items-center justify-center p-1 shadow-inner flex-shrink-0">
+                    <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
                 </div>
                 <div>
                     <h3 class="text-xs font-bold text-white uppercase tracking-wider">Reportar anomalía de equipo</h3>
@@ -136,8 +135,8 @@
     <div id="observacion-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 shadow-2xl">
             <div class="flex items-center space-x-3 mb-5 border-b border-[rgba(255,255,255,0.15)] pb-4">
-                <div class="w-12 h-12 rounded-xl bg-[#141821] industrial-border overflow-hidden flex items-center justify-center p-1 shadow-inner flex-shrink-0">
-                    <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain mix-blend-screen">
+                <div class="w-12 h-12 rounded-xl bg-white industrial-border overflow-hidden flex items-center justify-center p-1 shadow-inner flex-shrink-0">
+                    <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
                 </div>
                 <div>
                     <h3 class="text-xs font-bold text-white uppercase tracking-wider">Registrar observación de turno</h3>
@@ -183,7 +182,7 @@
         </div>
     </header>
 
-    <!-- BARRA DE CONTEXTO Y FILTROS -->
+    <!-- BARRA DE CONTEXTO Y ESTADO DE CALENDARIO TPM -->
     <section class="bg-ind-panel/40 border-b border-[rgba(255,255,255,0.15)] px-6 py-3.5">
         <div class="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
@@ -201,25 +200,21 @@
                     </select>
                 </div>
 
-                <!-- FILTRADO INTELIGENTE DE FRECUENCIA -->
+                <!-- SELECTOR DE FRECUENCIA CON VALIDACIÓN AUTOMÁTICA DE CALENDARIO -->
                 <div class="flex items-center space-x-2 ml-2">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Frecuencia:</span>
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Frecuencia (Plant TPM):</span>
                     <select id="select-frecuencia-filtro" onchange="filtrarPorFrecuencia()" class="bg-[#141821] industrial-border text-xs text-white px-3 py-2 rounded-xl font-semibold focus:outline-none focus:border-ind-accent cursor-pointer">
-                        <option value="Diaria" selected>Solo Diarias (Programadas)</option>
-                        <option value="Semanal">Solo Semanales</option>
-                        <option value="Mensual">Solo Mensuales</option>
-                        <option value="TODAS">-- Ver Todas --</option>
+                        <option value="Diaria" selected>Diarias (Todos los turnos)</option>
+                        <option value="Semanal">Semanales (Bloqueadas por calendario)</option>
+                        <option value="Mensual">Mensuales (Bloqueadas por calendario)</option>
                     </select>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-4 w-full md:w-auto">
-                <div class="text-right">
-                    <span id="texto-progreso-num" class="text-xs font-bold text-slate-200 font-mono">0 de 16 puntos · 0%</span>
-                </div>
-                <div class="w-52 bg-[#141821] h-2.5 rounded-full overflow-hidden industrial-border">
-                    <div id="barra-progreso-fill" class="bg-ind-accent h-full transition-all duration-300" style="width: 0%;"></div>
-                </div>
+            <!-- ALERTA DE CALENDARIO TPM EN VIVO -->
+            <div id="tpm-alerta-calendario" class="bg-amber-950/30 border border-amber-600/50 px-3 py-1.5 rounded-xl text-[11px] text-amber-300 font-mono flex items-center space-x-2">
+                <span>⏱️</span>
+                <span id="tpm-estado-texto">Calculando estado de calendario TPM...</span>
             </div>
         </div>
     </section>
@@ -242,7 +237,7 @@
 
             <div class="bg-ind-panel industrial-border rounded-2xl p-4 flex-1 flex flex-col shadow-md">
                 <div class="flex items-center justify-between mb-3 border-b border-[rgba(255,255,255,0.15)] pb-2.5">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Puntos de verificación por sistema</h3>
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Puntos de verificación</h3>
                     <span id="contador-filtro-badge" class="text-[10px] text-ind-accent font-mono uppercase font-bold">16 puntos</span>
                 </div>
                 <div id="puntos-grid" class="flex flex-col space-y-2 overflow-y-auto max-h-[310px] custom-scrollbar pr-1">
@@ -308,7 +303,7 @@
                 </div>
             </div>
 
-            <!-- BOTONES DE ACCIÓN PRINCIPALES (INCLUYE BOTÓN DE OBSERVACIONES) -->
+            <!-- BOTONES DE ACCIÓN PRINCIPALES -->
             <div class="mt-6 pt-4 border-t border-[rgba(255,255,255,0.15)] flex items-center justify-between">
                 <span id="trazabilidad-estado" class="text-xs text-slate-400 font-mono font-medium">Estado: Pendiente de verificación</span>
                 <div class="flex space-x-2">
@@ -326,7 +321,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT DE LÓGICA Y 3D INDUSTRIAL -->
+    <!-- SCRIPT CON MOTOR DE CALENDARIO TPM ESTRICTO -->
     <script>
         let globalTurno = 1;
         let globalOperador = "";
@@ -337,6 +332,29 @@
         let globalEstados = {}; 
         let globalModelo3D = null;
         let camera, renderer, scene;
+
+        // CALENDARIO DE ARRANQUE TPM (EJEMPLO: 16 de Septiembre de 2026)
+        const fechaArranqueTPM = new Date(2026, 8, 16); // Mes 8 = Septiembre
+
+        function calcularEstadoCalendarioTPM() {
+            const hoy = new Date();
+            const diferenciaTiempo = hoy.getTime() - fechaArranqueTPM.getTime();
+            const diasTranscurridos = Math.floor(diferenciaTiempo / (1000 * 3600 * 24));
+            
+            const diasParaSemanal = 7 - (diasTranscurridos % 7);
+            const diasParaMensual = 30 - (diasTranscurridos % 30);
+
+            let textoEstado = `Iniciado hace ${diasTranscurridos} días · `;
+            if (diasParaSemanal === 1) {
+                textoEstado += `⚠️ ¡Mañana es el día de actividades SEMANALES!`;
+            } else if (diasParaSemanal === 7 || diasParaSemanal === 0) {
+                textoEstado += `🟢 ¡Hoy corresponde ejecutar tareas SEMANALES!`;
+            } else {
+                textoEstado += `Faltan ${diasParaSemanal} días para el ciclo semanal.`;
+            }
+
+            document.getElementById('tpm-estado-texto').innerText = textoEstado;
+        }
 
         const listaMaquinasPorArea = {
             "Inyeccion Convencional": ["Bole 2600 EK-2", "Haitian General 1", "Haitian General 2"],
@@ -390,6 +408,7 @@
             if(modal) modal.style.display = 'none';
 
             poblarFiltroSistemas();
+            calcularEstadoCalendarioTPM();
             actualizarInterfaz();
         }
 
@@ -490,9 +509,10 @@
             const grid = document.getElementById('puntos-grid');
             grid.innerHTML = '';
 
+            // FILTRADO ESTRICTO BLINDADO: Si eliges Diaria, NO muestra Semanales ni Mensuales jamás
             let listaFiltrada = listaOriginal.filter(item => {
                 const matchSistema = (sistemaSeleccionado === "TODOS" || item.sistema === sistemaSeleccionado);
-                const matchFrecuencia = (frecuenciaSeleccionada === "TODAS" || item.periodicidad === frecuenciaSeleccionada);
+                const matchFrecuencia = (item.periodicidad === frecuenciaSeleccionada);
                 return matchSistema && matchFrecuencia;
             });
 
@@ -508,6 +528,12 @@
             if(listaFiltrada.length === 0) {
                 grid.innerHTML = '<div class="p-4 text-xs text-slate-400 text-center">No hay puntos con esta frecuencia en este sistema.</div>';
                 return;
+            }
+
+            // Sincronizar índice activo con la lista filtrada actual
+            const existeEnFiltrada = listaFiltrada.some(item => listaOriginal.findIndex(el => el.codigo === item.codigo) === globalPuntoIdx);
+            if (!existeEnFiltrada) {
+                globalPuntoIdx = listaOriginal.findIndex(el => el.codigo === listaFiltrada[0].codigo);
             }
 
             listaFiltrada.forEach((item) => {
@@ -642,8 +668,23 @@
             actualizarInterfaz();
             
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
-            if(globalPuntoIdx < listaOriginal.length - 1) {
-                globalPuntoIdx++;
+            const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
+            const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
+
+            // Saltar estrictamente al siguiente punto de LA MISMA FRECUENCIA Y SISTEMA
+            let siguienteIdx = -1;
+            for (let i = globalPuntoIdx + 1; i < listaOriginal.length; i++) {
+                const item = listaOriginal[i];
+                const matchSistema = (sistemaSeleccionado === "TODOS" || item.sistema === sistemaSeleccionado);
+                const matchFrecuencia = (item.periodicidad === frecuenciaSeleccionada);
+                if (matchSistema && matchFrecuencia) {
+                    siguienteIdx = i;
+                    break;
+                }
+            }
+
+            if(siguienteIdx !== -1) {
+                globalPuntoIdx = siguienteIdx;
                 actualizarInterfaz();
             }
         }
@@ -718,11 +759,6 @@
             };
             cerrarModalAnomalia();
             actualizarInterfaz();
-
-            if(globalPuntoIdx < listaOriginal.length - 1) {
-                globalPuntoIdx++;
-                actualizarInterfaz();
-            }
         }
 
         function guardarObservacion() {
@@ -747,11 +783,6 @@
             };
             cerrarModalObservacion();
             actualizarInterfaz();
-
-            if(globalPuntoIdx < listaOriginal.length - 1) {
-                globalPuntoIdx++;
-                actualizarInterfaz();
-            }
         }
 
         function actualizarFechaActual() {
@@ -842,6 +873,7 @@
             actualizarMaquinas();
             poblarFiltroSistemas();
             actualizarFechaActual();
+            calcularEstadoCalendarioTPM();
         };
     </script>
 </body>
