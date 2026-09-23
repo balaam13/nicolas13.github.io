@@ -37,7 +37,7 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
 
-    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL) -->
+    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL REPARADO) -->
     <div id="setup-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 shadow-2xl">
             <div class="flex flex-col items-center text-center mb-5 border-b border-[rgba(255,255,255,0.15)] pb-5">
@@ -83,7 +83,7 @@
                         <button type="button" onclick="setTurno(2)" id="btn-turno-2" class="py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400">TURNO 2</button>
                     </div>
                 </div>
-                <button onclick="iniciarSesion()" class="w-full mt-2 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs tracking-widest uppercase transition shadow-xl">Iniciar mantenimiento autónomo</button>
+                <button type="button" onclick="iniciarSesion()" class="w-full mt-2 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs tracking-widest uppercase transition shadow-xl cursor-pointer">Iniciar mantenimiento autónomo</button>
             </div>
         </div>
     </div>
@@ -153,7 +153,7 @@
         </div>
     </header>
 
-    <!-- BARRA DE CONTEXTO Y FILTROS POR SISTEMAS -->
+    <!-- BARRA DE CONTEXTO Y FILTROS -->
     <section class="bg-ind-panel/40 border-b border-[rgba(255,255,255,0.15)] px-6 py-3.5">
         <div class="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
@@ -183,7 +183,7 @@
     <!-- CONTENIDO PRINCIPAL INDUSTRIAL -->
     <main class="flex-1 flex flex-col md:flex-row p-5 gap-5 max-w-[1700px] mx-auto w-full">
         
-        <!-- COLUMNA IZQUIERDA: 3D INTERACTIVO + LISTA DE PUNTOS -->
+        <!-- COLUMNA IZQUIERDA: 3D + LISTA DE PUNTOS -->
         <div class="w-full md:w-5/12 flex flex-col gap-4">
             <div class="relative bg-ind-panel industrial-border rounded-2xl overflow-hidden shadow-md h-[280px] flex items-center justify-center">
                 <div id="canvas-container" class="absolute inset-0"></div>
@@ -225,7 +225,6 @@
                     </div>
                 </div>
 
-                <!-- FOTOS AMPLIADAS -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                     <div class="bg-[#141821] industrial-border rounded-xl overflow-hidden flex flex-col shadow-md">
                         <div class="h-44 bg-[#141821] relative flex items-center justify-center p-3">
@@ -280,7 +279,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT DE LÓGICA Y ENFOQUE 3D POR SISTEMA -->
+    <!-- SCRIPT DE LÓGICA Y 3D INDUSTRIAL (CORREGIDO Y REPARADO) -->
     <script>
         let turnoActual = 1;
         let operadorActual = "";
@@ -398,11 +397,15 @@
             document.getElementById('display-turno').innerText = `TURNO ${turnoActual} · ACTIVO`;
             document.getElementById('header-maq-title').innerText = maquinaActual;
             document.getElementById('header-area-title').innerText = `${areaActual} · EMPAQPLAST S.A.`;
-            document.getElementById('setup-modal').style.display = 'none';
+            
+            // Ocultar modal de login correctamente
+            const modal = document.getElementById('setup-modal');
+            if(modal) modal.style.display = 'none';
         }
 
         function cambiarOperador() {
-            document.getElementById('setup-modal').style.display = 'flex';
+            const modal = document.getElementById('setup-modal');
+            if(modal) modal.style.display = 'flex';
         }
 
         function cambiarModo(modo) {
@@ -428,7 +431,6 @@
                 if (primerIdx !== -1) {
                     puntoSeleccionadoIdx = primerIdx;
                 }
-                // ENFOQUE DINÁMICO DE CÁMARA 3D SEGÚN EL SISTEMA SELECCIONADO
                 enfocarSistemaEn3D(sistemaSeleccionado);
             } else {
                 puntoSeleccionadoIdx = 0;
@@ -666,7 +668,7 @@
             if(elem) elem.innerText = fechaStr;
         }
 
-        // CARGADOR 3D INTERACTIVO CON ENFOQUE DINÁMICO POR SISTEMA
+        // CARGADOR 3D INTERACTIVO CON ZOOM SÚPER CERCANO Y ROTACIÓN POR SISTEMA
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         let cameraGlobal, modelo3DGlobal;
@@ -701,25 +703,22 @@
             scene.add(modelo3DGlobal);
 
             const maxDim = Math.max(size.x, size.y, size.z);
-            camera.position.set(0, maxDim * 0.3, maxDim * 0.9);
+            // ZOOM MUCHO MÁS CERCANO A LA MÁQUINA
+            camera.position.set(0, maxDim * 0.25, maxDim * 0.75);
             camera.lookAt(0, 0, 0);
         }, undefined, function (error) {
             console.error('Error al cargar la máquina 3D:', error);
         });
 
-        // FUNCIÓN PARA MOVER LA CÁMARA 3D SEGÚN EL SISTEMA SELECCIONADO
         function enfocarSistemaEn3D(sistema) {
-            if (!cameraGlobal) return;
-            // Ajustar rotación o posición de la cámara según el sistema elegido
+            if (!modelo3DGlobal) return;
             let rotacionY = 0;
-            if (sistema.includes("ALIMENTACIÓN")) rotacionY = 0.5;
-            else if (sistema.includes("INYECCIÓN")) rotacionY = -0.5;
-            else if (sistema.includes("EXPULSOR") || sistema.includes("CIERRE")) rotacionY = 1.5;
-            else if (sistema.includes("HIDRÁULICO") || sistema.includes("ELÉCTRICO")) rotacionY = -1.5;
+            if (sistema.includes("ALIMENTACIÓN")) rotacionY = 0.8;
+            else if (sistema.includes("INYECCIÓN")) rotacionY = -0.3;
+            else if (sistema.includes("EXPULSOR") || sistema.includes("CIERRE")) rotacionY = 1.8;
+            else if (sistema.includes("HIDRÁULICO") || sistema.includes("ELÉCTRICO")) rotacionY = -1.8;
 
-            if (modelo3DGlobal) {
-                modelo3DGlobal.rotation.y = rotacionY;
-            }
+            modelo3DGlobal.rotation.y = rotacionY;
         }
 
         let isDragging = false;
@@ -745,7 +744,6 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            renderer.renderer ? null : renderer.render(scene, camera);
             renderer.render(scene, camera);
         }
         animate();
