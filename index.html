@@ -37,6 +37,18 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
 
+    <!-- MODAL DE ALERTA INDUSTRIAL PERSONALIZADA (REEMPLAZA LOS ALERTS NATIVOS) -->
+    <div id="alerta-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col items-center text-center">
+            <div class="w-24 h-32 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
+                <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
+            </div>
+            <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-1">AVISO DEL SISTEMA TPM</h3>
+            <p class="text-xs text-slate-200 mb-6 leading-relaxed font-medium" id="alerta-texto">Mensaje de advertencia...</p>
+            <button type="button" onclick="cerrarAlertaModal()" class="w-full bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Aceptar</button>
+        </div>
+    </div>
+
     <!-- MODAL DE INICIO (LOGIN INDUSTRIAL CON 3 TURNOS) -->
     <div id="setup-modal" class="fixed inset-0 z-50 bg-[#141821]/95 flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 shadow-2xl">
@@ -89,11 +101,11 @@
         </div>
     </div>
 
-    <!-- MODAL DE CIERRE DE JORNADA DE LIMPIEZA -->
+    <!-- MODAL DE CIERRE DE JORNADA DE LIMPIEZA (CON LA NUEVA IMAGEN ACTUALIZADA) -->
     <div id="cierre-jornada-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 shadow-2xl flex flex-col items-center text-center">
             <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
-                <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
+                <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
             </div>
             <h3 class="text-sm font-black text-white uppercase tracking-wider mb-2" id="cierre-titulo">¡HAS TERMINADO LA JORNADA DE LIMPIEZA!</h3>
             <p class="text-xs text-slate-300 mb-6 leading-relaxed">¿Ya monitoreaste el equipo?</p>
@@ -360,7 +372,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT CORREGIDO Y BLINDADO -->
+    <!-- SCRIPT CON MODALES DE ALERTA INDUSTRIALES -->
     <script>
         let globalTurno = 1;
         let globalOperador = "";
@@ -373,6 +385,15 @@
         let camera, renderer, scene;
 
         const fechaArranqueTPM = new Date(2026, 8, 17);
+
+        function mostrarAlertaIndustrial(mensaje) {
+            document.getElementById('alerta-texto').innerText = mensaje;
+            document.getElementById('alerta-modal').style.display = 'flex';
+        }
+
+        function cerrarAlertaModal() {
+            document.getElementById('alerta-modal').style.display = 'none';
+        }
 
         function calcularEstadoCalendarioTPM() {
             const hoy = new Date();
@@ -428,7 +449,7 @@
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             if(!codigoOp) {
-                alert("Por favor ingrese el código del operador.");
+                mostrarAlertaIndustrial("Por favor ingrese el código del operador.");
                 return;
             }
             globalOperador = codigoOp;
@@ -463,17 +484,17 @@
             {codigo: "L-008", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras y distribuidor de agua", periodicidad: "Mensual", estandar: "Limpiar polvo exterior y verificar que no existan dobleces o estrangulamientos.", anormal: "Fugas de aire audibles, mangueras cuarteadas o acoples sueltos.", material: "Ninguna", tiempo: "5 min", img1: "Mangueras y distribuidor de agua.jpg", label1: "Distribuidor de agua", img2: "", label2: ""},
             {codigo: "L-009", sistema: "SISTEMA NEUMÁTICO", componente: "Unidad de mantenimiento (FRL)", periodicidad: "Semanal", estandar: "Retirar polvo exterior de los manómetros y limpiar externamente los vasos transparentes.", anormal: "Vasos opacos/rotos, acumulación excesiva de agua en el filtro o fugas en el regulador.", material: "Ninguna", tiempo: "5 min", img1: "Unidad de mantenimiento (FRL) Externa.jpg", label1: "FRL Externa", img2: "Unidad de mantenimiento (FRL) Detalle.jpg", label2: "FRL Detalle"},
             {codigo: "L-010", sistema: "SISTEMA HIDRÁULICO", componente: "Mangueras hidráulicas visibles", periodicidad: "Mensual", estandar: "Limpiar aceite superficial para facilitar detección de fugas.", anormal: "Acumulación de aceite y polvo", material: "Paño industrial", tiempo: "5 min", img1: "Mangueras visibles Externa.jpeg", label1: "Mangueras Externa", img2: "Mangueras visibles Detalle.jpg", label2: "Mangueras Detalle"},
-            {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", tiempo: "5 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador Externo", img2: "Controlador de temperatura Detalle.jpg", label2: "Controlador Detalle"},
-            {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", periodicidad: "Diaria", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", tiempo: "5 min", img1: "HMI Externo.jpg", label1: "HMI Externo", img2: "HMI Detalle.jpg", label2: "HMI Detalle"},
-            {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", periodicidad: "Semanal", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", tiempo: "5 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Tablero Externo", img2: "", label2: ""},
-            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", tiempo: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det."},
-            {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", tiempo: "5 min", img1: "Estructura Externa.jpg", label1: "Estructura Externa", img2: "Mangueras visibles Externa.jpeg", label2: "Vista Lateral"},
-            {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", tiempo: "5 min", img1: "Piso Perimetral.jpg", label1: "Piso perimetral", img2: "", label2: ""}
+            {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", time: "5 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador Externo", img2: "Controlador de temperatura Detalle.jpg", label2: "Controlador Detalle"},
+            {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", periodicidad: "Diaria", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", time: "5 min", img1: "HMI Externo.jpg", label1: "HMI Externo", img2: "HMI Detalle.jpg", label2: "HMI Detalle"},
+            {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", periodicidad: "Semanal", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", time: "5 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Tablero Externo", img2: "", label2: ""},
+            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", time: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det."},
+            {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", time: "5 min", img1: "Estructura Externa.jpg", label1: "Estructura Externa", img2: "Mangueras visibles Externa.jpeg", label2: "Vista Lateral"},
+            {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", time: "5 min", img1: "Piso Perimetral.jpg", label1: "Piso perimetral", img2: "", label2: ""}
         ];
 
         const datosMonitoreo = [
             {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación"},
-            {codigo: "I-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Manguera de succión", periodicidad: "Diaria", estandar: "Verificar integridad y conexión.", anormal: "Roturas, fugas o desgaste.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Manguera", img2: "Succionador Detalle.jpg", label2: "Conexión"},
+            {codigo: "I-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Manguera de succión", periodicidad: "Diaria", estandar: "Verificar integridad y conexión.", anormal: "Roturas, fugas o desgaste.", material: "Visual", time: "3 min", img1: "Succionador Externo.jpg", label1: "Manguera", img2: "Succionador Detalle.jpg", label2: "Conexión"},
             {codigo: "I-003", sistema: "SISTEMA DE INYECCIÓN", componente: "Boquilla", periodicidad: "Diaria", estandar: "Verificar fugas y estado físico.", anormal: "Goteo o desgaste.", material: "HMI", time: "3 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla", img2: "Zona de boquilla detalle.jpg", label2: "Estado"},
             {codigo: "I-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zonas 1-2-3-4 de tornillo y cilindro", periodicidad: "Diaria", estandar: "Comparar temperatura real versus objetivo del proceso.", anormal: "Alarmas, fallas de calidad en PT.", material: "Visual", time: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Zonas", img2: "Controlador de temperatura Detalle.jpg", label2: "Temperaturas"},
             {codigo: "I-005", sistema: "SISTEMA EXPULSOR", componente: "Expulsor", periodicidad: "Diaria", estandar: "Verificar recorrido completo de avance y retorno.", anormal: "Atascamiento o retorno incompleto.", material: "Visual", time: "3 min", img1: "Área de Expulsion.jpg", label1: "Expulsor", img2: "Área de Expulsion.jpg", label2: "Recorrido"},
@@ -579,7 +600,7 @@
                 }
             });
 
-            // DISPARAR MODALES DE CIERRE ÚNICAMENTE CUANDO SE TERMINA LA FRECUENCIA ACTIVA FILTRADA
+            // DISPARAR MODALES DE CIERRE ESTRICTOS
             if (listaFiltrada.length > 0 && completadosFrecuenciaActual === listaFiltrada.length) {
                 if (globalModo === 'limpieza' && !window.modalLimpiezaMostrado) {
                     window.modalLimpiezaMostrado = true;
@@ -745,12 +766,12 @@
             const diasParaMensual = 30 - (diasTranscurridos % 30);
 
             if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 7 && diasParaSemanal !== 0 && diasParaSemanal !== 1) {
-                alert(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES SEMANALES!\nFaltan ${diasParaSemanal} días para el ciclo correspondiente.`);
+                mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES SEMANALES!\nFaltan ${diasParaSemanal} días para el ciclo correspondiente.`);
                 return;
             }
 
             if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 30 && diasParaMensual !== 0) {
-                alert(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES MENSUALES!\nFaltan ${diasParaMensual} días para el ciclo correspondiente.`);
+                mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES MENSUALES!\nFaltan ${diasParaMensual} días para el ciclo correspondiente.`);
                 return;
             }
 
@@ -771,7 +792,6 @@
             
             const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
 
-            // AVANCE AUTOMÁTICO EXCLUSIVO Y ESTRICTO DENTRO DE LA MISMA FRECUENCIA ACTUAL
             let siguienteIdx = -1;
             for (let i = globalPuntoIdx + 1; i < listaOriginal.length; i++) {
                 const item = listaOriginal[i];
@@ -863,7 +883,7 @@
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
             if(!com) {
-                alert("Por favor ingrese una descripción detallada de la anomalía.");
+                mostrarAlertaIndustrial("Por favor ingrese una descripción detallada de la anomalía.");
                 return;
             }
             const fileInput = document.getElementById('foto-anomalia');
@@ -889,7 +909,7 @@
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
             if(!com) {
-                alert("Por favor ingrese una observación.");
+                mostrarAlertaIndustrial("Por favor ingrese una observación.");
                 return;
             }
 
