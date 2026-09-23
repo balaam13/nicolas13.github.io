@@ -88,11 +88,14 @@
         </div>
     </div>
 
-    <!-- MODAL DE REPORTAR ANOMALÍA -->
+    <!-- MODAL DE REPORTAR ANOMALÍA (CON MASCOTA CORPORATIVA Y SIN FONDO BLANCO) -->
     <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 shadow-2xl">
             <div class="flex items-center space-x-3 mb-5 border-b border-[rgba(255,255,255,0.15)] pb-4">
-                <div class="w-9 h-9 rounded-xl bg-rose-500/25 border border-rose-500/50 flex items-center justify-center text-rose-400 font-bold">⚠</div>
+                <!-- Mascota corporativa integrada sin fondo blanco -->
+                <div class="w-12 h-12 rounded-xl bg-[#141821] industrial-border overflow-hidden flex items-center justify-center p-1 shadow-inner flex-shrink-0">
+                    <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain mix-blend-screen">
+                </div>
                 <div>
                     <h3 class="text-xs font-bold text-white uppercase tracking-wider">Reportar anomalía de equipo</h3>
                     <p class="text-[11px] text-rose-400 font-mono mt-0.5" id="modal-anomalia-info">Sistema · L-001</p>
@@ -124,6 +127,33 @@
                 <div class="flex space-x-3 pt-2">
                     <button type="button" onclick="guardarAnomalia()" class="flex-1 bg-rose-700 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Registrar anomalía</button>
                     <button type="button" onclick="cerrarModalAnomalia()" class="bg-[#141821] hover:bg-[#2A3142] text-slate-300 px-6 py-3.5 rounded-xl text-xs uppercase tracking-widest transition industrial-border cursor-pointer">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE REGISTRAR OBSERVACIÓN -->
+    <div id="observacion-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 shadow-2xl">
+            <div class="flex items-center space-x-3 mb-5 border-b border-[rgba(255,255,255,0.15)] pb-4">
+                <div class="w-12 h-12 rounded-xl bg-[#141821] industrial-border overflow-hidden flex items-center justify-center p-1 shadow-inner flex-shrink-0">
+                    <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain mix-blend-screen">
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wider">Registrar observación de turno</h3>
+                    <p class="text-[11px] text-ind-accent font-mono mt-0.5" id="modal-observacion-info">Nota general de equipo</p>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Escriba su observación (Sin ser anomalía crítica):</label>
+                    <textarea id="texto-observacion" rows="3" placeholder="Ej. Equipo operando con normalidad, leve marca exterior..." class="w-full bg-[#141821] industrial-border rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-ind-accent"></textarea>
+                </div>
+
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="guardarObservacion()" class="flex-1 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Guardar observación</button>
+                    <button type="button" onclick="cerrarModalObservacion()" class="bg-[#141821] hover:bg-[#2A3142] text-slate-300 px-6 py-3.5 rounded-xl text-xs uppercase tracking-widest transition industrial-border cursor-pointer">Cancelar</button>
                 </div>
             </div>
         </div>
@@ -171,14 +201,14 @@
                     </select>
                 </div>
 
-                <!-- FILTRO INTELIGENTE DE FRECUENCIA (DIARIA / SEMANAL / MENSUAL) -->
+                <!-- FILTRADO INTELIGENTE DE FRECUENCIA -->
                 <div class="flex items-center space-x-2 ml-2">
                     <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Frecuencia:</span>
                     <select id="select-frecuencia-filtro" onchange="filtrarPorFrecuencia()" class="bg-[#141821] industrial-border text-xs text-white px-3 py-2 rounded-xl font-semibold focus:outline-none focus:border-ind-accent cursor-pointer">
-                        <option value="TODAS">-- Todas (Diarias, Semanales, Mensuales) --</option>
-                        <option value="Diaria">Solo Diarias</option>
+                        <option value="Diaria" selected>Solo Diarias (Programadas)</option>
                         <option value="Semanal">Solo Semanales</option>
                         <option value="Mensual">Solo Mensuales</option>
+                        <option value="TODAS">-- Ver Todas --</option>
                     </select>
                 </div>
             </div>
@@ -197,7 +227,7 @@
     <!-- CONTENIDO PRINCIPAL INDUSTRIAL -->
     <main class="flex-1 flex flex-col md:flex-row p-5 gap-5 max-w-[1700px] mx-auto w-full">
         
-        <!-- COLUMNA IZQUIERDA: 3D LIMPIO SIN PUNTOS SATURADOS -->
+        <!-- COLUMNA IZQUIERDA: 3D LIMPIO -->
         <div class="w-full md:w-5/12 flex flex-col gap-4">
             <div class="relative bg-ind-panel industrial-border rounded-2xl overflow-hidden shadow-md h-[280px] flex items-center justify-center">
                 <div id="canvas-container" class="absolute inset-0"></div>
@@ -278,22 +308,25 @@
                 </div>
             </div>
 
-            <!-- BOTONES DE ACCIÓN PRINCIPALES (SIN INTERMITENCIA / FLUIDOS) -->
+            <!-- BOTONES DE ACCIÓN PRINCIPALES (INCLUYE BOTÓN DE OBSERVACIONES) -->
             <div class="mt-6 pt-4 border-t border-[rgba(255,255,255,0.15)] flex items-center justify-between">
                 <span id="trazabilidad-estado" class="text-xs text-slate-400 font-mono font-medium">Estado: Pendiente de verificación</span>
-                <div class="flex space-x-3">
-                    <button type="button" onclick="marcarEstado('listo')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg cursor-pointer">
+                <div class="flex space-x-2">
+                    <button type="button" onclick="marcarEstado('listo')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg cursor-pointer">
                         Verificación realizada
                     </button>
-                    <button type="button" onclick="abrirModalAnomalia()" class="bg-rose-700 hover:bg-rose-600 text-white font-bold py-3 px-5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg cursor-pointer">
-                        Reportar anomalía
+                    <button type="button" onclick="abrirModalObservacion()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg cursor-pointer">
+                        Observación
+                    </button>
+                    <button type="button" onclick="abrirModalAnomalia()" class="bg-rose-700 hover:bg-rose-600 text-white font-bold py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg cursor-pointer">
+                        Anomalía
                     </button>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- SCRIPT DE LÓGICA Y 3D INDUSTRIAL OPTIMIZADO -->
+    <!-- SCRIPT DE LÓGICA Y 3D INDUSTRIAL -->
     <script>
         let globalTurno = 1;
         let globalOperador = "";
@@ -457,7 +490,6 @@
             const grid = document.getElementById('puntos-grid');
             grid.innerHTML = '';
 
-            // Filtrar por sistema y frecuencia simultáneamente
             let listaFiltrada = listaOriginal.filter(item => {
                 const matchSistema = (sistemaSeleccionado === "TODOS" || item.sistema === sistemaSeleccionado);
                 const matchFrecuencia = (frecuenciaSeleccionada === "TODAS" || item.periodicidad === frecuenciaSeleccionada);
@@ -495,6 +527,10 @@
                     icon = '!';
                     colorClass = "text-rose-400 bg-rose-950/25 border-rose-700/60";
                     textState = "ANOMALÍA";
+                } else if(dataEstado && dataEstado.status === 'observacion') {
+                    icon = 'ℹ';
+                    colorClass = "text-blue-400 bg-blue-950/25 border-blue-700/60";
+                    textState = "OBSERVACIÓN";
                 }
 
                 if(idxReal === globalPuntoIdx) {
@@ -580,6 +616,9 @@
             } else if(dataEstado && dataEstado.status === 'anomalia') {
                 trazabilidadElem.innerHTML = `⚠ Anomalía reportada · ${dataEstado.tipo}`;
                 trazabilidadElem.className = "text-xs text-rose-400 font-mono font-bold";
+            } else if(dataEstado && dataEstado.status === 'observacion') {
+                trazabilidadElem.innerHTML = `ℹ Observación registrada · ${dataEstado.com}`;
+                trazabilidadElem.className = "text-xs text-blue-400 font-mono font-bold";
             } else {
                 trazabilidadElem.innerHTML = `Estado: Pendiente de inspección`;
                 trazabilidadElem.className = "text-xs text-slate-400 font-mono font-medium";
@@ -600,7 +639,6 @@
                 foto: null 
             };
             
-            // Actualización fluida sin intermitencia
             actualizarInterfaz();
             
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
@@ -627,6 +665,22 @@
         function cerrarModalAnomalia() {
             const modalAnom = document.getElementById('anomalia-modal');
             if(modalAnom) modalAnom.style.display = 'none';
+        }
+
+        function abrirModalObservacion() {
+            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const item = listaOriginal[globalPuntoIdx];
+            
+            document.getElementById('modal-observacion-info').innerText = `${item.sistema} · ${item.codigo}`;
+            document.getElementById('texto-observacion').value = '';
+            
+            const modalObs = document.getElementById('observacion-modal');
+            if(modalObs) modalObs.style.display = 'flex';
+        }
+
+        function cerrarModalObservacion() {
+            const modalObs = document.getElementById('observacion-modal');
+            if(modalObs) modalObs.style.display = 'none';
         }
 
         function mostrarNombreArchivo(input) {
@@ -663,6 +717,35 @@
                 foto: fotoNombre 
             };
             cerrarModalAnomalia();
+            actualizarInterfaz();
+
+            if(globalPuntoIdx < listaOriginal.length - 1) {
+                globalPuntoIdx++;
+                actualizarInterfaz();
+            }
+        }
+
+        function guardarObservacion() {
+            const com = document.getElementById('texto-observacion').value.trim();
+            const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            if(!com) {
+                alert("Por favor ingrese una observación.");
+                return;
+            }
+
+            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
+            const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
+
+            globalEstados[estadoKey] = { 
+                status: 'observacion', 
+                tipo: 'Observación', 
+                ejecuciones: anterior + 1,
+                ultimoTiempo: horaActual,
+                com: com, 
+                foto: null 
+            };
+            cerrarModalObservacion();
             actualizarInterfaz();
 
             if(globalPuntoIdx < listaOriginal.length - 1) {
