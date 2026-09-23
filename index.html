@@ -33,6 +33,12 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #141821; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #323A4D; border-radius: 3px; }
+        .hotspot-badge {
+            background: #ef4444; color: white; font-weight: 800; font-family: monospace;
+            padding: 4px 10px; border-radius: 9999px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);
+            border: 2px solid white; font-size: 11px; cursor: pointer; transition: all 0.2s;
+        }
+        .hotspot-badge:hover { transform: scale(1.1); background: #dc2626; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
@@ -79,11 +85,11 @@
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Turno:</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button type="button" onclick="setTurno(1)" id="btn-turno-1" class="py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer">TURNO 1</button>
-                        <button type="button" onclick="setTurno(2)" id="btn-turno-2" class="py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer">TURNO 2</button>
+                        <button type="button" onclick="appSetTurno(1)" id="btn-turno-1" class="py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer">TURNO 1</button>
+                        <button type="button" onclick="appSetTurno(2)" id="btn-turno-2" class="py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer">TURNO 2</button>
                     </div>
                 </div>
-                <button type="button" onclick="iniciarSesion()" class="w-full mt-2 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs tracking-widest uppercase transition shadow-xl cursor-pointer">Iniciar mantenimiento autónomo</button>
+                <button type="button" onclick="appIniciarSesion()" class="w-full mt-2 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs tracking-widest uppercase transition shadow-xl cursor-pointer">Iniciar mantenimiento autónomo</button>
             </div>
         </div>
     </div>
@@ -183,15 +189,18 @@
     <!-- CONTENIDO PRINCIPAL INDUSTRIAL -->
     <main class="flex-1 flex flex-col md:flex-row p-5 gap-5 max-w-[1700px] mx-auto w-full">
         
-        <!-- COLUMNA IZQUIERDA: 3D + LISTA DE PUNTOS -->
+        <!-- COLUMNA IZQUIERDA: 3D INTERACTIVO + ETIQUETAS FLOTANTES -->
         <div class="w-full md:w-5/12 flex flex-col gap-4">
             <div class="relative bg-ind-panel industrial-border rounded-2xl overflow-hidden shadow-md h-[280px] flex items-center justify-center">
                 <div id="canvas-container" class="absolute inset-0"></div>
-                <div class="absolute top-3 left-3 bg-[#141821]/90 backdrop-blur px-3 py-1.5 rounded-xl industrial-border text-[11px] font-mono text-slate-200 shadow flex items-center space-x-2 pointer-events-none">
+                <!-- CONTENEDOR DE ETIQUETAS FLOTANTES TIPO SCADA -->
+                <div id="hotspots-container" class="absolute inset-0 pointer-events-none z-20"></div>
+                
+                <div class="absolute top-3 left-3 bg-[#141821]/90 backdrop-blur px-3 py-1.5 rounded-xl industrial-border text-[11px] font-mono text-slate-200 shadow flex items-center space-x-2 pointer-events-none z-30">
                     <span class="w-2 h-2 rounded-full bg-ind-accent animate-pulse"></span>
                     <span id="indicador-3d-texto">L-001 · Sistema seleccionado</span>
                 </div>
-                <div class="absolute bottom-3 right-3 bg-black/50 px-3 py-1 rounded-xl industrial-border text-[10px] text-slate-400 pointer-events-none font-mono">
+                <div class="absolute bottom-3 right-3 bg-black/50 px-3 py-1 rounded-xl industrial-border text-[10px] text-slate-400 pointer-events-none font-mono z-30">
                     Rotar: Click + Arrastrar | Zoom: Rueda
                 </div>
             </div>
@@ -279,18 +288,19 @@
         </div>
     </main>
 
-    <!-- SCRIPT DE LÓGICA Y 3D INDUSTRIAL -->
+    <!-- SCRIPT DE LÓGICA Y 3D INDUSTRIAL CON ZOOM FOCAL Y HOTSPOTS -->
     <script>
-        let turnoActual = 1;
-        let operadorActual = "";
-        let areaActual = "Inyeccion Convencional";
-        let maquinaActual = "Bole 2600 EK-2";
-        let modoActual = 'limpieza';
-        let puntoSeleccionadoIdx = 0;
-        let estadosPuntos = {}; 
-        let modelo3DGlobal = null;
+        let globalTurno = 1;
+        let globalOperador = "";
+        let globalArea = "Inyeccion Convencional";
+        let globalMaquina = "Bole 2600 EK-2";
+        let globalModo = 'limpieza';
+        let globalPuntoIdx = 0;
+        let globalEstados = {}; 
+        let globalModelo3D = null;
+        let camera, renderer, scene;
 
-        const maquinasPorArea = {
+        const listaMaquinasPorArea = {
             "Inyeccion Convencional": ["Bole 2600 EK-2", "Haitian General 1", "Haitian General 2"],
             "Inyeccion Pet": ["SIPA Preform 1", "SIPA Preform 2"],
             "Soplado Pet": ["SIAPI Semplice", "Erwes Blow 1"],
@@ -301,8 +311,8 @@
             const area = document.getElementById('select-area').value;
             const maqSelect = document.getElementById('select-maquina');
             maqSelect.innerHTML = '';
-            const listaMaqs = maquinasPorArea[area] || ["Bole 2600 EK-2"];
-            listaMaqs.forEach(m => {
+            const lista = listaMaquinasPorArea[area] || ["Bole 2600 EK-2"];
+            lista.forEach(m => {
                 const opt = document.createElement('option');
                 opt.value = m;
                 opt.textContent = m;
@@ -310,89 +320,91 @@
             });
         }
 
-        function setTurno(t) {
-            turnoActual = t;
-            const btn1 = document.getElementById('btn-turno-1');
-            const btn2 = document.getElementById('btn-turno-2');
+        function appSetTurno(t) {
+            globalTurno = t;
+            const b1 = document.getElementById('btn-turno-1');
+            const b2 = document.getElementById('btn-turno-2');
             if(t === 1) {
-                btn1.className = "py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer";
-                btn2.className = "py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer";
+                b1.className = "py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer";
+                b2.className = "py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer";
             } else {
-                btn2.className = "py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer";
-                btn1.className = "py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer";
+                b2.className = "py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer";
+                b1.className = "py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer";
             }
         }
 
-        function iniciarSesion() {
+        function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             if(!codigoOp) {
                 alert("Por favor ingrese el código del operador.");
                 return;
             }
-            operadorActual = codigoOp;
-            areaActual = document.getElementById('select-area').value;
-            maquinaActual = document.getElementById('select-maquina').value;
+            globalOperador = codigoOp;
+            globalArea = document.getElementById('select-area').value;
+            globalMaquina = document.getElementById('select-maquina').value;
 
-            document.getElementById('display-operator').innerText = "Operador: " + operadorActual;
-            document.getElementById('display-turno').innerText = `TURNO ${turnoActual} · ACTIVO`;
-            document.getElementById('header-maq-title').innerText = maquinaActual;
-            document.getElementById('header-area-title').innerText = `${areaActual} · EMPAQPLAST S.A.`;
+            document.getElementById('display-operator').innerText = "Operador: " + globalOperador;
+            document.getElementById('display-turno').innerText = `TURNO ${globalTurno} · ACTIVO`;
+            document.getElementById('header-maq-title').innerText = globalMaquina;
+            document.getElementById('header-area-title').innerText = `${globalArea} · EMPAQPLAST S.A.`;
             
             const modal = document.getElementById('setup-modal');
-            if(modal) {
-                modal.style.display = 'none';
-            }
+            if(modal) modal.style.display = 'none';
 
             poblarFiltroSistemas();
             actualizarInterfaz();
         }
 
+        function cambiarOperador() {
+            location.reload();
+        }
+
         const datosLimpieza = [
-            {codigo: "L-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Tolva de alimentación", periodicidad: "Diaria", estandar: "Retirar polvo, pellets contaminados y residuos visibles del interior y borde superior de la tolva.", anormal: "Material contaminado, fisuras o deformación.", material: "Paño industrial / Brocha", tiempo: "5 min", img1: "imagen(166).jpg", label1: "Tolva Externa", img2: "imagen(167).jpg", label2: "Tolva Detalle"},
-            {codigo: "L-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Limpiar superficie externa y verificar libre de suciedad.", anormal: "Ruido anormal o baja succión.", material: "Paño industrial", tiempo: "5 min", img1: "Succionador Externo.jpg", label1: "Succionador Externo", img2: "Succionador Detalle.jpg", label2: "Succionador Detalle"},
-            {codigo: "L-003", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Filtro de succionador", periodicidad: "Semanal", estandar: "Limpiar filtro para asegurar flujo de aire.", anormal: "Filtro saturado, roto o deformado.", material: "Pistola de aire", tiempo: "5 min", img1: "Filtro Externo.jpg", label1: "Filtro Externo", img2: "Filtro Detalle.jpg", label2: "Filtro Detalle"},
-            {codigo: "L-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zona de boquilla", periodicidad: "Diaria", estandar: "Retirar residuos y material carbonizado.", anormal: "Fugas o material quemado.", material: "Cepillo de bronce", tiempo: "5 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla Externa", img2: "Zona de boquilla detalle.jpg", label2: "Boquilla Detalle"},
-            {codigo: "L-005", sistema: "SISTEMA EXPULSOR", componente: "Área de expulsión", periodicidad: "Diaria", estandar: "Eliminar rebabas, piezas atrapadas y residuos plásticos.", anormal: "Obstrucciones o acumulación de material.", material: "Brocha", tiempo: "5 min", img1: "Área de Expulsion.jpg", label1: "Área de Expulsión", img2: "Área de Expulsion.jpg", label2: "Detalle Expulsión"},
-            {codigo: "L-006", sistema: "SISTEMA DE CIERRE", componente: "Platina fija", periodicidad: "Semanal", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", tiempo: "5 min", img1: "Platina Fija.jpg", label1: "Platina Fija", img2: "Platina Fija.jpg", label2: "Detalle Platina Fija"},
-            {codigo: "L-007", sistema: "SISTEMA DE CIERRE", componente: "Platina móvil", periodicidad: "Semanal", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", tiempo: "5 min", img1: "Platina móvil.jpg", label1: "Platina Móvil", img2: "Platina móvil.jpg", label2: "Detalle Platina Móvil"},
-            {codigo: "L-008", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras y distribuidor de agua", periodicidad: "Mensual", estandar: "Limpiar polvo exterior y verificar que no existan dobleces o estrangulamientos.", anormal: "Fugas de aire audibles, mangueras cuarteadas o acoples sueltos.", material: "Ninguna", tiempo: "5 min", img1: "Mangueras y distribuidor de agua.jpg", label1: "Distribuidor de agua", img2: "Mangueras visibles Detalle.jpg", label2: "Mangueras Detalle"},
-            {codigo: "L-009", sistema: "SISTEMA NEUMÁTICO", componente: "Unidad de mantenimiento (FRL)", periodicidad: "Semanal", estandar: "Retirar polvo exterior de los manómetros y limpiar externamente los vasos transparentes.", anormal: "Vasos opacos/rotos, acumulación excesiva de agua en el filtro o fugas en el regulador.", material: "Ninguna", tiempo: "5 min", img1: "Unidad de mantenimiento (FRL) Externa.jpg", label1: "FRL Externa", img2: "Unidad de mantenimiento (FRL) Detalle.jpg", label2: "FRL Detalle"},
-            {codigo: "L-010", sistema: "SISTEMA HIDRÁULICO", componente: "Mangueras hidráulicas visibles", periodicidad: "Mensual", estandar: "Limpiar aceite superficial para facilitar detección de fugas.", anormal: "Acumulación de aceite y polvo", material: "Paño industrial", tiempo: "5 min", img1: "Mangueras visibles Externa.jpeg", label1: "Mangueras Externa", img2: "Mangueras visibles Detalle.jpg", label2: "Mangueras Detalle"},
-            {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", tiempo: "5 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador Externo", img2: "Controlador de temperatura Detalle.jpg", label2: "Controlador Detalle"},
-            {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", periodicidad: "Diaria", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", tiempo: "5 min", img1: "HMI Externo.jpg", label1: "HMI Externo", img2: "HMI Detalle.jpg", label2: "HMI Detalle"},
-            {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", periodicidad: "Semanal", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", tiempo: "5 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Tablero Externo", img2: "Superficie tablero electrico Externo.jpg", label2: "Tablero Detalle"},
-            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", tiempo: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det."},
-            {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", tiempo: "5 min", img1: "Estructura Externa.jpg", label1: "Estructura Externa", img2: "Estructura Detalle.jpg", label2: "Estructura Detalle"},
-            {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", tiempo: "5 min", img1: "Estructura Externa.jpg", label1: "Piso Externa", img2: "Estructura Detalle.jpg", label2: "Piso Detalle"}
+            {codigo: "L-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Tolva de alimentación", periodicidad: "Diaria", estandar: "Retirar polvo, pellets contaminados y residuos visibles del interior y borde superior de la tolva.", anormal: "Material contaminado, fisuras o deformación.", material: "Paño industrial / Brocha", tiempo: "5 min", img1: "imagen(166).jpg", label1: "Tolva Externa", img2: "imagen(167).jpg", label2: "Tolva Detalle", pos3d: {x: 1.2, y: 1.5, z: 0}},
+            {codigo: "L-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Limpiar superficie externa y verificar libre de suciedad.", anormal: "Ruido anormal o baja succión.", material: "Paño industrial", tiempo: "5 min", img1: "Succionador Externo.jpg", label1: "Succionador Externo", img2: "Succionador Detalle.jpg", label2: "Succionador Detalle", pos3d: {x: 1.4, y: 1.2, z: 0.3}},
+            {codigo: "L-003", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Filtro de succionador", periodicidad: "Semanal", estandar: "Limpiar filtro para asegurar flujo de aire.", anormal: "Filtro saturado, roto o deformado.", material: "Pistola de aire", tiempo: "5 min", img1: "Filtro Externo.jpg", label1: "Filtro Externo", img2: "Filtro Detalle.jpg", label2: "Filtro Detalle", pos3d: {x: 1.6, y: 1.8, z: -0.2}},
+            {codigo: "L-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zona de boquilla", periodicidad: "Diaria", estandar: "Retirar residuos y material carbonizado.", anormal: "Fugas o material quemado.", material: "Cepillo de bronce", tiempo: "5 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla Externa", img2: "Zona de boquilla detalle.jpg", label2: "Boquilla Detalle", pos3d: {x: 0.5, y: 0.3, z: 0}},
+            {codigo: "L-005", sistema: "SISTEMA EXPULSOR", componente: "Área de expulsión", periodicidad: "Diaria", estandar: "Eliminar rebabas, piezas atrapadas y residuos plásticos.", anormal: "Obstrucciones o acumulación de material.", material: "Brocha", tiempo: "5 min", img1: "Área de Expulsion.jpg", label1: "Área de Expulsión", img2: "Área de Expulsion.jpg", label2: "Detalle Expulsión", pos3d: {x: -0.8, y: 0.2, z: 0}},
+            {codigo: "L-006", sistema: "SISTEMA DE CIERRE", componente: "Platina fija", periodicidad: "Semanal", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", tiempo: "5 min", img1: "Platina Fija.jpg", label1: "Platina Fija", img2: "Platina Fija.jpg", label2: "Detalle Platina Fija", pos3d: {x: -0.3, y: 0.4, z: 0}},
+            {codigo: "L-007", sistema: "SISTEMA DE CIERRE", componente: "Platina móvil", periodicidad: "Semanal", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", tiempo: "5 min", img1: "Platina móvil.jpg", label1: "Platina Móvil", img2: "Platina móvil.jpg", label2: "Detalle Platina Móvil", pos3d: {x: -0.5, y: 0.4, z: 0}},
+            {codigo: "L-008", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras y distribuidor de agua", periodicidad: "Mensual", estandar: "Limpiar polvo exterior y verificar que no existan dobleces o estrangulamientos.", anormal: "Fugas de aire audibles, mangueras cuarteadas o acoples sueltos.", material: "Ninguna", tiempo: "5 min", img1: "Mangueras y distribuidor de agua.jpg", label1: "Distribuidor de agua", img2: "Mangueras visibles Detalle.jpg", label2: "Mangueras Detalle", pos3d: {x: 0, y: 0.8, z: 0.5}},
+            {codigo: "L-009", sistema: "SISTEMA NEUMÁTICO", componente: "Unidad de mantenimiento (FRL)", periodicidad: "Semanal", estandar: "Retirar polvo exterior de los manómetros y limpiar externamente los vasos transparentes.", anormal: "Vasos opacos/rotos, acumulación excesiva de agua en el filtro o fugas en el regulador.", material: "Ninguna", tiempo: "5 min", img1: "Unidad de mantenimiento (FRL) Externa.jpg", label1: "FRL Externa", img2: "Unidad de mantenimiento (FRL) Detalle.jpg", label2: "FRL Detalle", pos3d: {x: -1.2, y: -0.5, z: 0.5}},
+            {codigo: "L-010", sistema: "SISTEMA HIDRÁULICO", componente: "Mangueras hidráulicas visibles", periodicidad: "Mensual", estandar: "Limpiar aceite superficial para facilitar detección de fugas.", anormal: "Acumulación de aceite y polvo", material: "Paño industrial", tiempo: "5 min", img1: "Mangueras visibles Externa.jpeg", label1: "Mangueras Externa", img2: "Mangueras visibles Detalle.jpg", label2: "Mangueras Detalle", pos3d: {x: -0.2, y: -0.6, z: 0}},
+            {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", tiempo: "5 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador Externo", img2: "Controlador de temperatura Detalle.jpg", label2: "Controlador Detalle", pos3d: {x: 0.3, y: 0.5, z: -0.5}},
+            {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", periodicidad: "Diaria", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", tiempo: "5 min", img1: "HMI Externo.jpg", label1: "HMI Externo", img2: "HMI Detalle.jpg", label2: "HMI Detalle", pos3d: {x: 0.4, y: 0.2, z: 0.6}},
+            {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", periodicidad: "Semanal", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", tiempo: "5 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Tablero Externo", img2: "Superficie tablero electrico Externo.jpg", label2: "Tablero Detalle", pos3d: {x: -1.4, y: 0.3, z: 0.6}},
+            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", tiempo: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det.", pos3d: {x: -1.4, y: 0.6, z: 0.6}},
+            {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", tiempo: "5 min", img1: "Estructura Externa.jpg", label1: "Estructura Externa", img2: "Estructura Detalle.jpg", label2: "Estructura Detalle", pos3d: {x: 0, y: -0.2, z: 0}},
+            {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", tiempo: "5 min", img1: "Estructura Externa.jpg", label1: "Piso Externa", img2: "Estructura Detalle.jpg", label2: "Piso Detalle", pos3d: {x: 0, y: -1, z: 0}}
         ];
 
         const datosMonitoreo = [
-            {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación"},
-            {codigo: "I-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Manguera de succión", periodicidad: "Diaria", estandar: "Verificar integridad y conexión.", anormal: "Roturas, fugas o desgaste.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Manguera", img2: "Succionador Detalle.jpg", label2: "Conexión"},
-            {codigo: "I-003", sistema: "SISTEMA DE INYECCIÓN", componente: "Boquilla", periodicidad: "Diaria", estandar: "Verificar fugas y estado físico.", anormal: "Goteo o desgaste.", material: "HMI", tiempo: "3 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla", img2: "Zona de boquilla detalle.jpg", label2: "Estado"},
-            {codigo: "I-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zonas 1-2-3-4 de tornillo y cilindro", periodicidad: "Diaria", estandar: "Comparar temperatura real versus objetivo del proceso.", anormal: "Alarmas, fallas de calidad en PT.", material: "Visual", time: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Zonas", img2: "Controlador de temperatura Detalle.jpg", label2: "Temperaturas"},
-            {codigo: "I-005", sistema: "SISTEMA EXPULSOR", componente: "Expulsor", periodicidad: "Diaria", estandar: "Verificar recorrido completo de avance y retorno.", anormal: "Atascamiento o retorno incompleto.", material: "Visual", time: "3 min", img1: "Área de Expulsion.jpg", label1: "Expulsor", img2: "Área de Expulsion.jpg", label2: "Recorrido"},
-            {codigo: "I-006", sistema: "SISTEMA EXPULSOR", componente: "Área expulsión", periodicidad: "Diaria", estandar: "Verificar ausencia de piezas atrapadas.", anormal: "Rebaba acumulada / Componentes mecánicos obstruidos", material: "N/A", time: "3 min", img1: "Área de Expulsion.jpg", label1: "Área", img2: "Área de Expulsion.jpg", label2: "Libre"},
-            {codigo: "I-007", sistema: "SISTEMA EXPULSOR", componente: "Placas expulsoras", periodicidad: "Semanal", estandar: "Verificar golpes o ruido anormal.", anormal: "Atascamiento, fisuras o grietas / Movimiento errático", material: "N/A", time: "3 min", img1: "Platina móvil.jpg", label1: "Placas", img2: "Platina móvil.jpg", label2: "Inspección"},
-            {codigo: "I-008", sistema: "SISTEMA HIDRÁULICO", componente: "Nivel aceite hidráulico", periodicidad: "Diaria", estandar: "Verificar nivel y apariencia.", anormal: "Nivel bajo o contaminación.", material: "Visual", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Nivel", img2: "Mangueras visibles Detalle.jpg", label2: "Apariencia"},
-            {codigo: "I-009", sistema: "SISTEMA HIDRÁULICO", componente: "Fugas de aceite", periodicidad: "Diaria", estandar: "Inspeccionar mangueras, válvulas y conexiones.", anormal: "Goteos o fugas activas.", material: "Linterna", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Mangueras", img2: "Mangueras visibles Detalle.jpg", label2: "Válvulas"},
-            {codigo: "I-010", sistema: "SISTEMA HIDRÁULICO", componente: "Bombas", periodicidad: "Semanal", estandar: "Verificar ruido, vibración y funcionamiento.", anormal: "Ruido anormal o pérdida de desempeño.", material: "Visual", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Bombas", img2: "Mangueras visibles Detalle.jpg", label2: "Operación"},
-            {codigo: "I-011", sistema: "SISTEMA HIDRÁULICO", componente: "Válvulas", periodicidad: "Semanal", estandar: "Verificar ruido, vibración y funcionamiento.", anormal: "Ruido anormal o pérdida de desempeño.", material: "Visual", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Válvulas", img2: "Mangueras visibles Detalle.jpg", label2: "Banco"},
-            {codigo: "I-012", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras de agua", periodicidad: "Semanal", estandar: "Verificar conexión firme y ausencia de estrangulamientos.", anormal: "Mangueras dobladas, acoples mal encajados", material: "Visual", time: "3 min", img1: "Mangueras y distribuidor de agua.jpg", label1: "Enfriamiento", img2: "Mangueras visibles Detalle.jpg", label2: "Acoples"},
-            {codigo: "I-013", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Verificar que la temperatura real (PV) coincida con la objetivo (SV).", anormal: "Alarmas activas, módulo apagado.", material: "Visual", time: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador", img2: "Controlador de temperatura Detalle.jpg", label2: "PV / SV"},
-            {codigo: "I-014", sistema: "SISTEMA ELÉCTRICO", componente: "Cableado visible", periodicidad: "Mensual", estandar: "Verificar integridad de cables y conectores.", anormal: "Cables rotos, quemados o sueltos.", material: "Visual", time: "3 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Cableado", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Conectores"},
-            {codigo: "I-015", sistema: "SISTEMA ELÉCTRICO", componente: "Sensores accesibles", periodicidad: "Semanal", estandar: "Verificar fijación y estado.", anormal: "Sensor dañado o desalineado.", material: "Visual", time: "3 min", img1: "HMI Externo.jpg", label1: "Sensores", img2: "HMI Detalle.jpg", label2: "Fijación"},
-            {codigo: "I-016", sistema: "SISTEMA DE CIERRE", componente: "Platina móvil", periodicidad: "Semanal", estandar: "Detectar vibraciones anormales.", anormal: "Cabeceo durante el avance o retroceso", material: "N/A", time: "3 min", img1: "Platina móvil.jpg", label1: "Platina móvil", img2: "Platina móvil.jpg", label2: "Guías"},
-            {codigo: "I-017", sistema: "SISTEMA DE CIERRE", componente: "Platina fija", periodicidad: "Semanal", estandar: "Detectar ruidos anormales durante el cierre.", anormal: "Chirridos agudos continuos / Golpes secos", material: "N/A", time: "3 min", img1: "Platina Fija.jpg", label1: "Platina fija", img2: "Platina Fija.jpg", label2: "Cierre"},
-            {codigo: "I-018", sistema: "SISTEMA DE CIERRE", componente: "Tornillería accesible", periodicidad: "Mensual", estandar: "Verificar pernos presentes y ajustados.", anormal: "Pernos flojos, rotos o faltantes.", material: "N/A", time: "3 min", img1: "Estructura Externa.jpg", label1: "Tornillería", img2: "Estructura Detalle.jpg", label2: "Pernos"},
-            {codigo: "I-019", sistema: "SISTEMA DE LUBRICACIÓN", componente: "Presión del sistema", periodicidad: "Diaria", estandar: "Verificar manómetro de bomba dentro del rango verde.", anormal: "Presión cero / Aguja fuera de rango", material: "Visual", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Presión", img2: "Mangueras visibles Detalle.jpg", label2: "Manómetro"},
-            {codigo: "I-020", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Puertas de seguridad", periodicidad: "Diaria", estandar: "Verificar apertura, cierre e interbloqueos.", anormal: "Puertas trabadas o dispositivos defectuosos.", material: "Paño industrial", time: "3 min", img1: "Estructura Externa.jpg", label1: "Puertas", img2: "Estructura Detalle.jpg", label2: "Seguridad"},
-            {codigo: "I-021", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Guardas de protección", periodicidad: "Semanal", estandar: "Verificar presencia y fijación adecuada.", anormal: "Guardas faltantes o deterioradas.", material: "Brocha", time: "3 min", img1: "Estructura Externa.jpg", label1: "Guardas", img2: "Estructura Detalle.jpg", label2: "Fijación"},
-            {codigo: "I-022", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Señalética y etiquetas", periodicidad: "Mensual", estandar: "Verificar legibilidad y existencia.", anormal: "Etiquetas ilegibles o faltantes.", material: "Ninguna", time: "3 min", img1: "Estructura Externa.jpg", label1: "Señalética", img2: "Estructura Detalle.jpg", label2: "Etiquetas"}
+            {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación", pos3d: {x: 1.4, y: 1.2, z: 0.3}},
+            {codigo: "I-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Manguera de succión", periodicidad: "Diaria", estandar: "Verificar integridad y conexión.", anormal: "Roturas, fugas o desgaste.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Manguera", img2: "Succionador Detalle.jpg", label2: "Conexión", pos3d: {x: 1.3, y: 1.4, z: 0.2}},
+            {codigo: "I-003", sistema: "SISTEMA DE INYECCIÓN", componente: "Boquilla", periodicidad: "Diaria", estandar: "Verificar fugas y estado físico.", anormal: "Goteo o desgaste.", material: "HMI", tiempo: "3 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla", img2: "Zona de boquilla detalle.jpg", label2: "Estado", pos3d: {x: 0.5, y: 0.3, z: 0}},
+            {codigo: "I-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zonas 1-2-3-4 de tornillo y cilindro", periodicidad: "Diaria", estandar: "Comparar temperatura real versus objetivo del proceso.", anormal: "Alarmas, fallas de calidad en PT.", material: "Visual", time: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Zonas", img2: "Controlador de temperatura Detalle.jpg", label2: "Temperaturas", pos3d: {x: 0.8, y: 0.4, z: 0}},
+            {codigo: "I-005", sistema: "SISTEMA EXPULSOR", componente: "Expulsor", periodicidad: "Diaria", estandar: "Verificar recorrido completo de avance y retorno.", anormal: "Atascamiento o retorno incompleto.", material: "Visual", time: "3 min", img1: "Área de Expulsion.jpg", label1: "Expulsor", img2: "Área de Expulsion.jpg", label2: "Recorrido", pos3d: {x: -0.8, y: 0.2, z: 0}},
+            {codigo: "I-006", sistema: "SISTEMA EXPULSOR", componente: "Área expulsión", periodicidad: "Diaria", estandar: "Verificar ausencia de piezas atrapadas.", anormal: "Rebaba acumulada / Componentes mecánicos obstruidos", material: "N/A", time: "3 min", img1: "Área de Expulsion.jpg", label1: "Área", img2: "Área de Expulsion.jpg", label2: "Libre", pos3d: {x: -0.7, y: 0.3, z: 0}},
+            {codigo: "I-007", sistema: "SISTEMA EXPULSOR", componente: "Placas expulsoras", periodicidad: "Semanal", estandar: "Verificar golpes o ruido anormal.", anormal: "Atascamiento, fisuras o grietas / Movimiento errático", material: "N/A", time: "3 min", img1: "Platina móvil.jpg", label1: "Placas", img2: "Platina móvil.jpg", label2: "Inspección", pos3d: {x: -0.6, y: 0.5, z: 0}},
+            {codigo: "I-008", sistema: "SISTEMA HIDRÁULICO", componente: "Nivel aceite hidráulico", periodicidad: "Diaria", estandar: "Verificar nivel y apariencia.", anormal: "Nivel bajo o contaminación.", material: "Visual", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Nivel", img2: "Mangueras visibles Detalle.jpg", label2: "Apariencia", pos3d: {x: -0.3, y: -0.5, z: 0}},
+            {codigo: "I-009", sistema: "SISTEMA HIDRÁULICO", componente: "Fugas de aceite", periodicidad: "Diaria", estandar: "Inspeccionar mangueras, válvulas y conexiones.", anormal: "Goteos o fugas activas.", material: "Linterna", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Mangueras", img2: "Mangueras visibles Detalle.jpg", label2: "Válvulas", pos3d: {x: -0.2, y: -0.6, z: 0}},
+            {codigo: "I-010", sistema: "SISTEMA HIDRÁULICO", componente: "Bombas", periodicidad: "Semanal", estandar: "Verificar ruido, vibración y funcionamiento.", anormal: "Ruido anormal o pérdida de desempeño.", material: "Visual", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Bombas", img2: "Mangueras visibles Detalle.jpg", label2: "Operación", pos3d: {x: -0.4, y: -0.4, z: 0}},
+            {codigo: "I-011", sistema: "SISTEMA HIDRÁULICO", componente: "Válvulas", periodicidad: "Semanal", estandar: "Verificar ruido, vibración y funcionamiento.", anormal: "Ruido anormal o pérdida de desempeño.", material: "Visual", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Válvulas", img2: "Mangueras visibles Detalle.jpg", label2: "Banco", pos3d: {x: -0.5, y: -0.5, z: 0}},
+            {codigo: "I-012", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras de agua", periodicidad: "Semanal", estandar: "Verificar conexión firme y ausencia de estrangulamientos.", anormal: "Mangueras dobladas, acoples mal encajados", material: "Visual", time: "3 min", img1: "Mangueras y distribuidor de agua.jpg", label1: "Enfriamiento", img2: "Mangueras visibles Detalle.jpg", label2: "Acoples", pos3d: {x: 0, y: 0.8, z: 0.5}},
+            {codigo: "I-013", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Verificar que la temperatura real (PV) coincida con la objetivo (SV).", anormal: "Alarmas activas, módulo apagado.", material: "Visual", time: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador", img2: "Controlador de temperatura Detalle.jpg", label2: "PV / SV", pos3d: {x: 0.3, y: 0.5, z: -0.5}},
+            {codigo: "I-014", sistema: "SISTEMA ELÉCTRICO", componente: "Cableado visible", periodicidad: "Mensual", estandar: "Verificar integridad de cables y conectores.", anormal: "Cables rotos, quemados o sueltos.", material: "Visual", time: "3 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Cableado", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Conectores", pos3d: {x: -1.3, y: 0.4, z: 0.5}},
+            {codigo: "I-015", sistema: "SISTEMA ELÉCTRICO", componente: "Sensores accesibles", periodicidad: "Semanal", estandar: "Verificar fijación y estado.", anormal: "Sensor dañado o desalineado.", material: "Visual", time: "3 min", img1: "HMI Externo.jpg", label1: "Sensores", img2: "HMI Detalle.jpg", label2: "Fijación", pos3d: {x: 0.4, y: 0.2, z: 0.6}},
+            {codigo: "I-016", sistema: "SISTEMA DE CIERRE", componente: "Platina móvil", periodicidad: "Semanal", estandar: "Detectar vibraciones anormales.", anormal: "Cabeceo durante el avance o retroceso", material: "N/A", time: "3 min", img1: "Platina móvil.jpg", label1: "Platina móvil", img2: "Platina móvil.jpg", label2: "Guías", pos3d: {x: -0.5, y: 0.4, z: 0}},
+            {codigo: "I-017", sistema: "SISTEMA DE CIERRE", componente: "Platina fija", periodicidad: "Semanal", estandar: "Detectar ruidos anormales durante el cierre.", anormal: "Chirridos agudos continuos / Golpes secos", material: "N/A", time: "3 min", img1: "Platina Fija.jpg", label1: "Platina fija", img2: "Platina Fija.jpg", label2: "Cierre", pos3d: {x: -0.3, y: 0.4, z: 0}},
+            {codigo: "I-018", sistema: "SISTEMA DE CIERRE", componente: "Tornillería accesible", periodicidad: "Mensual", estandar: "Verificar pernos presentes y ajustados.", anormal: "Pernos flojos, rotos o faltantes.", material: "N/A", time: "3 min", img1: "Estructura Externa.jpg", label1: "Tornillería", img2: "Estructura Detalle.jpg", label2: "Pernos", pos3d: {x: -0.4, y: 0.2, z: 0}},
+            {codigo: "I-019", sistema: "SISTEMA DE LUBRICACIÓN", componente: "Presión del sistema", periodicidad: "Diaria", estandar: "Verificar manómetro de bomba dentro del rango verde.", anormal: "Presión cero / Aguja fuera de rango", material: "Visual", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Presión", img2: "Mangueras visibles Detalle.jpg", label2: "Manómetro", pos3d: {x: -0.6, y: -0.3, z: 0}},
+            {codigo: "I-020", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Puertas de seguridad", periodicidad: "Diaria", estandar: "Verificar apertura, cierre e interbloqueos.", anormal: "Puertas trabadas o dispositivos defectuosos.", material: "Paño industrial", time: "3 min", img1: "Estructura Externa.jpg", label1: "Puertas", img2: "Estructura Detalle.jpg", label2: "Seguridad", pos3d: {x: -0.9, y: 0, z: 0.8}},
+            {codigo: "I-021", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Guardas de protección", periodicidad: "Semanal", estandar: "Verificar presencia y fijación adecuada.", anormal: "Guardas faltantes o deterioradas.", material: "Brocha", time: "3 min", img1: "Estructura Externa.jpg", label1: "Guardas", img2: "Estructura Detalle.jpg", label2: "Fijación", pos3d: {x: -1.0, y: 0.2, z: 0.8}},
+            {codigo: "I-022", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Señalética y etiquetas", periodicidad: "Mensual", estandar: "Verificar legibilidad y existencia.", anormal: "Etiquetas ilegibles o faltantes.", material: "Ninguna", time: "3 min", img1: "Estructura Externa.jpg", label1: "Señalética", img2: "Estructura Detalle.jpg", label2: "Etiquetas", pos3d: {x: -1.2, y: 0.4, z: 0.8}}
         ];
 
         function poblarFiltroSistemas() {
-            const lista = modoActual === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const lista = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const sistemasUnicos = [...new Set(lista.map(item => item.sistema))];
             const selectFiltro = document.getElementById('select-sistema-filtro');
             
@@ -409,8 +421,8 @@
         }
 
         function cambiarModo(modo) {
-            modoActual = modo;
-            puntoSeleccionadoIdx = 0;
+            globalModo = modo;
+            globalPuntoIdx = 0;
             if(modo === 'limpieza') {
                 document.getElementById('tab-limpieza').className = "px-4 py-2 rounded-xl text-xs font-bold bg-ind-accent text-white transition shadow cursor-pointer";
                 document.getElementById('tab-monitoreo').className = "px-4 py-2 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer";
@@ -423,24 +435,24 @@
         }
 
         function filtrarPorSistema() {
-            const listaOriginal = modoActual === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
             
             if (sistemaSeleccionado !== "TODOS") {
                 const primerIdx = listaOriginal.findIndex(item => item.sistema === sistemaSeleccionado);
                 if (primerIdx !== -1) {
-                    puntoSeleccionadoIdx = primerIdx;
+                    globalPuntoIdx = primerIdx;
                 }
                 enfocarSistemaEn3D(sistemaSeleccionado);
             } else {
-                puntoSeleccionadoIdx = 0;
+                globalPuntoIdx = 0;
                 enfocarSistemaEn3D("TODOS");
             }
             actualizarInterfaz();
         }
 
         function actualizarInterfaz() {
-            const listaOriginal = modoActual === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
             
             const grid = document.getElementById('puntos-grid');
@@ -448,7 +460,7 @@
 
             let completadosTotales = 0;
             listaOriginal.forEach((item, idx) => {
-                if(estadosPuntos[`${modoActual}_${idx}`] && estadosPuntos[`${modoActual}_${idx}`].status !== 'pendiente') {
+                if(globalEstados[`${globalModo}_${idx}`] && globalEstados[`${globalModo}_${idx}`].status !== 'pendiente') {
                     completadosTotales++;
                 }
             });
@@ -459,13 +471,14 @@
 
             if(listaFiltrada.length === 0) {
                 grid.innerHTML = '<div class="p-4 text-xs text-slate-400 text-center">No hay puntos en este sistema.</div>';
+                actualizarHotspots([]);
                 return;
             }
 
             listaFiltrada.forEach((item) => {
                 const idxReal = listaOriginal.findIndex(el => el.codigo === item.codigo);
-                const estadoKey = `${modoActual}_${idxReal}`;
-                const dataEstado = estadosPuntos[estadoKey];
+                const estadoKey = `${globalModo}_${idxReal}`;
+                const dataEstado = globalEstados[estadoKey];
                 
                 let icon = '○';
                 let colorClass = "text-slate-400 bg-[#141821]/40 industrial-border hover:border-slate-400";
@@ -481,7 +494,7 @@
                     textState = "ANOMALÍA";
                 }
 
-                if(idxReal === puntoSeleccionadoIdx) {
+                if(idxReal === globalPuntoIdx) {
                     colorClass += " border-ind-accent bg-ind-accent/15";
                 }
 
@@ -503,7 +516,7 @@
                     </div>
                 `;
                 div.onclick = () => {
-                    puntoSeleccionadoIdx = idxReal;
+                    globalPuntoIdx = idxReal;
                     actualizarInterfaz();
                 };
                 grid.appendChild(div);
@@ -513,11 +526,12 @@
             document.getElementById('texto-progreso-num').innerText = `${completadosTotales} de ${listaOriginal.length} puntos · ${porcentaje}%`;
             document.getElementById('barra-progreso-fill').style.width = `${porcentaje}%`;
 
-            mostrarFicha(puntoSeleccionadoIdx);
+            mostrarFicha(globalPuntoIdx);
+            actualizarHotspots(listaFiltrada);
         }
 
         function mostrarFicha(idx) {
-            const listaOriginal = modoActual === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const item = listaOriginal[idx];
             if(!item) return;
 
@@ -546,8 +560,8 @@
             img2.src = item.img2;
             lbl2.innerText = item.label2;
 
-            const estadoKey = `${modoActual}_${idx}`;
-            const dataEstado = estadosPuntos[estadoKey];
+            const estadoKey = `${globalModo}_${idx}`;
+            const dataEstado = globalEstados[estadoKey];
             const contadorElem = document.getElementById('ficha-contador');
             
             if(dataEstado && dataEstado.ejecuciones) {
@@ -558,7 +572,7 @@
 
             const trazabilidadElem = document.getElementById('trazabilidad-estado');
             if(dataEstado && dataEstado.status === 'listo') {
-                trazabilidadElem.innerHTML = `✓ Verificación registrada · ${operadorActual || 'Operador'}`;
+                trazabilidadElem.innerHTML = `✓ Verificación registrada · ${globalOperador || 'Operador'}`;
                 trazabilidadElem.className = "text-xs text-emerald-400 font-mono font-bold";
             } else if(dataEstado && dataEstado.status === 'anomalia') {
                 trazabilidadElem.innerHTML = `⚠ Anomalía reportada · ${dataEstado.tipo}`;
@@ -570,11 +584,11 @@
         }
 
         function marcarEstado(estado) {
-            const estadoKey = `${modoActual}_${puntoSeleccionadoIdx}`;
-            const anterior = estadosPuntos[estadoKey] ? (estadosPuntos[estadoKey].ejecuciones || 0) : 0;
+            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
+            const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            estadosPuntos[estadoKey] = { 
+            globalEstados[estadoKey] = { 
                 status: estado, 
                 tipo: 'Normal', 
                 ejecuciones: anterior + 1, 
@@ -585,16 +599,16 @@
             
             actualizarInterfaz();
             
-            const listaOriginal = modoActual === 'limpieza' ? datosLimpieza : datosMonitoreo;
-            if(puntoSeleccionadoIdx < listaOriginal.length - 1) {
-                puntoSeleccionadoIdx++;
+            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            if(globalPuntoIdx < listaOriginal.length - 1) {
+                globalPuntoIdx++;
                 actualizarInterfaz();
             }
         }
 
         function abrirModalAnomalia() {
-            const listaOriginal = modoActual === 'limpieza' ? datosLimpieza : datosMonitoreo;
-            const item = listaOriginal[puntoSeleccionadoIdx];
+            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const item = listaOriginal[globalPuntoIdx];
             
             document.getElementById('modal-anomalia-info').innerText = `${item.sistema} · ${item.codigo}`;
             document.getElementById('tipo-anomalia-auto').value = `${item.sistema} - ${item.componente}`;
@@ -620,8 +634,8 @@
         }
 
         function guardarAnomalia() {
-            const listaOriginal = modoActual === 'limpieza' ? datosLimpieza : datosMonitoreo;
-            const item = listaOriginal[puntoSeleccionadoIdx];
+            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const item = listaOriginal[globalPuntoIdx];
             const tipoAuto = `${item.sistema} - ${item.componente}`;
             const com = document.getElementById('texto-anomalia').value.trim();
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -633,10 +647,10 @@
             const fileInput = document.getElementById('foto-anomalia');
             let fotoNombre = fileInput.files.length > 0 ? fileInput.files[0].name : null;
 
-            const estadoKey = `${modoActual}_${puntoSeleccionadoIdx}`;
-            const anterior = estadosPuntos[estadoKey] ? (estadosPuntos[estadoKey].ejecuciones || 0) : 0;
+            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
+            const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
 
-            estadosPuntos[estadoKey] = { 
+            globalEstados[estadoKey] = { 
                 status: 'anomalia', 
                 tipo: tipoAuto, 
                 ejecuciones: anterior + 1,
@@ -647,8 +661,8 @@
             cerrarModalAnomalia();
             actualizarInterfaz();
 
-            if(puntoSeleccionadoIdx < listaOriginal.length - 1) {
-                puntoSeleccionadoIdx++;
+            if(globalPuntoIdx < listaOriginal.length - 1) {
+                globalPuntoIdx++;
                 actualizarInterfaz();
             }
         }
@@ -660,14 +674,12 @@
             if(elem) elem.innerText = fechaStr;
         }
 
-        // CARGADOR 3D INTERACTIVO
+        // CARGADOR 3D SCADA CON ZOOM FOCAL Y HOTSPOTS FLOTANTES
         const container = document.getElementById('canvas-container');
-        const scene = new THREE.Scene();
-        let cameraGlobal;
+        scene = new THREE.Scene();
 
-        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-        cameraGlobal = camera;
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.shadowMap.enabled = true;
         container.appendChild(renderer.domElement);
@@ -680,19 +692,21 @@
         dirLight.castShadow = true;
         scene.add(dirLight);
 
+        let activeHotspots = [];
+
         const loader = new THREE.GLTFLoader();
         loader.load('máquina.glb', function (gltf) {
-            modelo3DGlobal = gltf.scene;
+            globalModelo3D = gltf.scene;
             
-            const box = new THREE.Box3().setFromObject(modelo3DGlobal);
+            const box = new THREE.Box3().setFromObject(globalModelo3D);
             const center = box.getCenter(new THREE.Vector3());
             const size = box.getSize(new THREE.Vector3());
             
-            modelo3DGlobal.position.x = -center.x;
-            modelo3DGlobal.position.y = -center.y;
-            modelo3DGlobal.position.z = -center.z;
+            globalModelo3D.position.x = -center.x;
+            globalModelo3D.position.y = -center.y;
+            globalModelo3D.position.z = -center.z;
             
-            scene.add(modelo3DGlobal);
+            scene.add(globalModelo3D);
 
             const maxDim = Math.max(size.x, size.y, size.z);
             camera.position.set(0, maxDim * 0.25, maxDim * 0.75);
@@ -701,15 +715,85 @@
             console.error('Error al cargar la máquina 3D:', error);
         });
 
+        // ZOOM FOCAL AUTOMÁTICO Y POSICIONAMIENTO DE ETIQUETAS SCADA
         function enfocarSistemaEn3D(sistema) {
-            if (!modelo3DGlobal) return;
+            if (!globalModelo3D) return;
+            let targetPos = { x: 0, y: 0.3, z: 2.2 };
             let rotacionY = 0;
-            if (sistema.includes("ALIMENTACIÓN")) rotacionY = 0.8;
-            else if (sistema.includes("INYECCIÓN")) rotacionY = -0.3;
-            else if (sistema.includes("EXPULSOR") || sistema.includes("CIERRE")) rotacionY = 1.8;
-            else if (sistema.includes("HIDRÁULICO") || sistema.includes("ELÉCTRICO")) rotacionY = -1.8;
 
-            modelo3DGlobal.rotation.y = rotacionY;
+            if (sistema.includes("ALIMENTACIÓN")) {
+                rotacionY = 0.8;
+                targetPos = { x: 1.2, y: 1.2, z: 1.5 };
+            } else if (sistema.includes("INYECCIÓN")) {
+                rotacionY = -0.3;
+                targetPos = { x: 0.5, y: 0.5, z: 1.8 };
+            } else if (sistema.includes("EXPULSOR") || sistema.includes("CIERRE")) {
+                rotacionY = 1.8;
+                targetPos = { x: -0.8, y: 0.4, z: 1.8 };
+            } else if (sistema.includes("HIDRÁULICO") || sistema.includes("ELÉCTRICO")) {
+                rotacionY = -1.8;
+                targetPos = { x: -1.0, y: 0.2, z: 1.8 };
+            } else {
+                rotacionY = 0;
+                targetPos = { x: 0, y: 0.3, z: 2.5 };
+            }
+
+            globalModelo3D.rotation.y = rotacionY;
+            camera.position.set(targetPos.x, targetPos.y, targetPos.z);
+            camera.lookAt(0, 0, 0);
+        }
+
+        function actualizarHotspots(listaFiltrada) {
+            const containerHotspots = document.getElementById('hotspots-container');
+            containerHotspots.innerHTML = '';
+            activeHotspots = [];
+
+            if (!globalModelo3D) return;
+
+            listaFiltrada.forEach((item) => {
+                if (!item.pos3d) return;
+
+                const badge = document.createElement('div');
+                badge.className = 'absolute pointer-events-auto hotspot-badge flex items-center space-x-1';
+                badge.innerHTML = `<span>${item.codigo}</span>`;
+                
+                badge.onclick = (e) => {
+                    e.stopPropagation();
+                    const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+                    const realIdx = listaOriginal.findIndex(el => el.codigo === item.codigo);
+                    if(realIdx !== -1) {
+                        globalPuntoIdx = realIdx;
+                        actualizarInterfaz();
+                    }
+                };
+
+                containerHotspots.appendChild(badge);
+                activeHotspots.push({ element: badge, pos: new THREE.Vector3(item.pos3d.x, item.pos3d.y, item.pos3d.z) });
+            });
+        }
+
+        function renderHotspots() {
+            if (!camera || activeHotspots.length === 0 || !globalModelo3D) return;
+
+            const widthHalf = container.clientWidth / 2;
+            const heightHalf = container.clientHeight / 2;
+
+            activeHotspots.forEach(item => {
+                let vector = item.pos.clone();
+                // Aplicar rotación actual del modelo 3D
+                vector.applyEuler(globalModelo3D.rotation);
+                vector.project(camera);
+
+                // Verificar si está en frente de la cámara
+                if (vector.z < 1) {
+                    const x = (vector.x * widthHalf) + widthHalf;
+                    const y = -(vector.y * heightHalf) + heightHalf;
+                    item.element.style.display = 'block';
+                    item.element.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+                } else {
+                    item.element.style.display = 'none';
+                }
+            });
         }
 
         let isDragging = false;
@@ -719,7 +803,7 @@
         container.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const deltaX = e.clientX - previousMousePosition.x;
-            if(modelo3DGlobal) modelo3DGlobal.rotation.y += deltaX * 0.01;
+            if(globalModelo3D) globalModelo3D.rotation.y += deltaX * 0.01;
             previousMousePosition = { x: e.clientX, y: e.clientY };
         });
         window.addEventListener('mouseup', () => { isDragging = false; });
@@ -728,7 +812,7 @@
         container.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
             const deltaX = e.touches[0].clientX - previousMousePosition.x;
-            if(modelo3DGlobal) modelo3DGlobal.rotation.y += deltaX * 0.01;
+            if(globalModelo3D) globalModelo3D.rotation.y += deltaX * 0.01;
             previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         });
         window.addEventListener('touchend', () => { isDragging = false; });
@@ -736,6 +820,7 @@
         function animate() {
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
+            renderHotspots();
         }
         animate();
 
