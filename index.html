@@ -153,7 +153,7 @@
         </div>
     </header>
 
-    <!-- BARRA DE CONTEXTO Y FILTROS -->
+    <!-- BARRA DE CONTEXTO Y FILTROS POR SISTEMAS -->
     <section class="bg-ind-panel/40 border-b border-[rgba(255,255,255,0.15)] px-6 py-3.5">
         <div class="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
@@ -183,13 +183,13 @@
     <!-- CONTENIDO PRINCIPAL INDUSTRIAL -->
     <main class="flex-1 flex flex-col md:flex-row p-5 gap-5 max-w-[1700px] mx-auto w-full">
         
-        <!-- COLUMNA IZQUIERDA: 3D + LISTA DE PUNTOS -->
+        <!-- COLUMNA IZQUIERDA: 3D INTERACTIVO + LISTA DE PUNTOS -->
         <div class="w-full md:w-5/12 flex flex-col gap-4">
             <div class="relative bg-ind-panel industrial-border rounded-2xl overflow-hidden shadow-md h-[280px] flex items-center justify-center">
                 <div id="canvas-container" class="absolute inset-0"></div>
                 <div class="absolute top-3 left-3 bg-[#141821]/90 backdrop-blur px-3 py-1.5 rounded-xl industrial-border text-[11px] font-mono text-slate-200 shadow flex items-center space-x-2 pointer-events-none">
                     <span class="w-2 h-2 rounded-full bg-ind-accent animate-pulse"></span>
-                    <span id="indicador-3d-texto">L-001 · Punto seleccionado</span>
+                    <span id="indicador-3d-texto">L-001 · Sistema seleccionado</span>
                 </div>
                 <div class="absolute bottom-3 right-3 bg-black/50 px-3 py-1 rounded-xl industrial-border text-[10px] text-slate-400 pointer-events-none font-mono">
                     Rotar: Click + Arrastrar | Zoom: Rueda
@@ -225,7 +225,7 @@
                     </div>
                 </div>
 
-                <!-- FOTOS SIN MARCOS SELELECTIVOS DIFERENTES Y BIEN ESPACIADAS -->
+                <!-- FOTOS AMPLIADAS -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                     <div class="bg-[#141821] industrial-border rounded-xl overflow-hidden flex flex-col shadow-md">
                         <div class="h-44 bg-[#141821] relative flex items-center justify-center p-3">
@@ -280,7 +280,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT DE LÓGICA Y 3D INDUSTRIAL (ZOOM MÁS CERCANO) -->
+    <!-- SCRIPT DE LÓGICA Y ENFOQUE 3D POR SISTEMA -->
     <script>
         let turnoActual = 1;
         let operadorActual = "";
@@ -289,6 +289,8 @@
         let modoActual = 'limpieza';
         let puntoSeleccionadoIdx = 0;
         let estadosPuntos = {}; 
+        let modelo3DGlobal = null;
+        let cameraGlobal = null;
 
         const maquinasPorArea = {
             "Inyeccion Convencional": ["Bole 2600 EK-2", "Haitian General 1", "Haitian General 2"],
@@ -426,8 +428,11 @@
                 if (primerIdx !== -1) {
                     puntoSeleccionadoIdx = primerIdx;
                 }
+                // ENFOQUE DINÁMICO DE CÁMARA 3D SEGÚN EL SISTEMA SELECCIONADO
+                enfocarSistemaEn3D(sistemaSeleccionado);
             } else {
                 puntoSeleccionadoIdx = 0;
+                enfocarSistemaEn3D("TODOS");
             }
             actualizarInterfaz();
         }
@@ -540,7 +545,6 @@
 
             document.getElementById('indicador-3d-texto').innerText = `${item.codigo} · ${item.componente}`;
 
-            // FOTOS SIN MARCOS AZULES SELECTIVOS DIFERENTES
             const img1 = document.getElementById('ficha-imagen-1');
             const lbl1 = document.getElementById('ficha-label-1');
             img1.src = item.img1;
@@ -662,14 +666,16 @@
             if(elem) elem.innerText = fechaStr;
         }
 
-        // CARGADOR 3D CON ZOOM MUCHO MÁS CERCANO A LA MÁQUINA
+        // CARGADOR 3D INTERACTIVO CON ENFOQUE DINÁMICO POR SISTEMA
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
+        let cameraGlobal, modelo3DGlobal;
+
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        cameraGlobal = camera;
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -680,28 +686,41 @@
         dirLight.castShadow = true;
         scene.add(dirLight);
 
-        // CARGAR MÁQUINA.GLB CON CÁMARA MÁS CERCANA (ZOOM AJUSTADO)
         const loader = new THREE.GLTFLoader();
         loader.load('máquina.glb', function (gltf) {
-            const modelo3D = gltf.scene;
+            modelo3DGlobal = gltf.scene;
             
-            const box = new THREE.Box3().setFromObject(modelo3D);
+            const box = new THREE.Box3().setFromObject(modelo3DGlobal);
             const center = box.getCenter(new THREE.Vector3());
             const size = box.getSize(new THREE.Vector3());
             
-            modelo3D.position.x = -center.x;
-            modelo3D.position.y = -center.y;
-            modelo3D.position.z = -center.z;
+            modelo3DGlobal.position.x = -center.x;
+            modelo3DGlobal.position.y = -center.y;
+            modelo3DGlobal.position.z = -center.z;
             
-            scene.add(modelo3D);
+            scene.add(modelo3DGlobal);
 
-            // Zoom más cercano multiplicando por un factor menor
             const maxDim = Math.max(size.x, size.y, size.z);
-            camera.position.set(0, maxDim * 0.4, maxDim * 1.1);
+            camera.position.set(0, maxDim * 0.3, maxDim * 0.9);
             camera.lookAt(0, 0, 0);
         }, undefined, function (error) {
             console.error('Error al cargar la máquina 3D:', error);
         });
+
+        // FUNCIÓN PARA MOVER LA CÁMARA 3D SEGÚN EL SISTEMA SELECCIONADO
+        function enfocarSistemaEn3D(sistema) {
+            if (!cameraGlobal) return;
+            // Ajustar rotación o posición de la cámara según el sistema elegido
+            let rotacionY = 0;
+            if (sistema.includes("ALIMENTACIÓN")) rotacionY = 0.5;
+            else if (sistema.includes("INYECCIÓN")) rotacionY = -0.5;
+            else if (sistema.includes("EXPULSOR") || sistema.includes("CIERRE")) rotacionY = 1.5;
+            else if (sistema.includes("HIDRÁULICO") || sistema.includes("ELÉCTRICO")) rotacionY = -1.5;
+
+            if (modelo3DGlobal) {
+                modelo3DGlobal.rotation.y = rotacionY;
+            }
+        }
 
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
@@ -710,7 +729,7 @@
         container.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const deltaX = e.clientX - previousMousePosition.x;
-            scene.rotation.y += deltaX * 0.01;
+            if(modelo3DGlobal) modelo3DGlobal.rotation.y += deltaX * 0.01;
             previousMousePosition = { x: e.clientX, y: e.clientY };
         });
         window.addEventListener('mouseup', () => { isDragging = false; });
@@ -719,13 +738,14 @@
         container.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
             const deltaX = e.touches[0].clientX - previousMousePosition.x;
-            scene.rotation.y += deltaX * 0.01;
+            if(modelo3DGlobal) modelo3DGlobal.rotation.y += deltaX * 0.01;
             previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         });
         window.addEventListener('touchend', () => { isDragging = false; });
 
         function animate() {
             requestAnimationFrame(animate);
+            renderer.renderer ? null : renderer.render(scene, camera);
             renderer.render(scene, camera);
         }
         animate();
