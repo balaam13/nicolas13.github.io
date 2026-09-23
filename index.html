@@ -37,9 +37,9 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
 
-    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL CORREGIDO Y FUNCIONAL) -->
-    <div id="setup-modal" style="display: flex;" class="fixed inset-0 z-[99999] bg-[#141821]/95 flex items-center justify-center p-4">
-        <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 shadow-2xl relative z-[100000]">
+    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL LIMPIO Y ACCESIBLE) -->
+    <div id="setup-modal" class="fixed inset-0 z-50 bg-[#141821]/95 flex items-center justify-center p-4">
+        <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 shadow-2xl">
             <div class="flex flex-col items-center text-center mb-5 border-b border-[rgba(255,255,255,0.15)] pb-5">
                 <div class="w-full h-24 bg-[#141821] industrial-border rounded-xl overflow-hidden flex items-center justify-center p-2 mb-3 shadow-inner">
                     <img src="imagen(162).jpg" alt="EMPAQPLAST S.A." class="max-h-full max-w-full object-contain rounded-lg" onerror="this.src='https://placehold.co/200x80/0066cc/ffffff?text=EMPAQPLAST'">
@@ -89,8 +89,8 @@
     </div>
 
     <!-- MODAL DE REPORTAR ANOMALÍA -->
-    <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 shadow-2xl relative z-[100000]">
+    <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 shadow-2xl">
             <div class="flex items-center space-x-3 mb-5 border-b border-[rgba(255,255,255,0.15)] pb-4">
                 <div class="w-9 h-9 rounded-xl bg-rose-500/25 border border-rose-500/50 flex items-center justify-center text-rose-400 font-bold">⚠</div>
                 <div>
@@ -342,7 +342,6 @@
             const modal = document.getElementById('setup-modal');
             if(modal) {
                 modal.style.display = 'none';
-                modal.remove();
             }
 
             poblarFiltroSistemas();
