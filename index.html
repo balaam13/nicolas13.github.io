@@ -78,9 +78,10 @@
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Turno:</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button type="button" onclick="appSetTurno(1)" id="btn-turno-1" class="py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer">TURNO 1</button>
-                        <button type="button" onclick="appSetTurno(2)" id="btn-turno-2" class="py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer">TURNO 2</button>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="appSetTurno(1)" id="btn-turno-1" class="py-2 px-2 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer">TURNO 1</button>
+                        <button type="button" onclick="appSetTurno(2)" id="btn-turno-2" class="py-2 px-2 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer">TURNO 2</button>
+                        <button type="button" onclick="appSetTurno(3)" id="btn-turno-3" class="py-2 px-2 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer">TURNO 3</button>
                     </div>
                 </div>
                 <button type="button" onclick="appIniciarSesion()" class="w-full mt-2 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs tracking-widest uppercase transition shadow-xl cursor-pointer">Iniciar mantenimiento autónomo</button>
@@ -88,7 +89,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE REPORTAR ANOMALÍA (CON MASCOTA GRANDE) -->
+    <!-- MODAL DE REPORTAR ANOMALÍA -->
     <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 shadow-2xl flex flex-col md:flex-row gap-6 items-center">
             <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg flex-shrink-0">
@@ -164,7 +165,7 @@
         </div>
     </div>
 
-    <!-- ENCABEZADO INDUSTRIAL PRINCIPAL CON LOGO MÁS GRANDE -->
+    <!-- ENCABEZADO INDUSTRIAL PRINCIPAL -->
     <header class="bg-ind-panel border-b border-[rgba(255,255,255,0.15)] px-6 py-4 flex items-center justify-between shadow-lg">
         <div class="flex items-center space-x-6">
             <div class="w-56 h-14 bg-[#141821] industrial-border rounded-xl overflow-hidden flex items-center justify-center p-1.5 shadow-inner">
@@ -215,9 +216,16 @@
                 </div>
             </div>
 
-            <div id="tpm-alerta-calendario" class="bg-amber-950/30 border border-amber-600/50 px-3 py-1.5 rounded-xl text-[11px] text-amber-300 font-mono flex items-center space-x-2">
-                <span>⏱️</span>
-                <span id="tpm-estado-texto">Calculando estado de calendario TPM...</span>
+            <div class="flex items-center space-x-4 w-full md:w-auto justify-end">
+                <div id="tpm-alerta-calendario" class="bg-amber-950/30 border border-amber-600/50 px-3 py-1.5 rounded-xl text-[11px] text-amber-300 font-mono">
+                    <span id="tpm-estado-texto">Calculando estado TPM...</span>
+                </div>
+                <div class="text-right">
+                    <span id="texto-progreso-num" class="text-xs font-bold text-slate-200 font-mono">0 de 16 puntos - 0%</span>
+                </div>
+                <div class="w-44 bg-[#141821] h-2.5 rounded-full overflow-hidden industrial-border">
+                    <div id="barra-progreso-fill" class="bg-ind-accent h-full transition-all duration-300" style="width: 0%;"></div>
+                </div>
             </div>
         </div>
     </section>
@@ -267,7 +275,7 @@
                     </div>
                 </div>
 
-                <!-- CONTENEDOR DINÁMICO DE 1 O 2 FOTOS -->
+                <!-- CONTENEDOR DINÁMICO DE FOTOS -->
                 <div id="contenedor-fotos" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                     <div id="card-foto-1" class="bg-[#141821] industrial-border rounded-xl overflow-hidden flex flex-col shadow-md">
                         <div class="h-44 bg-[#141821] relative flex items-center justify-center p-3">
@@ -325,7 +333,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT CORREGIDO Y BLINDADO -->
+    <!-- SCRIPT BLINDADO Y CORREGIDO -->
     <script>
         let globalTurno = 1;
         let globalOperador = "";
@@ -337,7 +345,8 @@
         let globalModelo3D = null;
         let camera, renderer, scene;
 
-        const fechaArranqueTPM = new Date(2026, 8, 16);
+        // Fecha de inicio TPM fijada al 17 de Septiembre de 2026
+        const fechaArranqueTPM = new Date(2026, 8, 17);
 
         function calcularEstadoCalendarioTPM() {
             const hoy = new Date();
@@ -345,16 +354,17 @@
             const diasTranscurridos = Math.floor(diferenciaTiempo / (1000 * 3600 * 24));
             
             const diasParaSemanal = 7 - (diasTranscurridos % 7);
+            const diasParaMensual = 30 - (diasTranscurridos % 30);
+            
             let textoEstado = `Iniciado hace ${diasTranscurridos} días - `;
-            if (diasParaSemanal === 1) {
-                textoEstado += `⚠️ ¡Mañana corresponde actividades SEMANALES!`;
-            } else if (diasParaSemanal === 7 || diasParaSemanal === 0) {
-                textoEstado += `🟢 ¡Hoy corresponde ejecutar tareas SEMANALES!`;
+            if (diasParaSemanal === 1 || diasParaSemanal === 7 || diasParaSemanal === 0) {
+                textoEstado += `¡Ciclo SEMANAL habilitado!`;
             } else {
-                textoEstado += `Faltan ${diasParaSemanal} días para el ciclo semanal.`;
+                textoEstado += `Ciclo Semanal en ${diasParaSemanal} días.`;
             }
 
             document.getElementById('tpm-estado-texto').innerText = textoEstado;
+            return { diasTranscurridos, diasParaSemanal, diasParaMensual };
         }
 
         const listaMaquinasPorArea = {
@@ -379,15 +389,14 @@
 
         function appSetTurno(t) {
             globalTurno = t;
-            const b1 = document.getElementById('btn-turno-1');
-            const b2 = document.getElementById('btn-turno-2');
-            if(t === 1) {
-                b1.className = "py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer";
-                b2.className = "py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer";
-            } else {
-                b2.className = "py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer";
-                b1.className = "py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer";
-            }
+            ['btn-turno-1', 'btn-turno-2', 'btn-turno-3'].forEach((id, idx) => {
+                const btn = document.getElementById(id);
+                if((idx + 1) === t) {
+                    btn.className = "py-2 px-2 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer";
+                } else {
+                    btn.className = "py-2 px-2 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer";
+                }
+            });
         }
 
         function appIniciarSesion() {
@@ -425,14 +434,14 @@
             {codigo: "L-005", sistema: "SISTEMA EXPULSOR", componente: "Área de expulsión", periodicidad: "Diaria", estandar: "Eliminar rebabas, piezas atrapadas y residuos plásticos.", anormal: "Obstrucciones o acumulación de material.", material: "Brocha", tiempo: "5 min", img1: "Área de Expulsion.jpg", label1: "Área de Expulsión externa", img2: "", label2: ""},
             {codigo: "L-006", sistema: "SISTEMA DE CIERRE", componente: "Platina fija", periodicidad: "Semanal", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", tiempo: "5 min", img1: "Platina Fija.jpg", label1: "Platina fija externa", img2: "", label2: ""},
             {codigo: "L-007", sistema: "SISTEMA DE CIERRE", componente: "Platina móvil", periodicidad: "Semanal", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", tiempo: "5 min", img1: "Platina móvil.jpg", label1: "Platina móvil externa", img2: "", label2: ""},
-            {codigo: "L-008", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras y distribuidor de agua", periodicidad: "Mensual", estandar: "Limpiar polvo exterior y verificar que no existan dobleces o estrangulamientos.", anormal: "Fugas de aire audibles, mangueras cuarteadas o acoples sueltos.", material: "Ninguna", tiempo: "5 min", img1: "Mangueras y distribuidor de agua.jpg", label1: "Distribuidor de agua", img2: "Mangueras visibles Detalle.jpg", label2: "Mangueras Detalle"},
+            {codigo: "L-008", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras y distribuidor de agua", periodicidad: "Mensual", estandar: "Limpiar polvo exterior y verificar que no existan dobleces o estrangulamientos.", anormal: "Fugas de aire audibles, mangueras cuarteadas o acoples sueltos.", material: "Ninguna", tiempo: "5 min", img1: "Mangueras y distribuidor de agua.jpg", label1: "Distribuidor de agua", img2: "", label2: ""},
             {codigo: "L-009", sistema: "SISTEMA NEUMÁTICO", componente: "Unidad de mantenimiento (FRL)", periodicidad: "Semanal", estandar: "Retirar polvo exterior de los manómetros y limpiar externamente los vasos transparentes.", anormal: "Vasos opacos/rotos, acumulación excesiva de agua en el filtro o fugas en el regulador.", material: "Ninguna", tiempo: "5 min", img1: "Unidad de mantenimiento (FRL) Externa.jpg", label1: "FRL Externa", img2: "Unidad de mantenimiento (FRL) Detalle.jpg", label2: "FRL Detalle"},
             {codigo: "L-010", sistema: "SISTEMA HIDRÁULICO", componente: "Mangueras hidráulicas visibles", periodicidad: "Mensual", estandar: "Limpiar aceite superficial para facilitar detección de fugas.", anormal: "Acumulación de aceite y polvo", material: "Paño industrial", tiempo: "5 min", img1: "Mangueras visibles Externa.jpeg", label1: "Mangueras Externa", img2: "Mangueras visibles Detalle.jpg", label2: "Mangueras Detalle"},
             {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", tiempo: "5 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador Externo", img2: "Controlador de temperatura Detalle.jpg", label2: "Controlador Detalle"},
             {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", periodicidad: "Diaria", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", tiempo: "5 min", img1: "HMI Externo.jpg", label1: "HMI Externo", img2: "HMI Detalle.jpg", label2: "HMI Detalle"},
             {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", periodicidad: "Semanal", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", tiempo: "5 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Tablero Externo", img2: "", label2: ""},
             {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", tiempo: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det."},
-            {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", tiempo: "5 min", img1: "Estructura Externa.jpg", label1: "Estructura Externa", img2: "", label2: ""},
+            {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", tiempo: "5 min", img1: "Estructura Externa.jpg", label1: "Estructura Externa", img2: "Mangueras visibles Externa.jpeg", label2: "Vista Lateral"},
             {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", tiempo: "5 min", img1: "Piso Perimetral.jpg", label1: "Piso perimetral", img2: "", label2: ""}
         ];
 
@@ -607,7 +616,7 @@
             document.getElementById('ficha-material').innerText = item.material || 'Ninguna';
             
             const freqBadge = document.getElementById('ficha-periodicidad-badge');
-            freqBadge.innerText = `Frecuencia: ${item.periodicidad}`;
+            freqBadge.innerText = `Frecuencia - ${item.periodicidad}`;
             if(item.periodicidad === "Diaria") freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-blue-400 bg-blue-950/40 border-blue-800/60";
             else if(item.periodicidad === "Semanal") freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-amber-400 bg-amber-950/40 border-amber-800/60";
             else freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-purple-400 bg-purple-950/40 border-purple-800/60";
@@ -639,11 +648,10 @@
                 card2.style.display = 'none';
             }
 
-            // Ajustar grid dinámicamente si hay 1 o 2 fotos
             if (item.img1 && item.img2 && item.img1.trim() !== '' && item.img2.trim() !== '') {
-                contenedorfotos.className = "grid grid-cols-1 md:grid-cols-2 gap-5 mb-6";
+                contenedorFotos.className = "grid grid-cols-1 md:grid-cols-2 gap-5 mb-6";
             } else {
-                contenedorfotos.className = "grid grid-cols-1 gap-5 mb-6";
+                contenedorFotos.className = "grid grid-cols-1 gap-5 mb-6";
             }
 
             const estadoKey = `${globalModo}_${idx}`;
@@ -673,6 +681,26 @@
         }
 
         function marcarEstado(estado) {
+            // VALIDACIÓN ESTRICTA DE CALENDARIO TPM ANTES DE PERMITIR VERIFICAR
+            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const itemActual = listaOriginal[globalPuntoIdx];
+            const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
+
+            const hoy = new Date();
+            const diasTranscurridos = Math.floor((hoy.getTime() - fechaArranqueTPM.getTime()) / (1000 * 3600 * 24));
+            const diasParaSemanal = 7 - (diasTranscurridos % 7);
+            const diasParaMensual = 30 - (diasTranscurridos % 30);
+
+            if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 7 && diasParaSemanal !== 0 && diasParaSemanal !== 1) {
+                alert(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES SEMANALES!\nFaltan ${diasParaSemanal} días para el ciclo correspondiente.`);
+                return;
+            }
+
+            if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 30 && diasParaMensual !== 0) {
+                alert(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES MENSUALES!\nFaltan ${diasParaMensual} días para el ciclo correspondiente.`);
+                return;
+            }
+
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -688,11 +716,9 @@
             
             actualizarInterfaz();
             
-            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
-            const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
             const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
 
-            // AVANCE AUTOMÁTICO RESTRINGIDO ESTRICTAMENTE AL FILTRO ACTUAL
+            // AVANCE AUTOMÁTICO RESTRINGIDO ESTRICTAMENTE A LA MISMA FRECUENCIA ACTUAL
             let siguienteIdx = -1;
             for (let i = globalPuntoIdx + 1; i < listaOriginal.length; i++) {
                 const item = listaOriginal[i];
@@ -878,7 +904,7 @@
 
         container.addEventListener('touchstart', (e) => { isDragging = true; previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY }; });
         container.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
+            if (!isDragging, !isDragging) return;
             const deltaX = e.touches[0].clientX - previousMousePosition.x;
             if(globalModelo3D) globalModelo3D.rotation.y += deltaX * 0.01;
             previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
