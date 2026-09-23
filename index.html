@@ -474,7 +474,7 @@
         const datosMonitoreo = [
             {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación"},
             {codigo: "I-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Manguera de succión", periodicidad: "Diaria", estandar: "Verificar integridad y conexión.", anormal: "Roturas, fugas o desgaste.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Manguera", img2: "Succionador Detalle.jpg", label2: "Conexión"},
-            {codigo: "I-003", sistema: "SISTEMA DE INYECCIÓN", componente: "Boquilla", periodicidad: "Diaria", estandar: "Verificar fugas y estado físico.", anormal: "Goteo o desgaste.", material: "HMI", tiempo: "3 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla", img2: "Zona de boquilla detalle.jpg", label2: "Estado"},
+            {codigo: "I-003", sistema: "SISTEMA DE INYECCIÓN", componente: "Boquilla", periodicidad: "Diaria", estandar: "Verificar fugas y estado físico.", anormal: "Goteo o desgaste.", material: "HMI", time: "3 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla", img2: "Zona de boquilla detalle.jpg", label2: "Estado"},
             {codigo: "I-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zonas 1-2-3-4 de tornillo y cilindro", periodicidad: "Diaria", estandar: "Comparar temperatura real versus objetivo del proceso.", anormal: "Alarmas, fallas de calidad en PT.", material: "Visual", time: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Zonas", img2: "Controlador de temperatura Detalle.jpg", label2: "Temperaturas"},
             {codigo: "I-005", sistema: "SISTEMA EXPULSOR", componente: "Expulsor", periodicidad: "Diaria", estandar: "Verificar recorrido completo de avance y retorno.", anormal: "Atascamiento o retorno incompleto.", material: "Visual", time: "3 min", img1: "Área de Expulsion.jpg", label1: "Expulsor", img2: "Área de Expulsion.jpg", label2: "Recorrido"},
             {codigo: "I-006", sistema: "SISTEMA EXPULSOR", componente: "Área expulsión", periodicidad: "Diaria", estandar: "Verificar ausencia de piezas atrapadas.", anormal: "Rebaba acumulada / Componentes mecánicos obstruidos", material: "N/A", time: "3 min", img1: "Área de Expulsion.jpg", label1: "Área", img2: "Área de Expulsion.jpg", label2: "Libre"},
@@ -579,11 +579,13 @@
                 }
             });
 
-            // COMPROBAR CIERRE DE JORNADA SEGÚN EL MODO ACTUAL
+            // DISPARAR MODALES DE CIERRE ÚNICAMENTE CUANDO SE TERMINA LA FRECUENCIA ACTIVA FILTRADA
             if (listaFiltrada.length > 0 && completadosFrecuenciaActual === listaFiltrada.length) {
-                if (globalModo === 'limpieza' && completadosLimpiezaTotal === datosLimpieza.length) {
+                if (globalModo === 'limpieza' && !window.modalLimpiezaMostrado) {
+                    window.modalLimpiezaMostrado = true;
                     mostrarModalCierreLimpieza(frecuenciaSeleccionada);
-                } else if (globalModo === 'monitoreo' && completadosMonitoreoTotal === datosMonitoreo.length) {
+                } else if (globalModo === 'monitoreo' && !window.modalMonitoreoMostrado) {
+                    window.modalMonitoreoMostrado = true;
                     mostrarModalMonitoreoFinal();
                 }
             }
