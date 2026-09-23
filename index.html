@@ -37,9 +37,9 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
 
-    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL CORREGIDO) -->
-    <div id="setup-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 shadow-2xl">
+    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL TOTALMENTE DESBLOQUEADO) -->
+    <div id="setup-modal" style="display: flex;" class="fixed inset-0 z-[9999] bg-[#141821]/95 flex items-center justify-center p-4">
+        <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 shadow-2xl relative z-[10000]">
             <div class="flex flex-col items-center text-center mb-5 border-b border-[rgba(255,255,255,0.15)] pb-5">
                 <div class="w-full h-24 bg-[#141821] industrial-border rounded-xl overflow-hidden flex items-center justify-center p-2 mb-3 shadow-inner">
                     <img src="imagen(162).jpg" alt="EMPAQPLAST S.A." class="max-h-full max-w-full object-contain rounded-lg" onerror="this.src='https://placehold.co/200x80/0066cc/ffffff?text=EMPAQPLAST'">
@@ -51,7 +51,7 @@
             <div class="space-y-3.5 text-xs">
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Área:</label>
-                    <select id="select-area" onchange="actualizarMaquinas()" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
+                    <select id="select-area" onchange="actualizarMaquinas()" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium cursor-pointer">
                         <option value="Inyeccion Convencional">Inyección Convencional</option>
                         <option value="Inyeccion Pet">Inyección PET</option>
                         <option value="Soplado Pet">Soplado PET</option>
@@ -60,7 +60,7 @@
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Máquina:</label>
-                    <select id="select-maquina" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
+                    <select id="select-maquina" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium cursor-pointer">
                         <option value="Bole 2600 EK-2">Bole 2600 EK-2</option>
                         <option value="Haitian General">Haitian General</option>
                         <option value="SIPA Unit">SIPA Unit</option>
@@ -79,8 +79,8 @@
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Turno:</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button type="button" onclick="setTurno(1)" id="btn-turno-1" class="py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow">TURNO 1</button>
-                        <button type="button" onclick="setTurno(2)" id="btn-turno-2" class="py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400">TURNO 2</button>
+                        <button type="button" onclick="setTurno(1)" id="btn-turno-1" class="py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer">TURNO 1</button>
+                        <button type="button" onclick="setTurno(2)" id="btn-turno-2" class="py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer">TURNO 2</button>
                     </div>
                 </div>
                 <button type="button" onclick="iniciarSesion()" class="w-full mt-2 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs tracking-widest uppercase transition shadow-xl cursor-pointer">Iniciar mantenimiento autónomo</button>
@@ -89,8 +89,8 @@
     </div>
 
     <!-- MODAL DE REPORTAR ANOMALÍA -->
-    <div id="anomalia-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
-        <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 shadow-2xl">
+    <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-[9999] bg-black/9text-black backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 shadow-2xl relative z-[10000]">
             <div class="flex items-center space-x-3 mb-5 border-b border-[rgba(255,255,255,0.15)] pb-4">
                 <div class="w-9 h-9 rounded-xl bg-rose-500/25 border border-rose-500/50 flex items-center justify-center text-rose-400 font-bold">⚠</div>
                 <div>
@@ -122,8 +122,8 @@
                 </div>
 
                 <div class="flex space-x-3 pt-2">
-                    <button onclick="guardarAnomalia()" class="flex-1 bg-rose-700 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg">Registrar anomalía</button>
-                    <button onclick="cerrarModalAnomalia()" class="bg-[#141821] hover:bg-[#2A3142] text-slate-300 px-6 py-3.5 rounded-xl text-xs uppercase tracking-widest transition industrial-border">Cancelar</button>
+                    <button type="button" onclick="guardarAnomalia()" class="flex-1 bg-rose-700 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Registrar anomalía</button>
+                    <button type="button" onclick="cerrarModalAnomalia()" class="bg-[#141821] hover:bg-[#2A3142] text-slate-300 px-6 py-3.5 rounded-xl text-xs uppercase tracking-widest transition industrial-border cursor-pointer">Cancelar</button>
                 </div>
             </div>
         </div>
@@ -149,7 +149,7 @@
                 <span id="display-fecha" class="block text-xs font-bold text-ind-accent font-mono">--/--/----</span>
                 <span class="block text-[10px] text-slate-400 font-mono">FECHA ACTUAL</span>
             </div>
-            <button onclick="cambiarOperador()" class="text-xs bg-[#141821] hover:bg-[#323743] text-slate-300 px-4 py-3 rounded-xl industrial-border transition font-bold shadow-sm">Cambiar</button>
+            <button type="button" onclick="cambiarOperador()" class="text-xs bg-[#141821] hover:bg-[#323743] text-slate-300 px-4 py-3 rounded-xl industrial-border transition font-bold shadow-sm cursor-pointer">Cambiar</button>
         </div>
     </header>
 
@@ -158,13 +158,13 @@
         <div class="max-w-[1700px] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
                 <div class="flex space-x-2">
-                    <button onclick="cambiarModo('limpieza')" id="tab-limpieza" class="px-4 py-2 rounded-xl text-xs font-bold bg-ind-accent text-white transition shadow">Limpieza (16)</button>
-                    <button onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold">Monitoreo (22)</button>
+                    <button type="button" onclick="cambiarModo('limpieza')" id="tab-limpieza" class="px-4 py-2 rounded-xl text-xs font-bold bg-ind-accent text-white transition shadow cursor-pointer">Limpieza (16)</button>
+                    <button type="button" onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer">Monitoreo (22)</button>
                 </div>
                 <div class="h-6 w-px bg-[rgba(255,255,255,0.15)] hidden md:block"></div>
                 <div class="flex items-center space-x-2">
                     <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Sistema:</span>
-                    <select id="select-sistema-filtro" onchange="filtrarPorSistema()" class="bg-[#141821] industrial-border text-xs text-white px-3 py-2 rounded-xl font-semibold focus:outline-none focus:border-ind-accent">
+                    <select id="select-sistema-filtro" onchange="filtrarPorSistema()" class="bg-[#141821] industrial-border text-xs text-white px-3 py-2 rounded-xl font-semibold focus:outline-none focus:border-ind-accent cursor-pointer">
                         <option value="TODOS">-- Todos los sistemas --</option>
                     </select>
                 </div>
@@ -268,10 +268,10 @@
             <div class="mt-6 pt-4 border-t border-[rgba(255,255,255,0.15)] flex items-center justify-between">
                 <span id="trazabilidad-estado" class="text-xs text-slate-400 font-mono font-medium">Estado: Pendiente de verificación</span>
                 <div class="flex space-x-3">
-                    <button onclick="marcarEstado('listo')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg">
+                    <button type="button" onclick="marcarEstado('listo')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg cursor-pointer">
                         Verificación realizada
                     </button>
-                    <button onclick="abrirModalAnomalia()" class="bg-rose-700 hover:bg-rose-600 text-white font-bold py-3 px-5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg">
+                    <button type="button" onclick="abrirModalAnomalia()" class="bg-rose-700 hover:bg-rose-600 text-white font-bold py-3 px-5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg cursor-pointer">
                         Reportar anomalía
                     </button>
                 </div>
@@ -375,11 +375,11 @@
         function setTurno(t) {
             turnoActual = t;
             if(t === 1) {
-                document.getElementById('btn-turno-1').className = "py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition";
-                document.getElementById('btn-turno-2').className = "py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400";
+                document.getElementById('btn-turno-1').className = "py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition cursor-pointer";
+                document.getElementById('btn-turno-2').className = "py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer";
             } else {
-                document.getElementById('btn-turno-2').className = "py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition";
-                document.getElementById('btn-turno-1').className = "py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400";
+                document.getElementById('btn-turno-2').className = "py-2.5 px-3 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition cursor-pointer";
+                document.getElementById('btn-turno-1').className = "py-2.5 px-3 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer";
             }
         }
 
@@ -398,25 +398,30 @@
             document.getElementById('header-maq-title').innerText = maquinaActual;
             document.getElementById('header-area-title').innerText = `${areaActual} · EMPAQPLAST S.A.`;
             
-            // OCULTAR MODAL DE INICIO CORRECTAMENTE
+            // OCULTAR MODAL DE INICIO DE FORMA DIRECTA Y SEGURA
             const modal = document.getElementById('setup-modal');
-            if(modal) modal.style.display = 'none';
+            if(modal) {
+                modal.style.display = 'none';
+                modal.remove(); // Eliminar por completo para evitar que bloquee clics posteriores
+            }
+
+            poblarFiltroSistemas();
+            actualizarInterfaz();
         }
 
         function cambiarOperador() {
-            const modal = document.getElementById('setup-modal');
-            if(modal) modal.style.display = 'flex';
+            location.reload(); // Recarga limpia para volver al login
         }
 
         function cambiarModo(modo) {
             modoActual = modo;
             puntoSeleccionadoIdx = 0;
             if(modo === 'limpieza') {
-                document.getElementById('tab-limpieza').className = "px-4 py-2 rounded-xl text-xs font-bold bg-ind-accent text-white transition shadow";
-                document.getElementById('tab-monitoreo').className = "px-4 py-2 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold";
+                document.getElementById('tab-limpieza').className = "px-4 py-2 rounded-xl text-xs font-bold bg-ind-accent text-white transition shadow cursor-pointer";
+                document.getElementById('tab-monitoreo').className = "px-4 py-2 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer";
             } else {
-                document.getElementById('tab-monitoreo').className = "px-4 py-2 rounded-xl text-xs font-bold bg-ind-accent text-white transition shadow";
-                document.getElementById('tab-limpieza').className = "px-4 py-2 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold";
+                document.getElementById('tab-monitoreo').className = "px-4 py-2 rounded-xl text-xs font-bold bg-ind-accent text-white transition shadow cursor-pointer";
+                document.getElementById('tab-limpieza').className = "px-4 py-2 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer";
             }
             poblarFiltroSistemas();
             actualizarInterfaz();
@@ -612,11 +617,14 @@
             document.getElementById('texto-anomalia').value = '';
             document.getElementById('nombre-archivo').innerText = 'Sin archivo';
             document.getElementById('foto-anomalia').value = '';
-            document.getElementById('anomalia-modal').style.display = 'flex';
+            
+            const modalAnom = document.getElementById('anomalia-modal');
+            if(modalAnom) modalAnom.style.display = 'flex';
         }
 
         function cerrarModalAnomalia() {
-            document.getElementById('anomalia-modal').style.display = 'none';
+            const modalAnom = document.getElementById('anomalia-modal');
+            if(modalAnom) modalAnom.style.display = 'none';
         }
 
         function mostrarNombreArchivo(input) {
@@ -668,7 +676,7 @@
             if(elem) elem.innerText = fechaStr;
         }
 
-        // CARGADOR 3D INTERACTIVO CON ZOOM ADECUADO AL MODELO GLB
+        // CARGADOR 3D INTERACTIVO
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         let cameraGlobal, modelo3DGlobal;
@@ -703,7 +711,7 @@
             scene.add(modelo3DGlobal);
 
             const maxDim = Math.max(size.x, size.y, size.z);
-            camera.position.set(0, maxDim * 0.3, maxDim * 0.9);
+            camera.position.set(0, maxDim * 0.25, maxDim * 0.75);
             camera.lookAt(0, 0, 0);
         }, undefined, function (error) {
             console.error('Error al cargar la máquina 3D:', error);
@@ -751,7 +759,6 @@
             actualizarMaquinas();
             poblarFiltroSistemas();
             actualizarFechaActual();
-            actualizarInterfaz();
         };
     </script>
 </body>
