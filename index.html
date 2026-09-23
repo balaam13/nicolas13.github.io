@@ -29,7 +29,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { background-color: #141821; color: #F3F4F6; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-        .industrial-border { border: 1.5px solid rgba(255, 255, 255, 0.15); }
+        .industrial-border { border: 1.5px solid rgba(255, 255, 255, 0.2); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #141821; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #323A4D; border-radius: 3px; }
@@ -37,7 +37,7 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
 
-    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL) -->
+    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL CON 3 TURNOS) -->
     <div id="setup-modal" class="fixed inset-0 z-50 bg-[#141821]/95 flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 shadow-2xl">
             <div class="flex flex-col items-center text-center mb-5 border-b border-[rgba(255,255,255,0.15)] pb-5">
@@ -89,7 +89,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE REPORTAR ANOMALÍA -->
+    <!-- MODAL DE REPORTAR ANOMALÍA (CON MASCOTA GRANDE) -->
     <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 shadow-2xl flex flex-col md:flex-row gap-6 items-center">
             <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg flex-shrink-0">
@@ -165,7 +165,7 @@
         </div>
     </div>
 
-    <!-- ENCABEZADO INDUSTRIAL PRINCIPAL -->
+    <!-- ENCABEZADO INDUSTRIAL PRINCIPAL (LOGO GRANDE CON BORDES BLANCOS) -->
     <header class="bg-ind-panel border-b border-[rgba(255,255,255,0.15)] px-6 py-4 flex items-center justify-between shadow-lg">
         <div class="flex items-center space-x-6">
             <div class="w-56 h-14 bg-[#141821] industrial-border rounded-xl overflow-hidden flex items-center justify-center p-1.5 shadow-inner">
@@ -345,7 +345,6 @@
         let globalModelo3D = null;
         let camera, renderer, scene;
 
-        // Fecha de inicio TPM fijada al 17 de Septiembre de 2026
         const fechaArranqueTPM = new Date(2026, 8, 17);
 
         function calcularEstadoCalendarioTPM() {
@@ -681,7 +680,6 @@
         }
 
         function marcarEstado(estado) {
-            // VALIDACIÓN ESTRICTA DE CALENDARIO TPM ANTES DE PERMITIR VERIFICAR
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const itemActual = listaOriginal[globalPuntoIdx];
             const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
@@ -718,7 +716,7 @@
             
             const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
 
-            // AVANCE AUTOMÁTICO RESTRINGIDO ESTRICTAMENTE A LA MISMA FRECUENCIA ACTUAL
+            // AVANCE AUTOMÁTICO ESTRICTO DENTRO DE LA MISMA FRECUENCIA
             let siguienteIdx = -1;
             for (let i = globalPuntoIdx + 1; i < listaOriginal.length; i++) {
                 const item = listaOriginal[i];
@@ -904,7 +902,7 @@
 
         container.addEventListener('touchstart', (e) => { isDragging = true; previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY }; });
         container.addEventListener('touchmove', (e) => {
-            if (!isDragging, !isDragging) return;
+            if (!isDragging) return;
             const deltaX = e.touches[0].clientX - previousMousePosition.x;
             if(globalModelo3D) globalModelo3D.rotation.y += deltaX * 0.01;
             previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
