@@ -81,11 +81,11 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Código operador:</label>
-                        <input type="text" id="operator-code" value="" placeholder="Ej. op11" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
+                        <input type="text" id="operator-code" placeholder="Ej. op11" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Contraseña:</label>
-                        <input type="password" id="operator-pass" value="" placeholder="••••" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
+                        <input type="password" id="operator-pass" placeholder="••••" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                     </div>
                 </div>
                 <div>
@@ -448,11 +448,13 @@
 
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
-            // VALIDACIÓN CORREGIDA EXACTA: Si el campo está vacío, lanza el modal industrial corporativo
+            
+            // VALIDACIÓN ESTRICTA CORREGIDA: Si está vacío, muestra el modal y DETIENE la ejecución
             if (codigoOp === "") {
                 mostrarAlertaIndustrial("Por favor ingrese el código del operador.");
                 return;
             }
+
             globalOperador = codigoOp;
             globalArea = document.getElementById('select-area').value;
             globalMaquina = document.getElementById('select-maquina').value;
