@@ -37,7 +37,7 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
 
-    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL REPARADO) -->
+    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL CORREGIDO) -->
     <div id="setup-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 shadow-2xl">
             <div class="flex flex-col items-center text-center mb-5 border-b border-[rgba(255,255,255,0.15)] pb-5">
@@ -279,7 +279,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT DE LÓGICA Y 3D INDUSTRIAL (CORREGIDO Y REPARADO) -->
+    <!-- SCRIPT DE LÓGICA Y 3D INDUSTRIAL -->
     <script>
         let turnoActual = 1;
         let operadorActual = "";
@@ -398,7 +398,7 @@
             document.getElementById('header-maq-title').innerText = maquinaActual;
             document.getElementById('header-area-title').innerText = `${areaActual} · EMPAQPLAST S.A.`;
             
-            // Ocultar modal de login correctamente
+            // OCULTAR MODAL DE INICIO CORRECTAMENTE
             const modal = document.getElementById('setup-modal');
             if(modal) modal.style.display = 'none';
         }
@@ -668,7 +668,7 @@
             if(elem) elem.innerText = fechaStr;
         }
 
-        // CARGADOR 3D INTERACTIVO CON ZOOM SÚPER CERCANO Y ROTACIÓN POR SISTEMA
+        // CARGADOR 3D INTERACTIVO CON ZOOM ADECUADO AL MODELO GLB
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         let cameraGlobal, modelo3DGlobal;
@@ -703,8 +703,7 @@
             scene.add(modelo3DGlobal);
 
             const maxDim = Math.max(size.x, size.y, size.z);
-            // ZOOM MUCHO MÁS CERCANO A LA MÁQUINA
-            camera.position.set(0, maxDim * 0.25, maxDim * 0.75);
+            camera.position.set(0, maxDim * 0.3, maxDim * 0.9);
             camera.lookAt(0, 0, 0);
         }, undefined, function (error) {
             console.error('Error al cargar la máquina 3D:', error);
