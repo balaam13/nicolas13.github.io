@@ -17,7 +17,7 @@
                         ind: {
                             base: '#141821',
                             panel: '#1E2330',
-                            border: 'rgba(0, 102, 204, 0.4)', // Bordes azules industriales
+                            border: 'rgba(0, 102, 204, 0.4)',
                             accent: '#0066cc',
                             accentHover: '#0052a3'
                         }
@@ -29,7 +29,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { background-color: #141821; color: #F3F4F6; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-        .industrial-border { border: 1.5px solid rgba(0, 102, 204, 0.4); } /* Bordes azules limpios */
+        .industrial-border { border: 1.5px solid rgba(0, 102, 204, 0.4); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #141821; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #0066cc; border-radius: 3px; }
@@ -89,18 +89,30 @@
         </div>
     </div>
 
-    <!-- MODAL DE CIERRE DE JORNADA / RESUMEN INTELIGENTE -->
+    <!-- MODAL DE CIERRE DE JORNADA DE LIMPIEZA -->
     <div id="cierre-jornada-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 shadow-2xl flex flex-col items-center text-center">
-            <div class="w-28 h-36 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
+            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
                 <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
             </div>
-            <h3 class="text-sm font-black text-white uppercase tracking-wider mb-2" id="cierre-titulo">¡Has terminado la jornada de Limpieza!</h3>
-            <p class="text-xs text-slate-300 mb-6 leading-relaxed" id="cierre-subtitulo">¿Ya monitoreaste el equipo?</p>
-            <div id="cierre-botones" class="flex space-x-3 w-full">
+            <h3 class="text-sm font-black text-white uppercase tracking-wider mb-2" id="cierre-titulo">¡HAS TERMINADO LA JORNADA DE LIMPIEZA!</h3>
+            <p class="text-xs text-slate-300 mb-6 leading-relaxed">¿Ya monitoreaste el equipo?</p>
+            <div class="flex space-x-3 w-full">
                 <button type="button" onclick="irAMonitoreo()" class="flex-1 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Sí, ir a Monitoreo</button>
                 <button type="button" onclick="cerrarModalCierre()" class="bg-[#141821] hover:bg-[#2A3142] text-slate-300 px-6 py-3 rounded-xl text-xs uppercase tracking-widest transition industrial-border cursor-pointer">Cerrar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CIERRE DEFINITIVO DE MONITOREO -->
+    <div id="cierre-monitoreo-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 shadow-2xl flex flex-col items-center text-center">
+            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
+                <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
+            </div>
+            <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider mb-2">¡PERFECTO, REGRESA EL DÍA DE MAÑANA!</h3>
+            <p class="text-xs text-slate-300 mb-6 leading-relaxed">Has completado todas las actividades del turno correctamente.</p>
+            <button type="button" onclick="cerrarModalMonitoreoFinal()" class="w-full bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Entendido</button>
         </div>
     </div>
 
@@ -348,7 +360,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT CON ASISTENTE DE CIERRE DE JORNADA Y BORDES AZULES -->
+    <!-- SCRIPT CORREGIDO Y BLINDADO -->
     <script>
         let globalTurno = 1;
         let globalOperador = "";
@@ -543,7 +555,21 @@
 
             let completadosTotales = 0;
             let completadosFrecuenciaActual = 0;
+            let completadosLimpiezaTotal = 0;
+            let completadosMonitoreoTotal = 0;
             
+            datosLimpieza.forEach((item, idx) => {
+                if(globalEstados[`limpieza_${idx}`] && globalEstados[`limpieza_${idx}`].status !== 'pendiente') {
+                    completadosLimpiezaTotal++;
+                }
+            });
+
+            datosMonitoreo.forEach((item, idx) => {
+                if(globalEstados[`monitoreo_${idx}`] && globalEstados[`monitoreo_${idx}`].status !== 'pendiente') {
+                    completadosMonitoreoTotal++;
+                }
+            });
+
             listaOriginal.forEach((item, idx) => {
                 if(globalEstados[`${globalModo}_${idx}`] && globalEstados[`${globalModo}_${idx}`].status !== 'pendiente') {
                     completadosTotales++;
@@ -553,9 +579,13 @@
                 }
             });
 
-            // COMPROBAR SI SE TERMINÓ LA FRECUENCIA ACTUAL EN LIMPIEZA
-            if (listaFiltrada.length > 0 && completadosFrecuenciaActual === listaFiltrada.length && globalModo === 'limpieza') {
-                mostrarModalCierreJornada(frecuenciaSeleccionada);
+            // COMPROBAR CIERRE DE JORNADA SEGÚN EL MODO ACTUAL
+            if (listaFiltrada.length > 0 && completadosFrecuenciaActual === listaFiltrada.length) {
+                if (globalModo === 'limpieza' && completadosLimpiezaTotal === datosLimpieza.length) {
+                    mostrarModalCierreLimpieza(frecuenciaSeleccionada);
+                } else if (globalModo === 'monitoreo' && completadosMonitoreoTotal === datosMonitoreo.length) {
+                    mostrarModalMonitoreoFinal();
+                }
             }
 
             if(listaFiltrada.length === 0) {
@@ -620,7 +650,7 @@
                 grid.appendChild(div);
             });
 
-            const porcentaje = Math.round((completadosTotales / listaOriginal.length) * 100);
+            const porcentaje = Math.round((completadosTotales / (datosLimpieza.length + datosMonitoreo.length)) * 100);
             document.getElementById('texto-progreso-num').innerText = `${completadosTotales} de ${listaOriginal.length} puntos - ${porcentaje}%`;
             document.getElementById('barra-progreso-fill').style.width = `${porcentaje}%`;
 
@@ -758,8 +788,8 @@
             }
         }
 
-        function mostrarModalCierreJornada(frecuencia) {
-            document.getElementById('cierre-titulo').innerText = `¡Has terminado la jornada de ${frecuencia}s!`;
+        function mostrarModalCierreLimpieza(frecuencia) {
+            document.getElementById('cierre-titulo').innerText = `¡HAS TERMINADO LA JORNADA DE ${frecuencia.toUpperCase()}S!`;
             document.getElementById('cierre-jornada-modal').style.display = 'flex';
         }
 
@@ -770,6 +800,14 @@
         function irAMonitoreo() {
             cerrarModalCierre();
             cambiarModo('monitoreo');
+        }
+
+        function mostrarModalMonitoreoFinal() {
+            document.getElementById('cierre-monitoreo-modal').style.display = 'flex';
+        }
+
+        function cerrarModalMonitoreoFinal() {
+            document.getElementById('cierre-monitoreo-modal').style.display = 'none';
         }
 
         function abrirModalAnomalia() {
