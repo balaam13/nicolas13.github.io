@@ -372,7 +372,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT CORREGIDO Y BLINDADO -->
+    <!-- SCRIPT CORREGIDO: LOGIN Y CONTROL DE EJECUCIÓN ÚNICA SEMANAL/MENSUAL -->
     <script>
         let globalTurno = 1;
         let globalOperador = "";
@@ -383,6 +383,7 @@
         let globalEstados = {}; 
         let globalModelo3D = null;
         let camera, renderer, scene;
+        let fechasEjecucionUnica = {}; // Control para que semanal/mensual se hagan una sola vez por ciclo
 
         const fechaArranqueTPM = new Date(2026, 8, 17);
 
@@ -449,7 +450,7 @@
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             
-            // LA CORRECCIÓN EXACTA: Si el campo está VACÍO, muestra la alerta y frena. Si TIENE TEXTO, entra directo al sistema sin mostrar nada.
+            // VALIDACIÓN CORREGIDA INICIAL: Si está VACÍO, muestra alerta y DETIENE. Si TIENE TEXTO, entra.
             if (codigoOp === "") {
                 mostrarAlertaIndustrial("Por favor ingrese el código del operador.");
                 return;
@@ -767,14 +768,31 @@
             const diasParaSemanal = 7 - (diasTranscurridos % 7);
             const diasParaMensual = 30 - (diasTranscurridos % 30);
 
-            if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 7 && diasParaSemanal !== 0 && diasParaSemanal !== 1) {
-                mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES SEMANALES!\nFaltan ${diasParaSemanal} días para el ciclo correspondiente.`);
-                return;
+            // VALIDACIÓN CALENDARIO TPM Y CONTROL DE EJECUCIÓN ÚNICA (SEMANAL / MENSUAL)
+            if (frecuenciaSeleccionada === "Semanal") {
+                if (diasParaSemanal !== 7 && diasParaSemanal !== 0 && diasParaSemanal !== 1) {
+                    mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES SEMANALES!\nFaltan ${diasParaSemanal} días para el ciclo correspondiente.`);
+                    return;
+                }
+                // Control para que se haga una sola vez por ciclo semanal
+                const cicloSemanalActual = Math.floor(diasTranscurridos / 7);
+                if (fechasEjecucionUnica[`semana_${cicloSemanalActual}`]) {
+                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES SEMANALES YA FUERON EJECUTADAS ESTA SEMANA!\nPróximo ciclo semanal disponible en ${diasParaSemanal} días.`);
+                    return;
+                }
             }
 
-            if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 30 && diasParaMensual !== 0) {
-                mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES MENSUALES!\nFaltan ${diasParaMensual} días para el ciclo correspondiente.`);
-                return;
+            if (frecuenciaSeleccionada === "Mensual") {
+                if (diasParaMensual !== 30 && diasParaMensual !== 0) {
+                    mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES MENSUALES!\nFaltan ${diasParaMensual} días para el ciclo correspondiente.`);
+                    return;
+                }
+                // Control para que se haga una sola vez por ciclo mensual
+                const cicloMensualActual = Math.floor(diasTranscurridos / 30);
+                if (fechasEjecucionUnica[`mes_${cicloMensualActual}`]) {
+                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES MENSUALES YA FUERON EJECUTADAS ESTE MES!\nPróximo ciclo mensual disponible en ${diasParaMensual} días.`);
+                    return;
+                }
             }
 
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
@@ -790,6 +808,15 @@
                 foto: null 
             };
             
+            // Si completó la frecuencia semanal o mensual, registrar la ejecución única del ciclo
+            if (frecuenciaSeleccionada === "Semanal") {
+                const cicloSemanalActual = Math.floor(diasTranscurridos / 7);
+                fechasEjecucionUnica[`semana_${cicloSemanalActual}`] = true;
+            } else if (frecuenciaSeleccionada === "Mensual") {
+                const cicloMensualActual = Math.floor(diasTranscurridos / 30);
+                fechasEjecucionUnica[`mes_${cicloMensualActual}`] = true;
+            }
+
             actualizarInterfaz();
             
             const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
