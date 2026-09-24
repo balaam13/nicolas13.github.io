@@ -49,7 +49,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL CON 3 TURNOS) -->
+    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL CON VALIDACIÓN ESTRICTA) -->
     <div id="setup-modal" class="fixed inset-0 z-50 bg-[#141821]/95 flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 shadow-2xl">
             <div class="flex flex-col items-center text-center mb-5 border-b border-[rgba(0,102,204,0.3)] pb-5">
@@ -131,7 +131,7 @@
     <!-- MODAL DE REPORTAR ANOMALÍA -->
     <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 shadow-2xl flex flex-col md:flex-row gap-6 items-center">
-            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg flex-shrink-0">
+            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg flex-shrink-0">
                 <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
             </div>
             
@@ -257,7 +257,7 @@
 
             <div class="flex flex-wrap items-center gap-4 justify-end">
                 <div id="tpm-alerta-calendario" class="bg-blue-950/30 border border-blue-600/50 px-4 py-2 rounded-xl text-xs text-blue-300 font-mono">
-                    <span id="tpm-estado-texto">Calculando estado TPM...</span>
+                    <span id="tpm-estado-texto">DÍAS ACTIVIDADES SEMANALES: 7 DIAS | DIAS PARA ACTIVIDADES MENSUALES: 30 DIAS</span>
                 </div>
                 <div class="text-right">
                     <span id="texto-progreso-num" class="text-xs font-bold text-slate-200 font-mono">0 de 16 puntos - 0%</span>
@@ -383,7 +383,7 @@
         let globalEstados = {}; 
         let globalModelo3D = null;
         let camera, renderer, scene;
-        let fechasEjecucionUnica = {}; // Control estricto de ejecución única por ciclo
+        let fechasEjecucionUnica = {}; 
 
         const fechaArranqueTPM = new Date(2026, 8, 17);
 
@@ -404,8 +404,8 @@
             const diasParaSemanal = 7 - (diasTranscurridos % 7);
             const diasParaMensual = 30 - (diasTranscurridos % 30);
             
-            const diasSemanalTexto = (diasParaSemanal === 7 || diasParaSemanal === 0) ? '0 DÍAS (Habilitado)' : `${diasParaSemanal} DÍAS`;
-            const diasMensualTexto = (diasParaMensual === 30 || diasParaMensual === 0) ? '0 DÍAS (Habilitado)' : `${diasParaMensual} DÍAS`;
+            const diasSemanalTexto = (diasParaSemanal === 7 || diasParaSemanal === 0) ? '0 DIAS' : `${diasParaSemanal} DIAS`;
+            const diasMensualTexto = (diasParaMensual === 30 || diasParaMensual === 0) ? '0 DIAS' : `${diasParaMensual} DIAS`;
 
             const textoEstado = `DÍAS ACTIVIDADES SEMANALES: ${diasSemanalTexto} | DIAS PARA ACTIVIDADES MENSUALES: ${diasMensualTexto}`;
 
@@ -448,7 +448,7 @@
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             
-            // VALIDACIÓN INVERTIDA CORRECTA: Si está vacío, muestra la alerta. Si tiene texto, avanza.
+            // VALIDACIÓN DE INICIO DE SESIÓN CORREGIDA: Si está vacío, muestra alerta obligatoria y frena.
             if (codigoOp === "") {
                 mostrarAlertaIndustrial("Por favor ingrese el código del operador.");
                 return;
@@ -585,25 +585,36 @@
             document.getElementById('contador-filtro-badge').innerText = `${listaFiltrada.length} puntos`;
 
             let completadosTotales = 0;
-            let completadosFrecuenciaActual = 0;
+            let completadosLimpiezaDiarias = 0;
+            let completadosMonitoreoDiarias = 0;
+
+            datosLimpieza.forEach((item, idx) => {
+                if(item.periodicidad === 'Diaria' && globalEstados[`limpieza_${idx}`] && globalEstados[`limpieza_${idx}`].status !== 'pendiente') {
+                    completadosLimpiezaDiarias++;
+                }
+            });
+
+            datosMonitoreo.forEach((item, idx) => {
+                if(item.periodicidad === 'Diaria' && globalEstados[`monitoreo_${idx}`] && globalEstados[`monitoreo_${idx}`].status !== 'pendiente') {
+                    completadosMonitoreoDiarias++;
+                }
+            });
             
             listaOriginal.forEach((item, idx) => {
                 if(globalEstados[`${globalModo}_${idx}`] && globalEstados[`${globalModo}_${idx}`].status !== 'pendiente') {
                     completadosTotales++;
-                    if(item.periodicidad === frecuenciaSeleccionada) {
-                        completadosFrecuenciaActual++;
-                    }
                 }
             });
 
-            if (listaFiltrada.length > 0 && completadosFrecuenciaActual === listaFiltrada.length) {
-                if (globalModo === 'limpieza' && !window.modalLimpiezaMostrado) {
-                    window.modalLimpiezaMostrado = true;
-                    mostrarModalCierreLimpieza(frecuenciaSeleccionada);
-                } else if (globalModo === 'monitoreo' && !window.modalMonitoreoMostrado) {
-                    window.modalMonitoreoMostrado = true;
-                    mostrarModalMonitoreoFinal();
-                }
+            let totalDiariasLimpieza = datosLimpieza.filter(i => i.periodicidad === 'Diaria').length;
+            let totalDiariasMonitoreo = datosMonitoreo.filter(i => i.periodicidad === 'Diaria').length;
+
+            if (globalModo === 'limpieza' && frecuenciaSeleccionada === 'Diaria' && completadosLimpiezaDiarias === totalDiariasLimpieza && !window.modalLimpiezaMostrado) {
+                window.modalLimpiezaMostrado = true;
+                mostrarModalCierreLimpieza('Diaria');
+            } else if (globalModo === 'monitoreo' && frecuenciaSeleccionada === 'Diaria' && completadosMonitoreoDiarias === totalDiariasMonitoreo && !window.modalMonitoreoMostrado) {
+                window.modalMonitoreoMostrado = true;
+                mostrarModalMonitoreoFinal();
             }
 
             if(listaFiltrada.length === 0) {
@@ -752,7 +763,6 @@
         }
 
         function marcarEstado(estado) {
-            // BLOQUEO TOTAL SI YA SE COMPLETÓ TODO EL TURNO
             if (window.modalMonitoreoMostrado) {
                 mostrarAlertaIndustrial("¡La jornada de este turno ha finalizado! Por favor regresa el día de mañana.");
                 return;
@@ -766,7 +776,7 @@
             const diasParaSemanal = 7 - (diasTranscurridos % 7);
             const diasParaMensual = 30 - (diasTranscurridos % 30);
 
-            // CONTROL ESTRICTO DE CICLO Y BLOQUEO CON CUENTA REGRESIVA
+            // CONTROL ESTRICTO DE CICLOS CON ALERTAS DE TIEMPO RESTANTE
             if (frecuenciaSeleccionada === "Semanal") {
                 const cicloSemanalActual = Math.floor(diasTranscurridos / 7);
                 if (fechasEjecucionUnica[`semana_${cicloSemanalActual}`]) {
@@ -804,7 +814,6 @@
                 foto: null 
             };
             
-            // Registrar ejecución única del ciclo al terminar todos los puntos de esa frecuencia
             let filtroActualList = listaOriginal.filter(item => item.periodicidad === frecuenciaSeleccionada);
             let completadosFreq = filtroActualList.filter(item => {
                 let rIdx = listaOriginal.findIndex(el => el.codigo === item.codigo);
