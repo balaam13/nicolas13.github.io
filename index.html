@@ -44,13 +44,10 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
 
-    <!-- MODAL DE ALERTA INDUSTRIAL PERSONALIZADA (CON MASCOTA 1) -->
+    <!-- MODAL DE ALERTA INDUSTRIAL PERSONALIZADA -->
     <div id="alerta-modal" style="display: none;" class="fixed inset-0 z-[999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-6 industrial-shadow flex flex-col items-center text-center">
-            <div class="w-24 h-32 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
-                <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
-            </div>
-            <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-1">AVISO DEL SISTEMA TPM</h3>
+            <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-2">AVISO DEL SISTEMA TPM</h3>
             <p class="text-xs text-slate-200 mb-6 leading-relaxed font-medium whitespace-pre-line" id="alerta-texto">Mensaje de advertencia...</p>
             <button type="button" onclick="cerrarAlertaModal()" class="w-full bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Aceptar</button>
         </div>
@@ -118,7 +115,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE CIERRE DE JORNADA DE LIMPIEZA (CON MASCOTA 2) -->
+    <!-- MODAL DE CIERRE DE JORNADA DE LIMPIEZA -->
     <div id="cierre-jornada-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 industrial-shadow flex flex-col items-center text-center">
             <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
@@ -133,7 +130,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE CIERRE DEFINITIVO DE MONITOREO (CON MASCOTA 2) -->
+    <!-- MODAL DE CIERRE DEFINITIVO DE MONITOREO -->
     <div id="cierre-monitoreo-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 industrial-shadow flex flex-col items-center text-center">
             <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
@@ -169,7 +166,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE REPORTAR ANOMALÍA (CON MASCOTA 1) -->
+    <!-- MODAL DE REPORTAR ANOMALÍA -->
     <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 industrial-shadow flex flex-col md:flex-row gap-6 items-center">
             <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg flex-shrink-0">
@@ -188,7 +185,8 @@
                         <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Tipo de daño</label>
                         <div class="relative">
                             <input type="text" id="tipo-dano-input" autocomplete="off" placeholder="Escriba para buscar: fuga, falla, daño..." class="w-full bg-[#141821] industrial-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent">
-                            <div id="tipo-dano-resultados" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-[#1E2330] border border-slate-600 rounded-xl z-[90] shadow-2xl"></div>
+                            <!-- Z-INDEX ELEVADO Y CLICABILIDAD BLINDADA CON onmousedown -->
+                            <div id="tipo-dano-resultados" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-[#1E2330] border border-slate-600 rounded-xl z-[9999] shadow-2xl"></div>
                         </div>
                         <input type="hidden" id="tipo-dano-seleccionado">
                         <p class="text-[10px] text-slate-500 mt-1">Escriba para filtrar y haga clic en la opción deseada para seleccionarla.</p>
@@ -201,7 +199,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE REGISTRAR OBSERVACIÓN (CON MASCOTA 1) -->
+    <!-- MODAL DE REGISTRAR OBSERVACIÓN -->
     <div id="observacion-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 industrial-shadow flex flex-col md:flex-row gap-6 items-center">
             <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg flex-shrink-0">
@@ -492,8 +490,6 @@
             globalOperador = codigoOp;
             configurarEquipoQR();
             document.getElementById('display-operator').innerText = "Operador: " + globalOperador;
-            document.getElementById('header-maq-title').innerText = globalMaquina;
-            document.getElementById('header-area-title').innerText = `${globalArea} - EMPAQPLAST S.A.`;
             
             const modal = document.getElementById('setup-modal');
             if (modal) modal.style.display = 'none';
@@ -622,7 +618,7 @@
             if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 0) {
                 mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades semanales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 7 (Faltan ${diasParaSemanal} días).`);
             } else if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 0) {
-                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades mensuales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 30 (Faltan ${diasParaMensual} days).`);
+                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades mensuales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 30 (Faltan ${diasParaMensual} días).`);
             }
 
             actualizarInterfaz();
@@ -696,7 +692,7 @@
                 let colorClass = "text-slate-400 bg-[#141821]/40 industrial-border hover:border-slate-400";
                 let textState = "PENDIENTE";
 
-                // REGLA DE ORO: SI TIENE ANOMALÍA, SE QUEDA ROJO PERMANENTEMENTE AUNQUE SE HAYA VERIFICADO
+                // REGLA DE ORO ESTRICTA: SI TIENE ANOMALÍA, SE QUEDA ROJO PERMANENTEMENTE Y BLOQUEA SOBREESCRITURA A VERDE
                 if(dataEstado && dataEstado.status === 'anomalia') {
                     icon = '!';
                     colorClass = "text-rose-400 bg-rose-950/25 border-rose-700/60";
@@ -816,18 +812,36 @@
             }
 
             const trazabilidadElem = document.getElementById('trazabilidad-estado');
+            const btnVerificacion = document.getElementById('btn-verificacion');
+
             if(dataEstado && dataEstado.status === 'anomalia') {
                 trazabilidadElem.innerHTML = `ANOMALÍA REPORTADA - ${dataEstado.tipo || 'Sin tipo'}`;
                 trazabilidadElem.className = "text-xs text-rose-400 font-mono font-bold";
+                if(btnVerificacion) {
+                    btnVerificacion.disabled = true;
+                    btnVerificacion.title = "No se puede verificar un punto reportado con anomalía.";
+                }
             } else if(dataEstado && dataEstado.status === 'listo') {
                 trazabilidadElem.innerHTML = `VERIFICACIÓN REGISTRADA - ${globalOperador || 'Operador'}`;
                 trazabilidadElem.className = "text-xs text-emerald-400 font-mono font-bold";
+                if(btnVerificacion) {
+                    btnVerificacion.disabled = true; // REGLA: YA NO SE PUEDE VOLVER A VERIFICAR UNA VEZ HECHO
+                    btnVerificacion.title = "Esta actividad ya fue verificada en este ciclo.";
+                }
             } else if(dataEstado && dataEstado.status === 'observacion') {
                 trazabilidadElem.innerHTML = `OBSERVACIÓN REGISTRADA - ${dataEstado.com}`;
                 trazabilidadElem.className = "text-xs text-blue-400 font-mono font-bold";
+                if(btnVerificacion) {
+                    btnVerificacion.disabled = false;
+                    btnVerificacion.title = "";
+                }
             } else {
                 trazabilidadElem.innerHTML = `Estado: Pendiente de inspección`;
                 trazabilidadElem.className = "text-xs text-slate-400 font-mono font-medium";
+                if(btnVerificacion) {
+                    btnVerificacion.disabled = false;
+                    btnVerificacion.title = "";
+                }
             }
         }
 
@@ -871,7 +885,14 @@
         function establecerBotonesActividad(habilitados) {
             ['btn-verificacion','btn-observacion','btn-anomalia'].forEach(id => {
                 const b = document.getElementById(id);
-                if (b) b.disabled = !habilitados;
+                if (b) {
+                    if (id === 'btn-verificacion' && habilitados) {
+                        const estadoKey = `${globalModo}_${globalPuntoIdx}`;
+                        const st = globalEstados[estadoKey];
+                        if (st && (st.status === 'listo' || st.status === 'anomalia')) return; // Mantener bloqueado si ya está listo o es anomalía
+                    }
+                    b.disabled = !habilitados;
+                }
             });
         }
 
@@ -919,8 +940,20 @@
             actualizarTemporizadorUI();
         }
 
-        // CORRECCIÓN REGLA DE ORO: ANOMALÍA PERSISTENTE Y BLOQUEO DE FRECUENCIAS
+        // REGLA DE ORO ESTRICTA: SI ES ANOMALÍA O YA ESTÁ LISTO, BLOQUEA VERIFICACIÓN MÚLTIPLE Y MANTIENE ROJO
         function marcarEstado(estado) {
+            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
+            const estadoActual = globalEstados[estadoKey] ? globalEstados[estadoKey].status : null;
+
+            if (estadoActual === 'anomalia') {
+                mostrarAlertaIndustrial("Este punto tiene registrada una anomalía activa. No puede ser sobrescrito a verificado.");
+                return;
+            }
+            if (estadoActual === 'listo') {
+                mostrarAlertaIndustrial("Esta actividad ya fue verificada en este ciclo. Evite registros duplicados.");
+                return;
+            }
+
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
 
@@ -940,22 +973,13 @@
                 return;
             }
 
-            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
-            const estadoActual = globalEstados[estadoKey] ? globalEstados[estadoKey].status : null;
-
-            // SI YA FUE ANOMALÍA, SE QUEDA EN ANOMALÍA Y NO CAMBIA A LISTO/VERIFICADO
-            let estadoFinal = estado;
-            if (estadoActual === 'anomalia') {
-                estadoFinal = 'anomalia';
-            }
-
             const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const tiempoRealActividad = globalTimer.elapsed;
             detenerTemporizador();
 
             globalEstados[estadoKey] = { 
-                status: estadoFinal, 
+                status: estado, 
                 tipo: (globalEstados[estadoKey] && globalEstados[estadoKey].tipo) || 'Normal', 
                 ejecuciones: anterior + 1, 
                 ultimoTiempo: horaActual,
@@ -1038,7 +1062,6 @@
             return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         }
 
-        // BÚSQUEDA Y SELECCIÓN REAL CLICKEABLE CON onmousedown
         function mostrarResultadosTipoDano() {
             const input = document.getElementById('tipo-dano-input');
             const caja = document.getElementById('tipo-dano-resultados');
@@ -1241,7 +1264,6 @@
         window.onload = () => {
             configurarEquipoQR();
             poblarFiltroSistemas();
-            actualizarFechaActual();
             calcularEstadoCalendarioTPM();
         };
     </script>
