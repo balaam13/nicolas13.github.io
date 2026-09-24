@@ -44,7 +44,7 @@
                 <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
             </div>
             <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-1">AVISO DEL SISTEMA TPM</h3>
-            <p class="text-xs text-slate-200 mb-6 leading-relaxed font-medium" id="alerta-texto">Mensaje de advertencia...</p>
+            <p class="text-xs text-slate-200 mb-6 leading-relaxed font-medium whitespace-pre-line" id="alerta-texto">Mensaje de advertencia...</p>
             <button type="button" onclick="cerrarAlertaModal()" class="w-full bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Aceptar</button>
         </div>
     </div>
@@ -228,7 +228,7 @@
         </div>
     </header>
 
-    <!-- BARRA DE CONTEXTO Y FILTROS (DISEÑO ESPACIOSO Y FLUIDO) -->
+    <!-- BARRA DE CONTEXTO Y FILTROS -->
     <section class="bg-ind-panel/40 border-b border-[rgba(0,102,204,0.3)] px-6 py-4">
         <div class="max-w-[1900px] mx-auto flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
             <div class="flex flex-wrap items-center gap-4">
@@ -406,7 +406,7 @@
             
             let textoEstado = `Iniciado hace ${diasTranscurridos} días - `;
             if (diasParaSemanal === 7 || diasParaSemanal === 0) {
-                textoEstado += `Semanal activo (Próx: 7d) | `;
+                textoEstado += `Semanal activo | `;
             } else {
                 textoEstado += `Semanal en ${diasParaSemanal}d | `;
             }
@@ -455,7 +455,7 @@
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             
-            // VALIDACIÓN CORREGIDA INICIAL: Si está vacío, lanza alerta y frena. Si tiene texto, avanza.
+            // VALIDACIÓN DE LOGIN CORREGIDA: Si está vacío, muestra la alerta. Si tiene texto, avanza.
             if (codigoOp === "") {
                 mostrarAlertaIndustrial("Por favor ingrese el código del operador.");
                 return;
@@ -765,27 +765,29 @@
             const diasParaSemanal = 7 - (diasTranscurridos % 7);
             const diasParaMensual = 30 - (diasTranscurridos % 30);
 
-            // CONTROL ESTRICTO DE EJECUCIÓN ÚNICA POR CICLO
+            // CONTROL ESTRICTO DE EJECUCIÓN ÚNICA CON MENSAJE CLARO DE DÍAS RESTANTES
             if (frecuenciaSeleccionada === "Semanal") {
-                if (diasParaSemanal !== 7 && diasParaSemanal !== 0 && diasParaSemanal !== 1) {
-                    mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES SEMANALES!\nFaltan ${diasParaSemanal} días para el ciclo correspondiente.`);
-                    return;
-                }
                 const cicloSemanalActual = Math.floor(diasTranscurridos / 7);
                 if (fechasEjecucionUnica[`semana_${cicloSemanalActual}`]) {
-                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES SEMANALES YA FUERON EJECUTADAS ESTA SEMANA!\nPróximo ciclo semanal disponible en ${diasParaSemanal === 0 ? 7 : diasParaSemanal} días.`);
+                    const diasRestantesProximo = 7 - (diasTranscurridos % 7);
+                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES SEMANALES YA FUERON EJECUTADAS!\nFaltan ${diasRestantesProximo} días para que se habiliten de nuevo.`);
+                    return;
+                }
+                if (diasParaSemanal !== 7 && diasParaSemanal !== 0 && diasParaSemanal !== 1) {
+                    mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES SEMANALES!\nFaltan ${diasParaSemanal} días para el ciclo correspondiente.`);
                     return;
                 }
             }
 
             if (frecuenciaSeleccionada === "Mensual") {
-                if (diasParaMensual !== 30 && diasParaMensual !== 0) {
-                    mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES MENSUALES!\nFaltan ${diasParaMensual} días para el ciclo correspondiente.`);
-                    return;
-                }
                 const cicloMensualActual = Math.floor(diasTranscurridos / 30);
                 if (fechasEjecucionUnica[`mes_${cicloMensualActual}`]) {
-                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES MENSUALES YA FUERON EJECUTADAS ESTE MES!\nPróximo ciclo mensual disponible en ${diasParaMensual === 0 ? 30 : diasParaMensual} días.`);
+                    const diasRestantesProximo = 30 - (diasTranscurridos % 30);
+                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES MENSUALES YA FUERON EJECUTADAS!\nFaltan ${diasRestantesProximo} días para que se habiliten de nuevo.`);
+                    return;
+                }
+                if (diasParaMensual !== 30 && diasParaMensual !== 0) {
+                    mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES MENSUALES!\nFaltan ${diasParaMensual} días para el ciclo correspondiente.`);
                     return;
                 }
             }
@@ -803,6 +805,22 @@
                 foto: null 
             };
             
+            // Registrar ejecución única del ciclo al terminar el punto
+            let filtroActualList = listaOriginal.filter(item => item.periodicidad === frecuenciaSeleccionada);
+            let completadosFreq = filtroActualList.filter(item => {
+                let rIdx = listaOriginal.findIndex(el => el.codigo === item.codigo);
+                let st = globalEstados[`${globalModo}_${rIdx}`];
+                return st && st.status !== 'pendiente';
+            }).length;
+
+            if (completadosFreq === filtroActualList.length) {
+                if (frecuenciaSeleccionada === "Semanal") {
+                    fechasEjecucionUnica[`semana_${Math.floor(diasTranscurridos / 7)}`] = true;
+                } else if (frecuenciaSeleccionada === "Mensual") {
+                    fechasEjecucionUnica[`mes_${Math.floor(diasTranscurridos / 30)}`] = true;
+                }
+            }
+
             actualizarInterfaz();
             
             const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
@@ -995,7 +1013,7 @@
             let rotacionY = 0;
             if (sistema.includes("ALIMENTACIÓN")) rotacionY = 0.8;
             else if (sistema.includes("INYECCIÓN")) rotacionY = -0.3;
-            else if (sistema.includes("EXPULSOR") || sistema.includes("CIERRE")) rotacionY = 1.8;
+            else if (sistema.includes("EXPULSOR" ) || sistema.includes("CIERRE")) rotacionY = 1.8;
             else if (sistema.includes("HIDRÁULICO") || sistema.includes("ELÉCTRICO")) rotacionY = -1.8;
 
             globalModelo3D.rotation.y = rotacionY;
