@@ -53,10 +53,10 @@
         </div>
     </div>
 
-    <!-- PANTALLA DE FAMILIARIZACIÓN INICIAL -->
+    <!-- PANTALLA DE FAMILIARIZACIÓN INICIAL (CON LA MASCOTA RESTAURADA) -->
     <div id="familiarizacion-modal" style="display: none;" class="fixed inset-0 z-[90] bg-[#141821]/95 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-8 industrial-shadow flex flex-col items-center text-center">
-            <div class="w-28 h-36 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
+            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
                 <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
             </div>
             <h2 class="text-lg font-black text-white uppercase tracking-wider mb-3">Bienvenido al Mantenimiento Autónomo</h2>
@@ -118,9 +118,6 @@
     <!-- MODAL DE CIERRE DE JORNADA DE LIMPIEZA -->
     <div id="cierre-jornada-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 industrial-shadow flex flex-col items-center text-center">
-            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
-                <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
-            </div>
             <h3 class="text-sm font-black text-white uppercase tracking-wider mb-2" id="cierre-titulo">¡HAS TERMINADO LA JORNADA DE ACTIVIDADES DIARIAS!</h3>
             <p class="text-xs text-slate-300 mb-6 leading-relaxed">¿Ya monitoreaste el equipo?</p>
             <div class="flex space-x-3 w-full">
@@ -133,9 +130,6 @@
     <!-- MODAL DE CIERRE DEFINITIVO DE MONITOREO -->
     <div id="cierre-monitoreo-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 industrial-shadow flex flex-col items-center text-center">
-            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
-                <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
-            </div>
             <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider mb-2">¡PERFECTO, REGRESA EL DÍA DE MAÑANA!</h3>
             <p class="text-xs text-slate-300 mb-6 leading-relaxed">Has completado todas las actividades del turno correctamente.</p>
             <button type="button" onclick="cerrarModalMonitoreoFinal()" class="w-full bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Entendido</button>
@@ -169,9 +163,6 @@
     <!-- MODAL DE REPORTAR ANOMALÍA -->
     <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 industrial-shadow flex flex-col md:flex-row gap-6 items-center">
-            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg flex-shrink-0">
-                <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
-            </div>
             <div class="flex-1 w-full">
                 <div class="flex items-center space-x-3 mb-4 border-b border-[rgba(0,102,204,0.3)] pb-3">
                     <div><h3 class="text-xs font-bold text-white uppercase tracking-wider">Reportar anomalía de equipo</h3><p class="text-[11px] text-rose-400 font-mono mt-0.5" id="modal-anomalia-info">Sistema - L-001</p></div>
@@ -185,7 +176,6 @@
                         <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Tipo de daño</label>
                         <div class="relative">
                             <input type="text" id="tipo-dano-input" autocomplete="off" placeholder="Escriba para buscar: fuga, falla, daño..." class="w-full bg-[#141821] industrial-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent">
-                            <!-- Z-INDEX ELEVADO Y CLICABILIDAD BLINDADA CON onmousedown -->
                             <div id="tipo-dano-resultados" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-[#1E2330] border border-slate-600 rounded-xl z-[9999] shadow-2xl"></div>
                         </div>
                         <input type="hidden" id="tipo-dano-seleccionado">
@@ -202,10 +192,6 @@
     <!-- MODAL DE REGISTRAR OBSERVACIÓN -->
     <div id="observacion-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 industrial-shadow flex flex-col md:flex-row gap-6 items-center">
-            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg flex-shrink-0">
-                <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
-            </div>
-
             <div class="flex-1 w-full">
                 <div class="flex items-center space-x-3 mb-4 border-b border-[rgba(0,102,204,0.3)] pb-3">
                     <div>
@@ -546,7 +532,7 @@
         ];
 
         const datosMonitoreo = [
-            {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación"},
+            {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", time: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación"},
             {codigo: "I-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Manguera de succión", periodicidad: "Diaria", estandar: "Verificar integridad y conexión.", anormal: "Roturas, fugas o desgaste.", material: "Visual", time: "3 min", img1: "Succionador Externo.jpg", label1: "Manguera", img2: "Succionador Detalle.jpg", label2: "Conexión"},
             {codigo: "I-003", sistema: "SISTEMA DE INYECCIÓN", componente: "Boquilla", periodicidad: "Diaria", estandar: "Verificar fugas y estado físico.", anormal: "Goteo o desgaste.", material: "HMI", time: "3 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla", img2: "Zona de boquilla detalle.jpg", label2: "Estado"},
             {codigo: "I-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zonas 1-2-3-4 de tornillo y cilindro", periodicidad: "Diaria", estandar: "Comparar temperatura real versus objetivo del proceso.", anormal: "Alarmas, fallas de calidad en PT.", material: "Visual", time: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Zonas", img2: "Controlador de temperatura Detalle.jpg", label2: "Temperaturas"},
@@ -692,7 +678,6 @@
                 let colorClass = "text-slate-400 bg-[#141821]/40 industrial-border hover:border-slate-400";
                 let textState = "PENDIENTE";
 
-                // REGLA DE ORO ESTRICTA: SI TIENE ANOMALÍA, SE QUEDA ROJO PERMANENTEMENTE Y BLOQUEA SOBREESCRITURA A VERDE
                 if(dataEstado && dataEstado.status === 'anomalia') {
                     icon = '!';
                     colorClass = "text-rose-400 bg-rose-950/25 border-rose-700/60";
@@ -825,7 +810,7 @@
                 trazabilidadElem.innerHTML = `VERIFICACIÓN REGISTRADA - ${globalOperador || 'Operador'}`;
                 trazabilidadElem.className = "text-xs text-emerald-400 font-mono font-bold";
                 if(btnVerificacion) {
-                    btnVerificacion.disabled = true; // REGLA: YA NO SE PUEDE VOLVER A VERIFICAR UNA VEZ HECHO
+                    btnVerificacion.disabled = true; // REGLA: BLOQUEO ESTRICTO DE DOBLE VERIFICACIÓN
                     btnVerificacion.title = "Esta actividad ya fue verificada en este ciclo.";
                 }
             } else if(dataEstado && dataEstado.status === 'observacion') {
@@ -882,6 +867,7 @@
             }
         }
 
+        // BLOQUEO ESTRICTO DE BOTONES HASTA QUE EL TEMPORIZADOR ESTÉ EN EJECUCIÓN
         function establecerBotonesActividad(habilitados) {
             ['btn-verificacion','btn-observacion','btn-anomalia'].forEach(id => {
                 const b = document.getElementById(id);
@@ -889,7 +875,7 @@
                     if (id === 'btn-verificacion' && habilitados) {
                         const estadoKey = `${globalModo}_${globalPuntoIdx}`;
                         const st = globalEstados[estadoKey];
-                        if (st && (st.status === 'listo' || st.status === 'anomalia')) return; // Mantener bloqueado si ya está listo o es anomalía
+                        if (st && (st.status === 'listo' || st.status === 'anomalia')) return;
                     }
                     b.disabled = !habilitados;
                 }
@@ -915,7 +901,10 @@
             globalTimer.running = false;
             document.getElementById('tiempo-estimado').innerText = formatearDuracion(globalTimer.estimated);
             document.getElementById('temporizador-reloj').innerText = '00:00:00';
+            
+            // BLOQUEO INICIAL OBLIGATORIO DURANTE LA CUENTA REGRESIVA DE PREPARACIÓN
             establecerBotonesActividad(false);
+
             let cuenta = 5;
             const estado = document.getElementById('temporizador-estado');
             if (estado) estado.innerText = `PREPÁRATE — INICIA EN ${cuenta}`;
@@ -928,7 +917,10 @@
                     globalTimer.countdownInterval = null;
                     globalTimer.running = true;
                     globalTimer.startMs = Date.now();
+                    
+                    // HABILITAR BOTONES SÓLO CUANDO INICIA LA EJECUCIÓN
                     establecerBotonesActividad(true);
+                    
                     estado.innerText = 'ACTIVIDAD EN EJECUCIÓN';
                     globalTimer.interval = setInterval(() => {
                         globalTimer.elapsed = Math.floor((Date.now() - globalTimer.startMs) / 1000);
@@ -940,7 +932,6 @@
             actualizarTemporizadorUI();
         }
 
-        // REGLA DE ORO ESTRICTA: SI ES ANOMALÍA O YA ESTÁ LISTO, BLOQUEA VERIFICACIÓN MÚLTIPLE Y MANTIENE ROJO
         function marcarEstado(estado) {
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const estadoActual = globalEstados[estadoKey] ? globalEstados[estadoKey].status : null;
@@ -978,8 +969,13 @@
             const tiempoRealActividad = globalTimer.elapsed;
             detenerTemporizador();
 
+            let estadoFinal = estado;
+            if (estadoActual === 'anomalia') {
+                estadoFinal = 'anomalia';
+            }
+
             globalEstados[estadoKey] = { 
-                status: estado, 
+                status: estadoFinal, 
                 tipo: (globalEstados[estadoKey] && globalEstados[estadoKey].tipo) || 'Normal', 
                 ejecuciones: anterior + 1, 
                 ultimoTiempo: horaActual,
