@@ -37,8 +37,8 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
 
-    <!-- MODAL DE ALERTA INDUSTRIAL PERSONALIZADA -->
-    <div id="alerta-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+    <!-- MODAL DE ALERTA INDUSTRIAL (Z-INDEX 999 PARA GANAR SIEMPRE) -->
+    <div id="alerta-modal" style="display: none;" class="fixed inset-0 z-[999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col items-center text-center">
             <div class="w-24 h-32 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
                 <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
@@ -49,7 +49,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL CON VALIDACIÓN ESTRICTA) -->
+    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL) -->
     <div id="setup-modal" class="fixed inset-0 z-50 bg-[#141821]/95 flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 shadow-2xl">
             <div class="flex flex-col items-center text-center mb-5 border-b border-[rgba(0,102,204,0.3)] pb-5">
@@ -81,11 +81,11 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Código operador:</label>
-                        <input type="text" id="operator-code" placeholder="Ej. op11" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
+                        <input type="text" id="operator-code" placeholder="Ej. op11" autocomplete="off" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Contraseña:</label>
-                        <input type="password" id="operator-pass" placeholder="••••" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
+                        <input type="password" id="operator-pass" placeholder="••••" autocomplete="new-password" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                     </div>
                 </div>
                 <div>
@@ -131,7 +131,7 @@
     <!-- MODAL DE REPORTAR ANOMALÍA -->
     <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 shadow-2xl flex flex-col md:flex-row gap-6 items-center">
-            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg flex-shrink-0">
+            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg flex-shrink-0">
                 <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
             </div>
             
@@ -221,6 +221,10 @@
                 <span id="display-turno" class="block text-[10px] text-slate-400 font-mono uppercase">TURNO 1 - ACTIVO</span>
             </div>
             <div class="hidden xl:block text-right bg-[#141821] px-4 py-2 rounded-xl industrial-border">
+                <span id="reloj-en-vivo" class="block text-xs font-bold text-ind-accent font-mono">--:--:--</span>
+                <span class="block text-[10px] text-slate-400 font-mono">HORA ACTUAL</span>
+            </div>
+            <div class="hidden xl:block text-right bg-[#141821] px-4 py-2 rounded-xl industrial-border">
                 <span id="display-fecha" class="block text-xs font-bold text-ind-accent font-mono">--/--/----</span>
                 <span class="block text-[10px] text-slate-400 font-mono">FECHA ACTUAL</span>
             </div>
@@ -257,7 +261,7 @@
 
             <div class="flex flex-wrap items-center gap-4 justify-end">
                 <div id="tpm-alerta-calendario" class="bg-blue-950/30 border border-blue-600/50 px-4 py-2 rounded-xl text-xs text-blue-300 font-mono">
-                    <span id="tpm-estado-texto">DÍAS ACTIVIDADES SEMANALES: 7 DIAS | DIAS PARA ACTIVIDADES MENSUALES: 30 DIAS</span>
+                    <span id="tpm-estado-texto">DÍAS ACTIVIDADES SEMANALES: 7 DÍAS | DIAS PARA ACTIVIDADES MENSUALES: 30 DÍAS</span>
                 </div>
                 <div class="text-right">
                     <span id="texto-progreso-num" class="text-xs font-bold text-slate-200 font-mono">0 de 16 puntos - 0%</span>
@@ -396,6 +400,25 @@
             document.getElementById('alerta-modal').style.display = 'none';
         }
 
+        function colorUrgenciaPorHora() {
+            const ahora = new Date();
+            const horaDecimal = ahora.getHours() + ahora.getMinutes() / 60;
+            const inicio = 6, fin = 18;
+            if (horaDecimal < inicio) return 'hsl(142, 70%, 45%)';
+            if (horaDecimal >= fin) return 'hsl(0, 75%, 50%)';
+            const fraccion = (horaDecimal - inicio) / (fin - inicio);
+            const hue = 142 - (142 * fraccion);
+            return `hsl(${hue}, 75%, 48%)`;
+        }
+
+        function actualizarReloj() {
+            const relojEl = document.getElementById('reloj-en-vivo');
+            if(relojEl) {
+                relojEl.innerText = new Date().toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+        }
+        setInterval(actualizarReloj, 1000);
+
         function calcularEstadoCalendarioTPM() {
             const hoy = new Date();
             const diferenciaTiempo = hoy.getTime() - fechaArranqueTPM.getTime();
@@ -404,8 +427,8 @@
             const diasParaSemanal = 7 - (diasTranscurridos % 7);
             const diasParaMensual = 30 - (diasTranscurridos % 30);
             
-            const diasSemanalTexto = (diasParaSemanal === 7 || diasParaSemanal === 0) ? '0 DIAS' : `${diasParaSemanal} DIAS`;
-            const diasMensualTexto = (diasParaMensual === 30 || diasParaMensual === 0) ? '0 DIAS' : `${diasParaMensual} DIAS`;
+            const diasSemanalTexto = (diasParaSemanal === 7 || diasParaSemanal === 0) ? '0 DÍAS' : `${diasParaSemanal} DÍAS`;
+            const diasMensualTexto = (diasParaMensual === 30 || diasParaMensual === 0) ? '0 DÍAS' : `${diasParaMensual} DÍAS`;
 
             const textoEstado = `DÍAS ACTIVIDADES SEMANALES: ${diasSemanalTexto} | DIAS PARA ACTIVIDADES MENSUALES: ${diasMensualTexto}`;
 
@@ -445,10 +468,10 @@
             });
         }
 
+        // CORRECCIÓN LOGIN: EVALUACIÓN ESTRICTA Y LIMPIEZA AUTOMÁTICA CONTRA AUTOCOMPLETADO
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             
-            // VALIDACIÓN DE INICIO DE SESIÓN CORREGIDA: Si está vacío, muestra alerta obligatoria y frena.
             if (codigoOp === "") {
                 mostrarAlertaIndustrial("Por favor ingrese el código del operador.");
                 return;
@@ -471,8 +494,13 @@
             actualizarInterfaz();
         }
 
-        // VINCULACIÓN DIRECTA AL BOTÓN POR ID PARA EVITAR CACHÉ DE EVENTOS
         document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('operator-code').value = '';
+            document.getElementById('operator-pass').value = '';
+            document.getElementById('select-area').selectedIndex = 0;
+            actualizarMaquinas();
+            actualizarReloj();
+
             const btnIniciar = document.getElementById('btn-iniciar');
             if(btnIniciar) {
                 btnIniciar.onclick = appIniciarSesion;
@@ -494,8 +522,8 @@
             {codigo: "L-008", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras y distribuidor de agua", periodicidad: "Mensual", estandar: "Limpiar polvo exterior y verificar que no existan dobleces o estrangulamientos.", anormal: "Fugas de aire audibles, mangueras cuarteadas o acoples sueltos.", material: "Ninguna", tiempo: "5 min", img1: "Mangueras y distribuidor de agua.jpg", label1: "Distribuidor de agua", img2: "", label2: ""},
             {codigo: "L-009", sistema: "SISTEMA NEUMÁTICO", componente: "Unidad de mantenimiento (FRL)", periodicidad: "Semanal", estandar: "Retirar polvo exterior de los manómetros y limpiar externamente los vasos transparentes.", anormal: "Vasos opacos/rotos, acumulación excesiva de agua en el filtro o fugas en el regulador.", material: "Ninguna", tiempo: "5 min", img1: "Unidad de mantenimiento (FRL) Externa.jpg", label1: "FRL Externa", img2: "Unidad de mantenimiento (FRL) Detalle.jpg", label2: "FRL Detalle"},
             {codigo: "L-010", sistema: "SISTEMA HIDRÁULICO", componente: "Mangueras hidráulicas visibles", periodicidad: "Mensual", estandar: "Limpiar aceite superficial para facilitar detección de fugas.", anormal: "Acumulación de aceite y polvo", material: "Paño industrial", tiempo: "5 min", img1: "Mangueras visibles Externa.jpeg", label1: "Mangueras Externa", img2: "Mangueras visibles Detalle.jpg", label2: "Mangueras Detalle"},
-            {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", time: "5 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador Externo", img2: "Controlador de temperatura Detalle.jpg", label2: "Controlador Detalle"},
-            {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", periodicidad: "Diaria", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", time: "5 min", img1: "HMI Externo.jpg", label1: "HMI Externo", img2: "HMI Detalle.jpg", label2: "HMI Detalle"},
+            {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", tiempo: "5 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador Externo", img2: "Controlador de temperatura Detalle.jpg", label2: "Controlador Detalle"},
+            {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", periodicidad: "Diaria", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", tiempo: "5 min", img1: "HMI Externo.jpg", label1: "HMI Externo", img2: "HMI Detalle.jpg", label2: "HMI Detalle"},
             {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", periodicidad: "Semanal", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", time: "5 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Tablero Externo", img2: "", label2: ""},
             {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", time: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det."},
             {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", time: "5 min", img1: "Estructura Externa.jpg", label1: "Estructura Externa", img2: "Mangueras visibles Externa.jpeg", label2: "Vista Lateral"},
@@ -503,7 +531,7 @@
         ];
 
         const datosMonitoreo = [
-            {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación"},
+            {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", time: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación"},
             {codigo: "I-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Manguera de succión", periodicidad: "Diaria", estandar: "Verificar integridad y conexión.", anormal: "Roturas, fugas o desgaste.", material: "Visual", time: "3 min", img1: "Succionador Externo.jpg", label1: "Manguera", img2: "Succionador Detalle.jpg", label2: "Conexión"},
             {codigo: "I-003", sistema: "SISTEMA DE INYECCIÓN", componente: "Boquilla", periodicidad: "Diaria", estandar: "Verificar fugas y estado físico.", anormal: "Goteo o desgaste.", material: "HMI", time: "3 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla", img2: "Zona de boquilla detalle.jpg", label2: "Estado"},
             {codigo: "I-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zonas 1-2-3-4 de tornillo y cilindro", periodicidad: "Diaria", estandar: "Comparar temperatura real versus objetivo del proceso.", anormal: "Alarmas, fallas de calidad en PT.", material: "Visual", time: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Zonas", img2: "Controlador de temperatura Detalle.jpg", label2: "Temperaturas"},
@@ -565,6 +593,18 @@
         }
 
         function filtrarPorFrecuencia() {
+            const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
+            const hoy = new Date();
+            const diasTranscurridos = Math.floor((hoy.getTime() - fechaArranqueTPM.getTime()) / (1000 * 3600 * 24));
+            const diasParaSemanal = 7 - (diasTranscurridos % 7);
+            const diasParaMensual = 30 - (diasTranscurridos % 30);
+
+            if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 7 && diasParaSemanal !== 0 && diasParaSemanal !== 1) {
+                mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES SEMANALES!\nFaltan ${diasParaSemanal} días para el ciclo correspondiente.`);
+            } else if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 30 && diasParaMensual !== 0) {
+                mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES MENSUALES!\nFaltan ${diasParaMensual} días para el ciclo correspondiente.`);
+            }
+
             actualizarInterfaz();
         }
 
@@ -609,10 +649,11 @@
             let totalDiariasLimpieza = datosLimpieza.filter(i => i.periodicidad === 'Diaria').length;
             let totalDiariasMonitoreo = datosMonitoreo.filter(i => i.periodicidad === 'Diaria').length;
 
-            if (globalModo === 'limpieza' && frecuenciaSeleccionada === 'Diaria' && completadosLimpiezaDiarias === totalDiariasLimpieza && !window.modalLimpiezaMostrado) {
+            // EL CIERRE DE JORNADA EVALÚA ESTRICTAMENTE LAS ACTIVIDADES DIARIAS GLOBALES
+            if (completadosLimpiezaDiarias === totalDiariasLimpieza && !window.modalLimpiezaMostrado) {
                 window.modalLimpiezaMostrado = true;
                 mostrarModalCierreLimpieza('Diaria');
-            } else if (globalModo === 'monitoreo' && frecuenciaSeleccionada === 'Diaria' && completadosMonitoreoDiarias === totalDiariasMonitoreo && !window.modalMonitoreoMostrado) {
+            } else if (completadosLimpiezaDiarias === totalDiariasLimpieza && completadosMonitoreoDiarias === totalDiariasMonitoreo && !window.modalMonitoreoMostrado) {
                 window.modalMonitoreoMostrado = true;
                 mostrarModalMonitoreoFinal();
             }
@@ -650,6 +691,11 @@
                     textState = "OBSERVACIÓN";
                 }
 
+                let estiloUrgencia = '';
+                if (item.periodicidad === 'Diaria' && (!dataEstado || dataEstado.status === 'pendiente')) {
+                    estiloUrgencia = `border-left: 4px solid ${colorUrgenciaPorHora()};`;
+                }
+
                 if(idxReal === globalPuntoIdx) {
                     colorClass += " border-ind-accent bg-ind-accent/15";
                 }
@@ -660,6 +706,7 @@
 
                 const div = document.createElement('div');
                 div.className = `px-3.5 py-2.5 rounded-xl border-[1.5px] cursor-pointer transition flex items-center justify-between text-xs font-mono ${colorClass}`;
+                div.style = estiloUrgencia;
                 div.innerHTML = `
                     <div class="flex items-center space-x-3 truncate">
                         <span class="font-bold w-4 text-center">${icon}</span>
@@ -776,7 +823,7 @@
             const diasParaSemanal = 7 - (diasTranscurridos % 7);
             const diasParaMensual = 30 - (diasTranscurridos % 30);
 
-            // CONTROL ESTRICTO DE CICLOS CON ALERTAS DE TIEMPO RESTANTE
+            // BLOQUEO PREVENTIVO ESTRICTO DE ACTIVIDADES SEMANALES Y MENSUALES ANTES DE MARCAR NADA
             if (frecuenciaSeleccionada === "Semanal") {
                 const cicloSemanalActual = Math.floor(diasTranscurridos / 7);
                 if (fechasEjecucionUnica[`semana_${cicloSemanalActual}`]) {
