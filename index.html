@@ -96,7 +96,7 @@
                         <button type="button" onclick="appSetTurno(3)" id="btn-turno-3" class="py-2 px-2 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer">TURNO 3</button>
                     </div>
                 </div>
-                <button type="button" onclick="appIniciarSesion()" class="w-full mt-2 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs tracking-widest uppercase transition shadow-xl cursor-pointer">Iniciar mantenimiento autónomo</button>
+                <button type="button" id="btn-iniciar" class="w-full mt-2 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs tracking-widest uppercase transition shadow-xl cursor-pointer">Iniciar mantenimiento autónomo</button>
             </div>
         </div>
     </div>
@@ -404,17 +404,10 @@
             const diasParaSemanal = 7 - (diasTranscurridos % 7);
             const diasParaMensual = 30 - (diasTranscurridos % 30);
             
-            let textoEstado = `Iniciado hace ${diasTranscurridos} días - `;
-            if (diasParaSemanal === 7 || diasParaSemanal === 0) {
-                textoEstado += `Semanal activo | `;
-            } else {
-                textoEstado += `Semanal en ${diasParaSemanal}d | `;
-            }
-            if (diasParaMensual === 30 || diasParaMensual === 0) {
-                textoEstado += `Mensual activo`;
-            } else {
-                textoEstado += `Mensual en ${diasParaMensual}d`;
-            }
+            const diasSemanalTexto = (diasParaSemanal === 7 || diasParaSemanal === 0) ? '0 DÍAS (Habilitado)' : `${diasParaSemanal} DÍAS`;
+            const diasMensualTexto = (diasParaMensual === 30 || diasParaMensual === 0) ? '0 DÍAS (Habilitado)' : `${diasParaMensual} DÍAS`;
+
+            const textoEstado = `DÍAS ACTIVIDADES SEMANALES: ${diasSemanalTexto} | DIAS PARA ACTIVIDADES MENSUALES: ${diasMensualTexto}`;
 
             document.getElementById('tpm-estado-texto').innerText = textoEstado;
             return { diasTranscurridos, diasParaSemanal, diasParaMensual };
@@ -455,7 +448,7 @@
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             
-            // VALIDACIÓN DE LOGIN CORREGIDA: Si está vacío, muestra la alerta. Si tiene texto, avanza.
+            // VALIDACIÓN INVERTIDA CORRECTA: Si está vacío, muestra la alerta. Si tiene texto, avanza.
             if (codigoOp === "") {
                 mostrarAlertaIndustrial("Por favor ingrese el código del operador.");
                 return;
@@ -478,6 +471,14 @@
             actualizarInterfaz();
         }
 
+        // VINCULACIÓN DIRECTA AL BOTÓN POR ID PARA EVITAR CACHÉ DE EVENTOS
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnIniciar = document.getElementById('btn-iniciar');
+            if(btnIniciar) {
+                btnIniciar.onclick = appIniciarSesion;
+            }
+        });
+
         function cambiarOperador() {
             location.reload();
         }
@@ -496,7 +497,7 @@
             {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", time: "5 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador Externo", img2: "Controlador de temperatura Detalle.jpg", label2: "Controlador Detalle"},
             {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", periodicidad: "Diaria", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", time: "5 min", img1: "HMI Externo.jpg", label1: "HMI Externo", img2: "HMI Detalle.jpg", label2: "HMI Detalle"},
             {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", periodicidad: "Semanal", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", time: "5 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Tablero Externo", img2: "", label2: ""},
-            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", tiempo: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det."},
+            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", time: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det."},
             {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", time: "5 min", img1: "Estructura Externa.jpg", label1: "Estructura Externa", img2: "Mangueras visibles Externa.jpeg", label2: "Vista Lateral"},
             {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", time: "5 min", img1: "Piso Perimetral.jpg", label1: "Piso perimetral", img2: "", label2: ""}
         ];
@@ -765,12 +766,11 @@
             const diasParaSemanal = 7 - (diasTranscurridos % 7);
             const diasParaMensual = 30 - (diasTranscurridos % 30);
 
-            // CONTROL ESTRICTO DE EJECUCIÓN ÚNICA CON MENSAJE CLARO DE DÍAS RESTANTES
+            // CONTROL ESTRICTO DE CICLO Y BLOQUEO CON CUENTA REGRESIVA
             if (frecuenciaSeleccionada === "Semanal") {
                 const cicloSemanalActual = Math.floor(diasTranscurridos / 7);
                 if (fechasEjecucionUnica[`semana_${cicloSemanalActual}`]) {
-                    const diasRestantesProximo = 7 - (diasTranscurridos % 7);
-                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES SEMANALES YA FUERON EJECUTADAS!\nFaltan ${diasRestantesProximo} días para que se habiliten de nuevo.`);
+                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES SEMANALES YA FUERON EJECUTADAS!\nFaltan ${diasParaSemanal === 0 ? 7 : diasParaSemanal} días para que se habiliten de nuevo.`);
                     return;
                 }
                 if (diasParaSemanal !== 7 && diasParaSemanal !== 0 && diasParaSemanal !== 1) {
@@ -782,8 +782,7 @@
             if (frecuenciaSeleccionada === "Mensual") {
                 const cicloMensualActual = Math.floor(diasTranscurridos / 30);
                 if (fechasEjecucionUnica[`mes_${cicloMensualActual}`]) {
-                    const diasRestantesProximo = 30 - (diasTranscurridos % 30);
-                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES MENSUALES YA FUERON EJECUTADAS!\nFaltan ${diasRestantesProximo} días para que se habiliten de nuevo.`);
+                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES MENSUALES YA FUERON EJECUTADAS!\nFaltan ${diasParaMensual === 0 ? 30 : diasParaMensual} días para que se habiliten de nuevo.`);
                     return;
                 }
                 if (diasParaMensual !== 30 && diasParaMensual !== 0) {
@@ -805,7 +804,7 @@
                 foto: null 
             };
             
-            // Registrar ejecución única del ciclo al terminar el punto
+            // Registrar ejecución única del ciclo al terminar todos los puntos de esa frecuencia
             let filtroActualList = listaOriginal.filter(item => item.periodicidad === frecuenciaSeleccionada);
             let completadosFreq = filtroActualList.filter(item => {
                 let rIdx = listaOriginal.findIndex(el => el.codigo === item.codigo);
@@ -1013,7 +1012,7 @@
             let rotacionY = 0;
             if (sistema.includes("ALIMENTACIÓN")) rotacionY = 0.8;
             else if (sistema.includes("INYECCIÓN")) rotacionY = -0.3;
-            else if (sistema.includes("EXPULSOR" ) || sistema.includes("CIERRE")) rotacionY = 1.8;
+            else if (sistema.includes("EXPULSOR") || sistema.includes("CIERRE")) rotacionY = 1.8;
             else if (sistema.includes("HIDRÁULICO") || sistema.includes("ELÉCTRICO")) rotacionY = -1.8;
 
             globalModelo3D.rotation.y = rotacionY;
