@@ -372,7 +372,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT CORREGIDO: LOGIN Y CONTROL DE EJECUCIÓN ÚNICA SEMANAL/MENSUAL -->
+    <!-- SCRIPT CORREGIDO Y BLINDADO -->
     <script>
         let globalTurno = 1;
         let globalOperador = "";
@@ -383,7 +383,7 @@
         let globalEstados = {}; 
         let globalModelo3D = null;
         let camera, renderer, scene;
-        let fechasEjecucionUnica = {}; // Control para que semanal/mensual se hagan una sola vez por ciclo
+        let fechasEjecucionUnica = {}; // Control para ejecución única de Semanales/Mensuales
 
         const fechaArranqueTPM = new Date(2026, 8, 17);
 
@@ -406,10 +406,11 @@
             
             let textoEstado = `Iniciado hace ${diasTranscurridos} días - `;
             if (diasParaSemanal === 1 || diasParaSemanal === 7 || diasParaSemanal === 0) {
-                textoEstado += `Ciclo SEMANAL habilitado`;
+                textoEstado += `Semanal activo (Próx: ${diasParaSemanal === 0 ? 7 : diasParaSemanal} días) | `;
             } else {
-                textoEstado += `Ciclo Semanal en ${diasParaSemanal} días`;
+                textoEstado += `Semanal en ${diasParaSemanal}d | `;
             }
+            textoEstado += `Mensual en ${diasParaMensual}d`;
 
             document.getElementById('tpm-estado-texto').innerText = textoEstado;
             return { diasTranscurridos, diasParaSemanal, diasParaMensual };
@@ -450,7 +451,7 @@
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             
-            // VALIDACIÓN CORREGIDA INICIAL: Si está VACÍO, muestra alerta y DETIENE. Si TIENE TEXTO, entra.
+            // VALIDACIÓN INVERTIDA CORRECTA: Si está vacío, muestra alerta. Si tiene texto, avanza.
             if (codigoOp === "") {
                 mostrarAlertaIndustrial("Por favor ingrese el código del operador.");
                 return;
@@ -491,7 +492,7 @@
             {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", time: "5 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador Externo", img2: "Controlador de temperatura Detalle.jpg", label2: "Controlador Detalle"},
             {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", periodicidad: "Diaria", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", time: "5 min", img1: "HMI Externo.jpg", label1: "HMI Externo", img2: "HMI Detalle.jpg", label2: "HMI Detalle"},
             {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", periodicidad: "Semanal", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", time: "5 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Tablero Externo", img2: "", label2: ""},
-            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", tiempo: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det."},
+            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", time: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det."},
             {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", time: "5 min", img1: "Estructura Externa.jpg", label1: "Estructura Externa", img2: "Mangueras visibles Externa.jpeg", label2: "Vista Lateral"},
             {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", time: "5 min", img1: "Piso Perimetral.jpg", label1: "Piso perimetral", img2: "", label2: ""}
         ];
@@ -760,6 +761,12 @@
         }
 
         function marcarEstado(estado) {
+            // BLOQUEO TOTAL SI YA SE COMPLETÓ TODO EL TURNO
+            if (window.modalMonitoreoMostrado) {
+                mostrarAlertaIndustrial("¡La jornada de este turno ha finalizado! Por favor regresa el día de mañana.");
+                return;
+            }
+
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
 
@@ -774,10 +781,9 @@
                     mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES SEMANALES!\nFaltan ${diasParaSemanal} días para el ciclo correspondiente.`);
                     return;
                 }
-                // Control para que se haga una sola vez por ciclo semanal
                 const cicloSemanalActual = Math.floor(diasTranscurridos / 7);
                 if (fechasEjecucionUnica[`semana_${cicloSemanalActual}`]) {
-                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES SEMANALES YA FUERON EJECUTADAS ESTA SEMANA!\nPróximo ciclo semanal disponible en ${diasParaSemanal} días.`);
+                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES SEMANALES YA FUERON EJECUTADAS ESTA SEMANA!\nPróximo ciclo semanal disponible en ${diasParaSemanal === 0 ? 7 : diasParaSemanal} días.`);
                     return;
                 }
             }
@@ -787,10 +793,9 @@
                     mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES MENSUALES!\nFaltan ${diasParaMensual} días para el ciclo correspondiente.`);
                     return;
                 }
-                // Control para que se haga una sola vez por ciclo mensual
                 const cicloMensualActual = Math.floor(diasTranscurridos / 30);
                 if (fechasEjecucionUnica[`mes_${cicloMensualActual}`]) {
-                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES MENSUALES YA FUERON EJECUTADAS ESTE MES!\nPróximo ciclo mensual disponible en ${diasParaMensual} días.`);
+                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES MENSUALES YA FUERON EJECUTADAS ESTE MES!\nPróximo ciclo mensual disponible en ${diasParaMensual === 0 ? 30 : diasParaMensual} días.`);
                     return;
                 }
             }
@@ -808,7 +813,6 @@
                 foto: null 
             };
             
-            // Si completó la frecuencia semanal o mensual, registrar la ejecución única del ciclo
             if (frecuenciaSeleccionada === "Semanal") {
                 const cicloSemanalActual = Math.floor(diasTranscurridos / 7);
                 fechasEjecucionUnica[`semana_${cicloSemanalActual}`] = true;
