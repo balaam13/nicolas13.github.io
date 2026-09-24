@@ -44,26 +44,31 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
 
-    <!-- MODAL DE ALERTA INDUSTRIAL PERSONALIZADA -->
+    <!-- MODAL DE ALERTA INDUSTRIAL PERSONALIZADA (CON MASCOTA 1) -->
     <div id="alerta-modal" style="display: none;" class="fixed inset-0 z-[999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-6 industrial-shadow flex flex-col items-center text-center">
-            <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-2">AVISO DEL SISTEMA TPM</h3>
+            <div class="w-24 h-32 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
+                <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
+            </div>
+            <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-1">AVISO DEL SISTEMA TPM</h3>
             <p class="text-xs text-slate-200 mb-6 leading-relaxed font-medium whitespace-pre-line" id="alerta-texto">Mensaje de advertencia...</p>
             <button type="button" onclick="cerrarAlertaModal()" class="w-full bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Aceptar</button>
         </div>
     </div>
 
-    <!-- PANTALLA DE FAMILIARIZACIÓN INICIAL (ANTES DE L-001) -->
+    <!-- PANTALLA DE FAMILIARIZACIÓN INICIAL -->
     <div id="familiarizacion-modal" style="display: none;" class="fixed inset-0 z-[90] bg-[#141821]/95 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-8 industrial-shadow flex flex-col items-center text-center">
-            <div class="w-16 h-16 rounded-2xl bg-ind-accent/20 border border-ind-accent/50 flex items-center justify-center text-2xl mb-4 text-ind-accent font-black">ABE</div>
+            <div class="w-28 h-36 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
+                <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
+            </div>
             <h2 class="text-lg font-black text-white uppercase tracking-wider mb-3">Bienvenido al Mantenimiento Autónomo</h2>
             <p class="text-xs text-slate-300 leading-relaxed mb-6">
                 Antes de iniciar, tómate unos momentos para familiarizarte con la plataforma. <br><br>
                 Aquí podrás consultar las actividades de limpieza y monitoreo, registrar observaciones y reportar anomalías cuando corresponda de acuerdo con los estándares operativos de EMPAQPLAST S.A.
             </p>
             <button type="button" onclick="cerrarFamiliarizacion()" class="w-full bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-xl cursor-pointer">
-                Iniciar Actividades
+                ¿Ya quieres comenzar? — Iniciar Actividades
             </button>
         </div>
     </div>
@@ -113,9 +118,12 @@
         </div>
     </div>
 
-    <!-- MODAL DE CIERRE DE JORNADA DE LIMPIEZA -->
+    <!-- MODAL DE CIERRE DE JORNADA DE LIMPIEZA (CON MASCOTA 2) -->
     <div id="cierre-jornada-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 industrial-shadow flex flex-col items-center text-center">
+            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
+                <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
+            </div>
             <h3 class="text-sm font-black text-white uppercase tracking-wider mb-2" id="cierre-titulo">¡HAS TERMINADO LA JORNADA DE ACTIVIDADES DIARIAS!</h3>
             <p class="text-xs text-slate-300 mb-6 leading-relaxed">¿Ya monitoreaste el equipo?</p>
             <div class="flex space-x-3 w-full">
@@ -125,9 +133,12 @@
         </div>
     </div>
 
-    <!-- MODAL DE CIERRE DEFINITIVO DE MONITOREO -->
+    <!-- MODAL DE CIERRE DEFINITIVO DE MONITOREO (CON MASCOTA 2) -->
     <div id="cierre-monitoreo-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 industrial-shadow flex flex-col items-center text-center">
+            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
+                <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
+            </div>
             <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider mb-2">¡PERFECTO, REGRESA EL DÍA DE MAÑANA!</h3>
             <p class="text-xs text-slate-300 mb-6 leading-relaxed">Has completado todas las actividades del turno correctamente.</p>
             <button type="button" onclick="cerrarModalMonitoreoFinal()" class="w-full bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Entendido</button>
@@ -158,9 +169,12 @@
         </div>
     </div>
 
-    <!-- MODAL DE REPORTAR ANOMALÍA -->
+    <!-- MODAL DE REPORTAR ANOMALÍA (CON MASCOTA 1) -->
     <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 industrial-shadow flex flex-col md:flex-row gap-6 items-center">
+            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg flex-shrink-0">
+                <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
+            </div>
             <div class="flex-1 w-full">
                 <div class="flex items-center space-x-3 mb-4 border-b border-[rgba(0,102,204,0.3)] pb-3">
                     <div><h3 class="text-xs font-bold text-white uppercase tracking-wider">Reportar anomalía de equipo</h3><p class="text-[11px] text-rose-400 font-mono mt-0.5" id="modal-anomalia-info">Sistema - L-001</p></div>
@@ -177,7 +191,7 @@
                             <div id="tipo-dano-resultados" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-[#1E2330] border border-slate-600 rounded-xl z-[90] shadow-2xl"></div>
                         </div>
                         <input type="hidden" id="tipo-dano-seleccionado">
-                        <p class="text-[10px] text-slate-500 mt-1">Escriba para filtrar y seleccione el daño correspondiente.</p>
+                        <p class="text-[10px] text-slate-500 mt-1">Escriba para filtrar y haga clic en la opción deseada para seleccionarla.</p>
                     </div>
                     <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Descripción detallada</label><textarea id="texto-anomalia" rows="2" placeholder="Describa la condición encontrada..." class="w-full bg-[#141821] industrial-border rounded-xl p-3 text-sm text-white focus:outline-none focus:border-ind-accent"></textarea></div>
                     <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Evidencia fotográfica</label><div class="flex items-center space-x-2"><label class="flex-1 bg-[#141821] hover:bg-[#2A3142] industrial-border rounded-xl px-3 py-2 text-center cursor-pointer transition text-slate-300 text-xs font-medium"><span>📷 + Adjuntar foto</span><input type="file" id="foto-anomalia" accept="image/*" class="hidden" onchange="mostrarNombreArchivo(this)"></label><span id="nombre-archivo" class="text-slate-400 truncate max-w-[120px]">Sin archivo</span></div></div>
@@ -187,9 +201,13 @@
         </div>
     </div>
 
-    <!-- MODAL DE REGISTRAR OBSERVACIÓN -->
+    <!-- MODAL DE REGISTRAR OBSERVACIÓN (CON MASCOTA 1) -->
     <div id="observacion-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 industrial-shadow flex flex-col md:flex-row gap-6 items-center">
+            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg flex-shrink-0">
+                <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
+            </div>
+
             <div class="flex-1 w-full">
                 <div class="flex items-center space-x-3 mb-4 border-b border-[rgba(0,102,204,0.3)] pb-3">
                     <div>
@@ -396,10 +414,9 @@
         let globalEstados = {}; 
         let globalModelo3D = null;
         let camera, renderer, scene;
-        let fechasEjecucionUnica = {};
         let globalTimer = { key: null, interval: null, countdownInterval: null, elapsed: 0, estimated: 0, running: false, startMs: null };
 
-        const fechaArranqueTPM = new Date(2026, 8, 24); // INICIO HOY 24/09/2026
+        const fechaArranqueTPM = new Date(2026, 8, 24); // 24 Septiembre 2026
 
         function mostrarAlertaIndustrial(mensaje) {
             document.getElementById('alerta-texto').innerText = mensaje;
@@ -426,7 +443,6 @@
             const diferenciaTiempo = hoy.getTime() - fechaArranqueTPM.getTime();
             const diasTranscurridos = Math.max(0, Math.floor(diferenciaTiempo / (1000 * 3600 * 24)));
             
-            // CONTEO REGRESIVO EXÁCTO DESDE HOY 24/09 (7 días para semanal, 30 días para mensual)
             let diasParaSemanal = Math.max(0, 7 - diasTranscurridos);
             let diasParaMensual = Math.max(0, 30 - diasTranscurridos);
             
@@ -467,7 +483,6 @@
             });
         }
 
-        // LOGIN ORIGINAL RESTAURADO CON VALIDACIÓN ESTRICTA DE OPERADOR
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             if (codigoOp === "") {
@@ -477,14 +492,12 @@
             globalOperador = codigoOp;
             configurarEquipoQR();
             document.getElementById('display-operator').innerText = "Operador: " + globalOperador;
-            document.getElementById('display-turno').innerText = `TURNO ${globalTurno} - ACTIVO`;
             document.getElementById('header-maq-title').innerText = globalMaquina;
             document.getElementById('header-area-title').innerText = `${globalArea} - EMPAQPLAST S.A.`;
             
             const modal = document.getElementById('setup-modal');
             if (modal) modal.style.display = 'none';
 
-            // MOSTRAR PANTALLA DE FAMILIARIZACIÓN ANTES DE ENTRAR A L-001
             const famModal = document.getElementById('familiarizacion-modal');
             if (famModal) famModal.style.display = 'flex';
         }
@@ -524,7 +537,7 @@
             {codigo: "L-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zona de boquilla", periodicidad: "Diaria", estandar: "Retirar residuos y material carbonizado.", anormal: "Fugas o material quemado.", material: "Cepillo de bronce", tiempo: "5 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla Externa", img2: "Zona de boquilla detalle.jpg", label2: "Boquilla Detalle"},
             {codigo: "L-005", sistema: "SISTEMA EXPULSOR", componente: "Área de expulsión", periodicidad: "Diaria", estandar: "Eliminar rebabas, piezas atrapadas y residuos plásticos.", anormal: "Obstrucciones o acumulación de material.", material: "Brocha", tiempo: "5 min", img1: "Área de Expulsion.jpg", label1: "Área de Expulsión externa", img2: "", label2: ""},
             {codigo: "L-006", sistema: "SISTEMA DE CIERRE", componente: "Platina fija", periodicidad: "Semanal", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", tiempo: "5 min", img1: "Platina Fija.jpg", label1: "Platina fija externa", img2: "", label2: ""},
-            {codigo: "L-007", sistema: "SISTEMA DE CIERRE", componente: "Platina móvil", periodicidad: "Semanal", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", tiempo: "5 min", img1: "Platina móvil.jpg", label1: "Platina móvil externa", img2: "", label2: ""},
+            {codigo: "L-007", sistema: "SISTEMA DE CIERRE", componente: "Platina móvil", periodicidad: "Semanal", estandar: "Retirar residuos y grasa contaminada.", anormal: "Golpes, fisuras o suciedad excesiva.", material: "Brocha", time: "5 min", img1: "Platina móvil.jpg", label1: "Platina móvil externa", img2: "", label2: ""},
             {codigo: "L-008", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras y distribuidor de agua", periodicidad: "Mensual", estandar: "Limpiar polvo exterior y verificar que no existan dobleces o estrangulamientos.", anormal: "Fugas de aire audibles, mangueras cuarteadas o acoples sueltos.", material: "Ninguna", tiempo: "5 min", img1: "Mangueras y distribuidor de agua.jpg", label1: "Distribuidor de agua", img2: "", label2: ""},
             {codigo: "L-009", sistema: "SISTEMA NEUMÁTICO", componente: "Unidad de mantenimiento (FRL)", periodicidad: "Semanal", estandar: "Retirar polvo exterior de los manómetros y limpiar externamente los vasos transparentes.", anormal: "Vasos opacos/rotos, acumulación excesiva de agua en el filtro o fugas en el regulador.", material: "Ninguna", tiempo: "5 min", img1: "Unidad de mantenimiento (FRL) Externa.jpg", label1: "FRL Externa", img2: "Unidad de mantenimiento (FRL) Detalle.jpg", label2: "FRL Detalle"},
             {codigo: "L-010", sistema: "SISTEMA HIDRÁULICO", componente: "Mangueras hidráulicas visibles", periodicidad: "Mensual", estandar: "Limpiar aceite superficial para facilitar detección de fugas.", anormal: "Acumulación de aceite y polvo", material: "Paño industrial", tiempo: "5 min", img1: "Mangueras visibles Externa.jpeg", label1: "Mangueras Externa", img2: "Mangueras visibles Detalle.jpg", label2: "Mangueras Detalle"},
@@ -603,13 +616,13 @@
             const hoy = new Date();
             const diasTranscurridos = Math.floor((hoy.getTime() - fechaArranqueTPM.getTime()) / (1000 * 3600 * 24));
             
-            let diasParaSemanal = Math.max(0, 7 - (diasTranscurridos % 7));
-            let diasParaMensual = Math.max(0, 30 - (diasTranscurridos % 30));
+            let diasParaSemanal = Math.max(0, 7 - diasTranscurridos);
+            let diasParaMensual = Math.max(0, 30 - diasTranscurridos);
 
             if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 0) {
                 mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades semanales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 7 (Faltan ${diasParaSemanal} días).`);
             } else if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 0) {
-                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades mensuales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 30 (Faltan ${diasParaMensual} días).`);
+                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades mensuales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 30 (Faltan ${diasParaMensual} days).`);
             }
 
             actualizarInterfaz();
@@ -683,7 +696,7 @@
                 let colorClass = "text-slate-400 bg-[#141821]/40 industrial-border hover:border-slate-400";
                 let textState = "PENDIENTE";
 
-                // SEPARACIÓN ESTRICTA: ANOMALÍA MANTIENE ESTADO ROJO AUNQUE ESTÉ VERIFICADA
+                // REGLA DE ORO: SI TIENE ANOMALÍA, SE QUEDA ROJO PERMANENTEMENTE AUNQUE SE HAYA VERIFICADO
                 if(dataEstado && dataEstado.status === 'anomalia') {
                     icon = '!';
                     colorClass = "text-rose-400 bg-rose-950/25 border-rose-700/60";
@@ -906,6 +919,7 @@
             actualizarTemporizadorUI();
         }
 
+        // CORRECCIÓN REGLA DE ORO: ANOMALÍA PERSISTENTE Y BLOQUEO DE FRECUENCIAS
         function marcarEstado(estado) {
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
@@ -913,10 +927,9 @@
             const hoy = new Date();
             const diasTranscurridos = Math.floor((hoy.getTime() - fechaArranqueTPM.getTime()) / (1000 * 3600 * 24));
             
-            let diasParaSemanal = Math.max(0, 7 - (diasTranscurridos % 7));
-            let diasParaMensual = Math.max(0, 30 - (diasTranscurridos % 30));
+            let diasParaSemanal = Math.max(0, 7 - diasTranscurridos);
+            let diasParaMensual = Math.max(0, 30 - diasTranscurridos);
 
-            // BLOQUEO ESTRICTO SI NO CUMPLE LOS DÍAS REQUERIDOS
             if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 0) {
                 mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades semanales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 7 (Faltan ${diasParaSemanal} días).`);
                 return;
@@ -928,17 +941,25 @@
             }
 
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
+            const estadoActual = globalEstados[estadoKey] ? globalEstados[estadoKey].status : null;
+
+            // SI YA FUE ANOMALÍA, SE QUEDA EN ANOMALÍA Y NO CAMBIA A LISTO/VERIFICADO
+            let estadoFinal = estado;
+            if (estadoActual === 'anomalia') {
+                estadoFinal = 'anomalia';
+            }
+
             const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const tiempoRealActividad = globalTimer.elapsed;
             detenerTemporizador();
 
             globalEstados[estadoKey] = { 
-                status: estado, 
-                tipo: 'Normal', 
+                status: estadoFinal, 
+                tipo: (globalEstados[estadoKey] && globalEstados[estadoKey].tipo) || 'Normal', 
                 ejecuciones: anterior + 1, 
                 ultimoTiempo: horaActual,
-                com: '',
+                com: (globalEstados[estadoKey] && globalEstados[estadoKey].com) || '',
                 foto: null,
                 tiempoReal: tiempoRealActividad,
                 tiempoEstimado: globalTimer.estimated
@@ -1017,13 +1038,14 @@
             return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         }
 
+        // BÚSQUEDA Y SELECCIÓN REAL CLICKEABLE CON onmousedown
         function mostrarResultadosTipoDano() {
             const input = document.getElementById('tipo-dano-input');
             const caja = document.getElementById('tipo-dano-resultados');
             if (!input || !caja) return;
             const q = normalizarBusqueda(input.value.trim());
             const resultados = q ? tiposDanio.filter(t => normalizarBusqueda(t).includes(q)) : tiposDanio;
-            caja.innerHTML = resultados.slice(0, 40).map(t => `<button type="button" class="w-full text-left px-3 py-2.5 text-xs text-slate-200 hover:bg-ind-accent/20 hover:text-white border-b border-slate-700/40 last:border-0" onclick="seleccionarTipoDano(${JSON.stringify(t)})">${t}</button>`).join('');
+            caja.innerHTML = resultados.slice(0, 40).map(t => `<div class="w-full text-left px-3.5 py-2.5 text-xs text-slate-200 hover:bg-ind-accent/40 hover:text-white border-b border-slate-700/40 last:border-0 cursor-pointer" onmousedown="seleccionarTipoDano(${JSON.stringify(t)})">${t}</div>`).join('');
             caja.classList.toggle('hidden', resultados.length === 0);
         }
 
@@ -1219,6 +1241,7 @@
         window.onload = () => {
             configurarEquipoQR();
             poblarFiltroSistemas();
+            actualizarFechaActual();
             calcularEstadoCalendarioTPM();
         };
     </script>
