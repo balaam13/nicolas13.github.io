@@ -107,7 +107,7 @@
             <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
                 <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
             </div>
-            <h3 class="text-sm font-black text-white uppercase tracking-wider mb-2" id="cierre-titulo">¡HAS TERMINADO LA JORNADA DE LIMPIEZA!</h3>
+            <h3 class="text-sm font-black text-white uppercase tracking-wider mb-2" id="cierre-titulo">¡HAS TERMINADO LA JORNADA DE ACTIVIDADES DIARIAS!</h3>
             <p class="text-xs text-slate-300 mb-6 leading-relaxed">¿Ya monitoreaste el equipo?</p>
             <div class="flex space-x-3 w-full">
                 <button type="button" onclick="irAMonitoreo()" class="flex-1 bg-ind-accent hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Sí, ir a Monitoreo</button>
@@ -372,7 +372,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT CORREGIDO Y BLINDADO -->
+    <!-- SCRIPT CON VALIDACIÓN DE INICIO DE SESIÓN CORREGIDA Y TEXTO ACTUALIZADO -->
     <script>
         let globalTurno = 1;
         let globalOperador = "";
@@ -449,7 +449,7 @@
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             
-            // VALIDACIÓN ESTRICTA CORREGIDA: Si está vacío, muestra el modal y DETIENE la ejecución
+            // VALIDACIÓN CORREGIDA: Si está vacío, lanza el aviso y frena. Si tiene texto, avanza.
             if (codigoOp === "") {
                 mostrarAlertaIndustrial("Por favor ingrese el código del operador.");
                 return;
@@ -492,7 +492,7 @@
             {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", periodicidad: "Semanal", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", tiempo: "5 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Tablero Externo", img2: "", label2: ""},
             {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", tiempo: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det."},
             {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", time: "5 min", img1: "Estructura Externa.jpg", label1: "Estructura Externa", img2: "Mangueras visibles Externa.jpeg", label2: "Vista Lateral"},
-            {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", tiempo: "5 min", img1: "Piso Perimetral.jpg", label1: "Piso perimetral", img2: "", label2: ""}
+            {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", time: "5 min", img1: "Piso Perimetral.jpg", label1: "Piso perimetral", img2: "", label2: ""}
         ];
 
         const datosMonitoreo = [
@@ -813,7 +813,8 @@
         }
 
         function mostrarModalCierreLimpieza(frecuencia) {
-            document.getElementById('cierre-titulo').innerText = `¡HAS TERMINADO LA JORNADA DE ${frecuencia.toUpperCase()}S!`;
+            let nombreFreq = frecuencia.toLowerCase() === 'diaria' ? 'ACTIVIDADES DIARIAS' : (frecuencia.toUpperCase() + 'S');
+            document.getElementById('cierre-titulo').innerText = `¡HAS TERMINADO LA JORNADA DE ${nombreFreq}!`;
             document.getElementById('cierre-jornada-modal').style.display = 'flex';
         }
 
