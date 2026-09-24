@@ -85,7 +85,7 @@
                         <input type="text" id="operator-code" placeholder="Ej. op11" autocomplete="off" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Contraseña (acceso seguro en backend):</label>
+                        <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Contraseña:</label>
                         <input type="password" id="operator-pass" placeholder="••••" autocomplete="current-password" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                     </div>
                 </div>
@@ -216,7 +216,7 @@
         </div>
     </div>
 
-    <!-- ENCABEZADO INDUSTRIAL PRINCIPAL (ESPACIADO MÁS GENEROSO) -->
+    <!-- ENCABEZADO INDUSTRIAL PRINCIPAL -->
     <header class="bg-ind-panel border-b border-[rgba(0,102,204,0.3)] px-6 py-5 flex items-center justify-between shadow-lg">
         <div class="flex items-center space-x-8">
             <div class="w-56 h-14 bg-white industrial-border rounded-xl overflow-hidden flex items-center justify-center px-3 py-2 shadow-inner">
@@ -269,18 +269,11 @@
                         <option value="Mensual">Mensuales</option>
                     </select>
                 </div>
-
-                <!-- LEYENDA DISCRETA DE COLORES DE FRECUENCIA PARA GERENCIA -->
-                <div class="hidden 2xl:flex items-center space-x-3 ml-4 bg-[#141821]/60 px-3 py-1.5 rounded-xl industrial-border text-[10px] font-mono text-slate-300">
-                    <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-1"></span> Diaria</span>
-                    <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-amber-500 inline-block mr-1"></span> Semanal</span>
-                    <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-purple-500 inline-block mr-1"></span> Mensual</span>
-                </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-4 justify-end">
                 <div id="tpm-alerta-calendario" class="bg-blue-950/30 border border-blue-600/50 px-4 py-2 rounded-xl text-xs text-blue-300 font-mono">
-                    <span id="tpm-estado-texto">DÍAS ACTIVIDADES SEMANALES: 7 DÍAS | DIAS PARA ACTIVIDADES MENSUALES: 30 DÍAS</span>
+                    <span id="tpm-estado-texto">DÍAS ACTIVIDADES SEMANALES: 7 DÍAS | DIAS PARA ACTIVIDADES MENSUALES: 30 DÍAS</span>
                 </div>
                 <div class="text-right">
                     <span id="texto-progreso-num" class="text-xs font-bold text-slate-200 font-mono">0 de 16 puntos - 0%</span>
@@ -319,7 +312,7 @@
             </div>
         </div>
 
-        <!-- COLUMNA DERECHA: FICHA TÉCNICA ACTIVA (CON BORDE LUMINOSO Y SOMBRA INDUSTRIAL) -->
+        <!-- COLUMNA DERECHA: FICHA TÉCNICA ACTIVA -->
         <div class="w-full xl:w-7/12 bg-ind-panel industrial-border-active industrial-shadow rounded-2xl p-8 shadow-xl flex flex-col justify-between">
             <div id="ficha-content">
                 <div class="border-b border-[rgba(0,102,204,0.3)] pb-4 mb-5">
@@ -345,7 +338,7 @@
                     <div id="temporizador-barra" class="mt-3 h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="temporizador-fill" class="h-full bg-sky-500 transition-all" style="width:0%"></div></div>
                 </div>
 
-                <!-- CONTENEDOR DE FOTOS CON MÁS AIRE Y SEPARACIÓN -->
+                <!-- CONTENEDOR DE FOTOS -->
                 <div id="contenedor-fotos" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-7">
                     <div id="card-foto-1" class="bg-[#141821] industrial-border rounded-xl overflow-hidden flex flex-col shadow-md p-1">
                         <div class="h-52 bg-[#141821] relative flex items-center justify-center p-2">
@@ -403,7 +396,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT CORREGIDO Y BLINDADO -->
+    <!-- SCRIPT ORIGINAL RESTAURADO -->
     <script>
         let globalTurno = 1;
         let globalOperador = "";
@@ -414,7 +407,6 @@
         let globalEstados = {}; 
         let globalModelo3D = null;
         let camera, renderer, scene;
-        let fechasEjecucionUnica = {};
         let globalTimer = { key: null, interval: null, countdownInterval: null, elapsed: 0, estimated: 0, running: false, startMs: null };
 
         const fechaArranqueTPM = new Date(2026, 8, 17);
@@ -458,13 +450,12 @@
             let diasParaMensual = 30 - (diasTranscurridos % 30);
             if (diasParaMensual === 30) diasParaMensual = 0;
             
-            const textoEstado = `DÍAS ACTIVIDADES SEMANALES: ${diasParaSemanal} DÍAS | DIAS PARA ACTIVIDADES MENSUALES: ${diasParaMensual} DÍAS`;
+            const textoEstado = `DÍAS ACTIVIDADES SEMANALES: ${diasParaSemanal} DÍAS | DIAS PARA ACTIVIDADES MENSUALES: ${diasParaMensual} DÍAS`;
 
             document.getElementById('tpm-estado-texto').innerText = textoEstado;
             return { diasTranscurridos, diasParaSemanal, diasParaMensual };
         }
 
-        // El QR identifica la máquina y el área. Ejemplo: ?maquina=Bole%202600%20EK-2&area=Inyeccion%20Convencional
         const EQUIPO_QR_DEFAULT = { maquina: "Bole 2600 EK-2", area: "Inyeccion Convencional" };
 
         function obtenerEquipoDesdeQR() {
@@ -483,8 +474,6 @@
             const area = document.getElementById('login-area');
             if (maq) maq.innerText = globalMaquina;
             if (area) area.innerText = globalArea;
-            const estado = document.getElementById('qr-estado');
-            if (estado) estado.innerText = window.location.search ? 'Equipo identificado mediante QR.' : 'Modo de prueba: equipo predeterminado.';
         }
 
         function appSetTurno(t) {
@@ -498,17 +487,23 @@
             });
         }
 
+        // LOGIN ORIGINAL RESTAURADO CON VALIDACIÓN CORRECTA
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
-            if (codigoOp === "") { mostrarAlertaIndustrial("Por favor ingrese el código del operador."); return; }
+            if (codigoOp === "") {
+                mostrarAlertaIndustrial("Por favor ingrese el código del operador.");
+                return;
+            }
             globalOperador = codigoOp;
             configurarEquipoQR();
             document.getElementById('display-operator').innerText = "Operador: " + globalOperador;
             document.getElementById('display-turno').innerText = `TURNO ${globalTurno} - ACTIVO`;
             document.getElementById('header-maq-title').innerText = globalMaquina;
             document.getElementById('header-area-title').innerText = `${globalArea} - EMPAQPLAST S.A.`;
+            
             const modal = document.getElementById('setup-modal');
             if (modal) modal.style.display = 'none';
+
             poblarFiltroSistemas();
             calcularEstadoCalendarioTPM();
             actualizarInterfaz();
@@ -521,8 +516,10 @@
             if(passInput) passInput.value = '';
             configurarEquipoQR();
             actualizarReloj();
+
             const btnIniciar = document.getElementById('btn-iniciar');
             if(btnIniciar) btnIniciar.onclick = appIniciarSesion;
+
             document.getElementById('tipo-dano-input')?.addEventListener('input', mostrarResultadosTipoDano);
             document.addEventListener('click', (e) => {
                 const caja = document.getElementById('tipo-dano-resultados');
@@ -544,37 +541,37 @@
             {codigo: "L-008", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras y distribuidor de agua", periodicidad: "Mensual", estandar: "Limpiar polvo exterior y verificar que no existan dobleces o estrangulamientos.", anormal: "Fugas de aire audibles, mangueras cuarteadas o acoples sueltos.", material: "Ninguna", tiempo: "5 min", img1: "Mangueras y distribuidor de agua.jpg", label1: "Distribuidor de agua", img2: "", label2: ""},
             {codigo: "L-009", sistema: "SISTEMA NEUMÁTICO", componente: "Unidad de mantenimiento (FRL)", periodicidad: "Semanal", estandar: "Retirar polvo exterior de los manómetros y limpiar externamente los vasos transparentes.", anormal: "Vasos opacos/rotos, acumulación excesiva de agua en el filtro o fugas en el regulador.", material: "Ninguna", tiempo: "5 min", img1: "Unidad de mantenimiento (FRL) Externa.jpg", label1: "FRL Externa", img2: "Unidad de mantenimiento (FRL) Detalle.jpg", label2: "FRL Detalle"},
             {codigo: "L-010", sistema: "SISTEMA HIDRÁULICO", componente: "Mangueras hidráulicas visibles", periodicidad: "Mensual", estandar: "Limpiar aceite superficial para facilitar detección de fugas.", anormal: "Acumulación de aceite y polvo", material: "Paño industrial", tiempo: "5 min", img1: "Mangueras visibles Externa.jpeg", label1: "Mangueras Externa", img2: "Mangueras visibles Detalle.jpg", label2: "Mangueras Detalle"},
-            {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", tiempo: "5 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador Externo", img2: "Controlador de temperatura Detalle.jpg", label2: "Controlador Detalle"},
-            {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", periodicidad: "Diaria", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", tiempo: "5 min", img1: "HMI Externo.jpg", label1: "HMI Externo", img2: "HMI Detalle.jpg", label2: "HMI Detalle"},
-            {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", periodicidad: "Semanal", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", tiempo: "5 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Tablero Externo", img2: "", label2: ""},
-            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", tiempo: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det."},
-            {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", tiempo: "5 min", img1: "Estructura Externa.jpg", label1: "Estructura Externa", img2: "Mangueras visibles Externa.jpeg", label2: "Vista Lateral"},
-            {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", tiempo: "5 min", img1: "Piso Perimetral.jpg", label1: "Piso perimetral", img2: "", label2: ""}
+            {codigo: "L-011", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Limpiar el polvo de la carcasa exterior y rejillas de ventilación.", anormal: "Rejillas obstruidas o displays apagados.", material: "Visual", time: "5 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador Externo", img2: "Controlador de temperatura Detalle.jpg", label2: "Controlador Detalle"},
+            {codigo: "L-012", sistema: "SISTEMA ELÉCTRICO", componente: "HMI", periodicidad: "Diaria", estandar: "Limpiar pantalla y marco externo.", anormal: "Acumulación externa polvo", material: "Paño absorbente", time: "5 min", img1: "HMI Externo.jpg", label1: "HMI Externo", img2: "HMI Detalle.jpg", label2: "HMI Detalle"},
+            {codigo: "L-013", sistema: "SISTEMA ELÉCTRICO", componente: "Superficie exterior de tablero eléctrico", periodicidad: "Semanal", estandar: "Mantener libre de polvo y suciedad las superficies externas y rejillas de ventilación.", anormal: "Calentamiento o daños físicos.", material: "Paño absorbente", time: "5 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Tablero Externo", img2: "", label2: ""},
+            {codigo: "L-014", sistema: "SISTEMA ELÉCTRICO", componente: "Filtros de tablero eléctrico", periodicidad: "Mensual", estandar: "Cambiar los filtros de ventilación", anormal: "Obstaculización de flujo de aire", material: "Paño absorbente", time: "5 min", img1: "Filtros del tablero eléctrico Externo.jpg", label1: "Filtros Tablero Ext.", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Filtros Tablero Det."},
+            {codigo: "L-015", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Estructura externa", periodicidad: "Semanal", estandar: "Limpiar cuidadosamente estructura externa, retirando polvo, residuos de PET y suciedad", anormal: "Corrosión, golpes o suciedad excesiva.", material: "Ninguna", time: "5 min", img1: "Estructura Externa.jpg", label1: "Estructura Externa", img2: "Mangueras visibles Externa.jpeg", label2: "Vista Lateral"},
+            {codigo: "L-016", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Piso perimetral", periodicidad: "Diaria", estandar: "Mantener libre de pellets, agua y aceite.", anormal: "Derrames y riesgos de resbalamiento.", material: "Escoba", time: "5 min", img1: "Piso Perimetral.jpg", label1: "Piso perimetral", img2: "", label2: ""}
         ];
 
         const datosMonitoreo = [
-            {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación"},
-            {codigo: "I-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Manguera de succión", periodicidad: "Diaria", estandar: "Verificar integridad y conexión.", anormal: "Roturas, fugas o desgaste.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Manguera", img2: "Succionador Detalle.jpg", label2: "Conexión"},
-            {codigo: "I-003", sistema: "SISTEMA DE INYECCIÓN", componente: "Boquilla", periodicidad: "Diaria", estandar: "Verificar fugas y estado físico.", anormal: "Goteo o desgaste.", material: "HMI", tiempo: "3 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla", img2: "Zona de boquilla detalle.jpg", label2: "Estado"},
-            {codigo: "I-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zonas 1-2-3-4 de tornillo y cilindro", periodicidad: "Diaria", estandar: "Comparar temperatura real versus objetivo del proceso.", anormal: "Alarmas, fallas de calidad en PT.", material: "Visual", tiempo: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Zonas", img2: "Controlador de temperatura Detalle.jpg", label2: "Temperaturas"},
-            {codigo: "I-005", sistema: "SISTEMA EXPULSOR", componente: "Expulsor", periodicidad: "Diaria", estandar: "Verificar recorrido completo de avance y retorno.", anormal: "Atascamiento o retorno incompleto.", material: "Visual", tiempo: "3 min", img1: "Área de Expulsion.jpg", label1: "Expulsor", img2: "Área de Expulsion.jpg", label2: "Recorrido"},
-            {codigo: "I-006", sistema: "SISTEMA EXPULSOR", componente: "Área expulsión", periodicidad: "Diaria", estandar: "Verificar ausencia de piezas atrapadas.", anormal: "Rebaba acumulada / Componentes mecánicos obstruidos", material: "N/A", tiempo: "3 min", img1: "Área de Expulsion.jpg", label1: "Área", img2: "Área de Expulsion.jpg", label2: "Libre"},
-            {codigo: "I-007", sistema: "SISTEMA EXPULSOR", componente: "Placas expulsoras", periodicidad: "Semanal", estandar: "Verificar golpes o ruido anormal.", anormal: "Atascamiento, fisuras o grietas / Movimiento errático", material: "N/A", tiempo: "3 min", img1: "Platina móvil.jpg", label1: "Placas", img2: "Platina móvil.jpg", label2: "Inspección"},
-            {codigo: "I-008", sistema: "SISTEMA HIDRÁULICO", componente: "Nivel aceite hidráulico", periodicidad: "Diaria", estandar: "Verificar nivel y apariencia.", anormal: "Nivel bajo o contaminación.", material: "Visual", tiempo: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Nivel", img2: "Mangueras visibles Detalle.jpg", label2: "Apariencia"},
-            {codigo: "I-009", sistema: "SISTEMA HIDRÁULICO", componente: "Fugas de aceite", periodicidad: "Diaria", estandar: "Inspeccionar mangueras, válvulas y conexiones.", anormal: "Goteos o fugas activas.", material: "Linterna", tiempo: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Mangueras", img2: "Mangueras visibles Detalle.jpg", label2: "Válvulas"},
-            {codigo: "I-010", sistema: "SISTEMA HIDRÁULICO", componente: "Bombas", periodicidad: "Semanal", estandar: "Verificar ruido, vibración y funcionamiento.", anormal: "Ruido anormal o pérdida de desempeño.", material: "Visual", tiempo: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Bombas", img2: "Mangueras visibles Detalle.jpg", label2: "Operación"},
-            {codigo: "I-011", sistema: "SISTEMA HIDRÁULICO", componente: "Válvulas", periodicidad: "Semanal", estandar: "Verificar ruido, vibración y funcionamiento.", anormal: "Ruido anormal o pérdida de desempeño.", material: "Visual", tiempo: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Válvulas", img2: "Mangueras visibles Detalle.jpg", label2: "Banco"},
-            {codigo: "I-012", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras de agua", periodicidad: "Semanal", estandar: "Verificar conexión firme y ausencia de estrangulamientos.", anormal: "Mangueras dobladas, acoples mal encajados", material: "Visual", tiempo: "3 min", img1: "Mangueras y distribuidor de agua.jpg", label1: "Enfriamiento", img2: "Mangueras visibles Detalle.jpg", label2: "Acoples"},
-            {codigo: "I-013", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Verificar que la temperatura real (PV) coincida con la objetivo (SV).", anormal: "Alarmas activas, módulo apagado.", material: "Visual", tiempo: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador", img2: "Controlador de temperatura Detalle.jpg", label2: "PV / SV"},
-            {codigo: "I-014", sistema: "SISTEMA ELÉCTRICO", componente: "Cableado visible", periodicidad: "Mensual", estandar: "Verificar integridad de cables y conectores.", anormal: "Cables rotos, quemados o sueltos.", material: "Visual", tiempo: "3 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Cableado", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Conectores"},
-            {codigo: "I-015", sistema: "SISTEMA ELÉCTRICO", componente: "Sensores accesibles", periodicidad: "Semanal", estandar: "Verificar fijación y estado.", anormal: "Sensor dañado o desalineado.", material: "Visual", tiempo: "3 min", img1: "HMI Externo.jpg", label1: "Sensores", img2: "HMI Detalle.jpg", label2: "Fijación"},
-            {codigo: "I-016", sistema: "SISTEMA DE CIERRE", componente: "Platina móvil", periodicidad: "Semanal", estandar: "Detectar vibraciones anormales.", anormal: "Cabeceo durante el avance o retroceso", material: "N/A", tiempo: "3 min", img1: "Platina móvil.jpg", label1: "Platina móvil", img2: "Platina móvil.jpg", label2: "Guías"},
-            {codigo: "I-017", sistema: "SISTEMA DE CIERRE", componente: "Platina fija", periodicidad: "Semanal", estandar: "Detectar ruidos anormales durante el cierre.", anormal: "Chirridos agudos continuos / Golpes secos", material: "N/A", tiempo: "3 min", img1: "Platina Fija.jpg", label1: "Platina fija", img2: "Platina Fija.jpg", label2: "Cierre"},
-            {codigo: "I-018", sistema: "SISTEMA DE CIERRE", componente: "Tornillería accesible", periodicidad: "Mensual", estandar: "Verificar pernos presentes y ajustados.", anormal: "Pernos flojos, rotos o faltantes.", material: "N/A", tiempo: "3 min", img1: "Estructura Externa.jpg", label1: "Tornillería", img2: "Estructura Detalle.jpg", label2: "Pernos"},
-            {codigo: "I-019", sistema: "SISTEMA DE LUBRICACIÓN", componente: "Presión del sistema", periodicidad: "Diaria", estandar: "Verificar manómetro de bomba dentro del rango verde.", anormal: "Presión cero / Aguja fuera de rango", material: "Visual", tiempo: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Presión", img2: "Mangueras visibles Detalle.jpg", label2: "Manómetro"},
-            {codigo: "I-020", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Puertas de seguridad", periodicidad: "Diaria", estandar: "Verificar apertura, cierre e interbloqueos.", anormal: "Puertas trabadas o dispositivos defectuosos.", material: "Paño industrial", tiempo: "3 min", img1: "Estructura Externa.jpg", label1: "Puertas", img2: "Estructura Detalle.jpg", label2: "Seguridad"},
-            {codigo: "I-021", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Guardas de protección", periodicidad: "Semanal", estandar: "Verificar presencia y fijación adecuada.", anormal: "Guardas faltantes o deterioradas.", material: "Brocha", tiempo: "3 min", img1: "Estructura Externa.jpg", label1: "Guardas", img2: "Estructura Detalle.jpg", label2: "Fijación"},
-            {codigo: "I-022", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Señalética y etiquetas", periodicidad: "Mensual", estandar: "Verificar legibilidad y existencia.", anormal: "Etiquetas ilegibles o faltantes.", material: "Ninguna", tiempo: "3 min", img1: "Estructura Externa.jpg", label1: "Señalética", img2: "Estructura Detalle.jpg", label2: "Etiquetas"}
+            {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", time: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación"},
+            {codigo: "I-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Manguera de succión", periodicidad: "Diaria", estandar: "Verificar integridad y conexión.", anormal: "Roturas, fugas o desgaste.", material: "Visual", time: "3 min", img1: "Succionador Externo.jpg", label1: "Manguera", img2: "Succionador Detalle.jpg", label2: "Conexión"},
+            {codigo: "I-003", sistema: "SISTEMA DE INYECCIÓN", componente: "Boquilla", periodicidad: "Diaria", estandar: "Verificar fugas y estado físico.", anormal: "Goteo o desgaste.", material: "HMI", time: "3 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla", img2: "Zona de boquilla detalle.jpg", label2: "Estado"},
+            {codigo: "I-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zonas 1-2-3-4 de tornillo y cilindro", periodicidad: "Diaria", estandar: "Comparar temperatura real versus objetivo del proceso.", anormal: "Alarmas, fallas de calidad en PT.", material: "Visual", time: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Zonas", img2: "Controlador de temperatura Detalle.jpg", label2: "Temperaturas"},
+            {codigo: "I-005", sistema: "SISTEMA EXPULSOR", componente: "Expulsor", periodicidad: "Diaria", estandar: "Verificar recorrido completo de avance y retorno.", anormal: "Atascamiento o retorno incompleto.", material: "Visual", time: "3 min", img1: "Área de Expulsion.jpg", label1: "Expulsor", img2: "Área de Expulsion.jpg", label2: "Recorrido"},
+            {codigo: "I-006", sistema: "SISTEMA EXPULSOR", componente: "Área expulsión", periodicidad: "Diaria", estandar: "Verificar ausencia de piezas atrapadas.", anormal: "Rebaba acumulada / Componentes mecánicos obstruidos", material: "N/A", time: "3 min", img1: "Área de Expulsion.jpg", label1: "Área", img2: "Área de Expulsion.jpg", label2: "Libre"},
+            {codigo: "I-007", sistema: "SISTEMA EXPULSOR", componente: "Placas expulsoras", periodicidad: "Semanal", estandar: "Verificar golpes o ruido anormal.", anormal: "Atascamiento, fisuras o grietas / Movimiento errático", material: "N/A", time: "3 min", img1: "Platina móvil.jpg", label1: "Placas", img2: "Platina móvil.jpg", label2: "Inspección"},
+            {codigo: "I-008", sistema: "SISTEMA HIDRÁULICO", componente: "Nivel aceite hidráulico", periodicidad: "Diaria", estandar: "Verificar nivel y apariencia.", anormal: "Nivel bajo o contaminación.", material: "Visual", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Nivel", img2: "Mangueras visibles Detalle.jpg", label2: "Apariencia"},
+            {codigo: "I-009", sistema: "SISTEMA HIDRÁULICO", componente: "Fugas de aceite", periodicidad: "Diaria", estandar: "Inspeccionar mangueras, válvulas y conexiones.", anormal: "Goteos o fugas activas.", material: "Linterna", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Mangueras", img2: "Mangueras visibles Detalle.jpg", label2: "Válvulas"},
+            {codigo: "I-010", sistema: "SISTEMA HIDRÁULICO", componente: "Bombas", periodicidad: "Semanal", estandar: "Verificar ruido, vibración y funcionamiento.", anormal: "Ruido anormal o pérdida de desempeño.", material: "Visual", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Bombas", img2: "Mangueras visibles Detalle.jpg", label2: "Operación"},
+            {codigo: "I-011", sistema: "SISTEMA HIDRÁULICO", componente: "Válvulas", periodicidad: "Semanal", estandar: "Verificar ruido, vibración y funcionamiento.", anormal: "Ruido anormal o pérdida de desempeño.", material: "Visual", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Válvulas", img2: "Mangueras visibles Detalle.jpg", label2: "Banco"},
+            {codigo: "I-012", sistema: "SISTEMA DE ENFRIAMIENTO", componente: "Mangueras de agua", periodicidad: "Semanal", estandar: "Verificar conexión firme y ausencia de estrangulamientos.", anormal: "Mangueras dobladas, acoples mal encajados", material: "Visual", time: "3 min", img1: "Mangueras y distribuidor de agua.jpg", label1: "Enfriamiento", img2: "Mangueras visibles Detalle.jpg", label2: "Acoples"},
+            {codigo: "I-013", sistema: "HOT RUNNER", componente: "Controlador de temperatura", periodicidad: "Diaria", estandar: "Verificar que la temperatura real (PV) coincida con la objetivo (SV).", anormal: "Alarmas activas, módulo apagado.", material: "Visual", time: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Controlador", img2: "Controlador de temperatura Detalle.jpg", label2: "PV / SV"},
+            {codigo: "I-014", sistema: "SISTEMA ELÉCTRICO", componente: "Cableado visible", periodicidad: "Mensual", estandar: "Verificar integridad de cables y conectores.", anormal: "Cables rotos, quemados o sueltos.", material: "Visual", time: "3 min", img1: "Superficie tablero electrico Externo.jpg", label1: "Cableado", img2: "Filtros del tablero eléctrico Detalle.jpg", label2: "Conectores"},
+            {codigo: "I-015", sistema: "SISTEMA ELÉCTRICO", componente: "Sensores accesibles", periodicidad: "Semanal", estandar: "Verificar fijación y estado.", anormal: "Sensor dañado o desalineado.", material: "Visual", time: "3 min", img1: "HMI Externo.jpg", label1: "Sensores", img2: "HMI Detalle.jpg", label2: "Fijación"},
+            {codigo: "I-016", sistema: "SISTEMA DE CIERRE", componente: "Platina móvil", periodicidad: "Semanal", estandar: "Detectar vibraciones anormales.", anormal: "Cabeceo durante el avance o retroceso", material: "N/A", time: "3 min", img1: "Platina móvil.jpg", label1: "Platina móvil", img2: "Platina móvil.jpg", label2: "Guías"},
+            {codigo: "I-017", sistema: "SISTEMA DE CIERRE", componente: "Platina fija", periodicidad: "Semanal", estandar: "Detectar ruidos anormales durante el cierre.", anormal: "Chirridos agudos continuos / Golpes secos", material: "N/A", time: "3 min", img1: "Platina Fija.jpg", label1: "Platina fija", img2: "Platina Fija.jpg", label2: "Cierre"},
+            {codigo: "I-018", sistema: "SISTEMA DE CIERRE", componente: "Tornillería accesible", periodicidad: "Mensual", estandar: "Verificar pernos presentes y ajustados.", anormal: "Pernos flojos, rotos o faltantes.", material: "N/A", time: "3 min", img1: "Estructura Externa.jpg", label1: "Tornillería", img2: "Estructura Detalle.jpg", label2: "Pernos"},
+            {codigo: "I-019", sistema: "SISTEMA DE LUBRICACIÓN", componente: "Presión del sistema", periodicidad: "Diaria", estandar: "Verificar manómetro de bomba dentro del rango verde.", anormal: "Presión cero / Aguja fuera de rango", material: "Visual", time: "3 min", img1: "Mangueras visibles Externa.jpeg", label1: "Presión", img2: "Mangueras visibles Detalle.jpg", label2: "Manómetro"},
+            {codigo: "I-020", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Puertas de seguridad", periodicidad: "Diaria", estandar: "Verificar apertura, cierre e interbloqueos.", anormal: "Puertas trabadas o dispositivos defectuosos.", material: "Paño industrial", time: "3 min", img1: "Estructura Externa.jpg", label1: "Puertas", img2: "Estructura Detalle.jpg", label2: "Seguridad"},
+            {codigo: "I-021", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Guardas de protección", periodicidad: "Semanal", estandar: "Verificar presencia y fijación adecuada.", anormal: "Guardas faltantes o deterioradas.", material: "Brocha", time: "3 min", img1: "Estructura Externa.jpg", label1: "Guardas", img2: "Estructura Detalle.jpg", label2: "Fijación"},
+            {codigo: "I-022", sistema: "ÁREA GENERAL DEL EQUIPO", componente: "Señalética y etiquetas", periodicidad: "Mensual", estandar: "Verificar legibilidad y existencia.", anormal: "Etiquetas ilegibles o faltantes.", material: "Ninguna", time: "3 min", img1: "Estructura Externa.jpg", label1: "Señalética", img2: "Estructura Detalle.jpg", label2: "Etiquetas"}
         ];
 
         function poblarFiltroSistemas() {
@@ -625,9 +622,9 @@
             let diasParaMensual = 30 - (diasTranscurridos % 30);
             if (diasParaMensual === 30) diasParaMensual = 0;
 
-            if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 0) {
+            if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 0 && diasParaSemanal !== 7) {
                 mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES SEMANALES!\nFaltan ${diasParaSemanal} días para el ciclo correspondiente.`);
-            } else if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 0) {
+            } else if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 0 && diasParaMensual !== 30) {
                 mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES MENSUALES!\nFaltan ${diasParaMensual} días para el ciclo correspondiente.`);
             }
 
@@ -651,37 +648,25 @@
             document.getElementById('contador-filtro-badge').innerText = `${listaFiltrada.length} puntos`;
 
             let completadosTotales = 0;
-            let completadosLimpiezaDiarias = 0;
-            let completadosMonitoreoDiarias = 0;
-
-            datosLimpieza.forEach((item, idx) => {
-                if(item.periodicidad === 'Diaria' && globalEstados[`limpieza_${idx}`] && globalEstados[`limpieza_${idx}`].status !== 'pendiente') {
-                    completadosLimpiezaDiarias++;
-                }
-            });
-
-            datosMonitoreo.forEach((item, idx) => {
-                if(item.periodicidad === 'Diaria' && globalEstados[`monitoreo_${idx}`] && globalEstados[`monitoreo_${idx}`].status !== 'pendiente') {
-                    completadosMonitoreoDiarias++;
-                }
-            });
+            let completadosFrecuenciaActual = 0;
             
             listaOriginal.forEach((item, idx) => {
                 if(globalEstados[`${globalModo}_${idx}`] && globalEstados[`${globalModo}_${idx}`].status !== 'pendiente') {
                     completadosTotales++;
+                    if(item.periodicidad === frecuenciaSeleccionada) {
+                        completadosFrecuenciaActual++;
+                    }
                 }
             });
 
-            let totalDiariasLimpieza = datosLimpieza.filter(i => i.periodicidad === 'Diaria').length;
-            let totalDiariasMonitoreo = datosMonitoreo.filter(i => i.periodicidad === 'Diaria').length;
-
-            // EL CIERRE DE JORNADA EVALÚA EXCLUSIVAMENTE LAS ACTIVIDADES DIARIAS GLOBALES
-            if (globalModo === 'limpieza' && completadosLimpiezaDiarias === totalDiariasLimpieza && !window.modalLimpiezaMostrado) {
-                window.modalLimpiezaMostrado = true;
-                mostrarModalCierreLimpieza('Diaria');
-            } else if (globalModo === 'monitoreo' && completadosLimpiezaDiarias === totalDiariasLimpieza && completadosMonitoreoDiarias === totalDiariasMonitoreo && !window.modalMonitoreoMostrado) {
-                window.modalMonitoreoMostrado = true;
-                mostrarModalMonitoreoFinal();
+            if (listaFiltrada.length > 0 && completadosFrecuenciaActual === listaFiltrada.length) {
+                if (globalModo === 'limpieza' && !window.modalLimpiezaMostrado) {
+                    window.modalLimpiezaMostrado = true;
+                    mostrarModalCierreLimpieza(frecuenciaSeleccionada);
+                } else if (globalModo === 'monitoreo' && !window.modalMonitoreoMostrado) {
+                    window.modalMonitoreoMostrado = true;
+                    mostrarModalMonitoreoFinal();
+                }
             }
 
             if(listaFiltrada.length === 0) {
@@ -929,40 +914,6 @@
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
 
-            const hoy = new Date();
-            const diasTranscurridos = Math.floor((hoy.getTime() - fechaArranqueTPM.getTime()) / (1000 * 3600 * 24));
-            
-            let diasParaSemanal = 7 - (diasTranscurridos % 7);
-            if (diasParaSemanal === 7) diasParaSemanal = 0;
-            
-            let diasParaMensual = 30 - (diasTranscurridos % 30);
-            if (diasParaMensual === 30) diasParaMensual = 0;
-
-            // BLOQUEO ESTRICTO DE ACTIVIDADES SEMANALES Y MENSUALES
-            if (frecuenciaSeleccionada === "Semanal") {
-                const cicloSemanalActual = Math.floor(diasTranscurridos / 7);
-                if (fechasEjecucionUnica[`semana_${cicloSemanalActual}`]) {
-                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES SEMANALES YA FUERON EJECUTADAS!\nFaltan 7 días para que se habiliten de nuevo.`);
-                    return;
-                }
-                if (diasParaSemanal !== 0) {
-                    mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES SEMANALES!\nFaltan ${diasParaSemanal} días para el ciclo correspondiente.`);
-                    return;
-                }
-            }
-
-            if (frecuenciaSeleccionada === "Mensual") {
-                const cicloMensualActual = Math.floor(diasTranscurridos / 30);
-                if (fechasEjecucionUnica[`mes_${cicloMensualActual}`]) {
-                    mostrarAlertaIndustrial(`¡LAS ACTIVIDADES MENSUALES YA FUERON EJECUTADAS!\nFaltan 30 días para que se habiliten de nuevo.`);
-                    return;
-                }
-                if (diasParaMensual !== 0) {
-                    mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES MENSUALES!\nFaltan ${diasParaMensual} días para el ciclo correspondiente.`);
-                    return;
-                }
-            }
-
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -980,21 +931,6 @@
                 tiempoEstimado: globalTimer.estimated
             };
             
-            let filtroActualList = listaOriginal.filter(item => item.periodicidad === frecuenciaSeleccionada);
-            let completadosFreq = filtroActualList.filter(item => {
-                let rIdx = listaOriginal.findIndex(el => el.codigo === item.codigo);
-                let st = globalEstados[`${globalModo}_${rIdx}`];
-                return st && st.status !== 'pendiente';
-            }).length;
-
-            if (completadosFreq === filtroActualList.length) {
-                if (frecuenciaSeleccionada === "Semanal") {
-                    fechasEjecucionUnica[`semana_${Math.floor(diasTranscurridos / 7)}`] = true;
-                } else if (frecuenciaSeleccionada === "Mensual") {
-                    fechasEjecucionUnica[`mes_${Math.floor(diasTranscurridos / 30)}`] = true;
-                }
-            }
-
             actualizarInterfaz();
             
             const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
@@ -1040,8 +976,6 @@
             document.getElementById('cierre-monitoreo-modal').style.display = 'none';
         }
 
-        // Tipos de daño tomados del listado proporcionado. Se excluyen encabezados de familia (mecánico, hidráulico, etc.)
-        // porque el formulario debe permitir buscar directamente el daño, no seleccionar el sistema técnico.
         const tiposDanio = [
             "Fuga aceite Tuberia metalica", "Fuga aceite cilindro Hidraulico", "Fuga aceite manguera",
             "Fuga de aceite Banco valvulas", "No hay movimientos de maquina", "Caída presión", "Filtro sucio",
@@ -1100,7 +1034,6 @@
         }
 
         function abrirModalAnomalia() {
-            // La confirmación aparece ANTES de pedir datos del reporte.
             abrirConfirmacionAnomalia();
         }
 
