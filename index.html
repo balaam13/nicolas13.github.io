@@ -47,16 +47,28 @@
     <!-- MODAL DE ALERTA INDUSTRIAL PERSONALIZADA -->
     <div id="alerta-modal" style="display: none;" class="fixed inset-0 z-[999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-6 industrial-shadow flex flex-col items-center text-center">
-            <div class="w-24 h-32 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
-                <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
-            </div>
-            <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-1">AVISO DEL SISTEMA TPM</h3>
+            <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-2">AVISO DEL SISTEMA TPM</h3>
             <p class="text-xs text-slate-200 mb-6 leading-relaxed font-medium whitespace-pre-line" id="alerta-texto">Mensaje de advertencia...</p>
             <button type="button" onclick="cerrarAlertaModal()" class="w-full bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Aceptar</button>
         </div>
     </div>
 
-    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL CON LOGO CORREGIDO) -->
+    <!-- PANTALLA DE FAMILIARIZACIÓN INICIAL (ANTES DE L-001) -->
+    <div id="familiarizacion-modal" style="display: none;" class="fixed inset-0 z-[90] bg-[#141821]/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-8 industrial-shadow flex flex-col items-center text-center">
+            <div class="w-16 h-16 rounded-2xl bg-ind-accent/20 border border-ind-accent/50 flex items-center justify-center text-2xl mb-4 text-ind-accent font-black">ABE</div>
+            <h2 class="text-lg font-black text-white uppercase tracking-wider mb-3">Bienvenido al Mantenimiento Autónomo</h2>
+            <p class="text-xs text-slate-300 leading-relaxed mb-6">
+                Antes de iniciar, tómate unos momentos para familiarizarte con la plataforma. <br><br>
+                Aquí podrás consultar las actividades de limpieza y monitoreo, registrar observaciones y reportar anomalías cuando corresponda de acuerdo con los estándares operativos de EMPAQPLAST S.A.
+            </p>
+            <button type="button" onclick="cerrarFamiliarizacion()" class="w-full bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-xl cursor-pointer">
+                Iniciar Actividades
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL) -->
     <div id="setup-modal" class="fixed inset-0 z-50 bg-[#141821]/95 flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 industrial-shadow">
             <div class="flex flex-col items-center text-center mb-5 border-b border-[rgba(0,102,204,0.3)] pb-5">
@@ -75,7 +87,6 @@
                             <span id="login-maquina" class="block text-sm font-black text-white uppercase">BOLE 2600 EK-2</span>
                             <span id="login-area" class="block text-[10px] text-ind-accent font-semibold uppercase mt-0.5">Inyección Convencional</span>
                         </div>
-                        <div class="w-10 h-10 rounded-lg bg-ind-accent/15 border border-ind-accent/40 flex items-center justify-center text-lg">▣</div>
                     </div>
                     <p id="qr-estado" class="text-[10px] text-slate-500 mt-3 font-mono">Equipo definido por el código de la URL del QR.</p>
                 </div>
@@ -105,9 +116,6 @@
     <!-- MODAL DE CIERRE DE JORNADA DE LIMPIEZA -->
     <div id="cierre-jornada-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 industrial-shadow flex flex-col items-center text-center">
-            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
-                <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
-            </div>
             <h3 class="text-sm font-black text-white uppercase tracking-wider mb-2" id="cierre-titulo">¡HAS TERMINADO LA JORNADA DE ACTIVIDADES DIARIAS!</h3>
             <p class="text-xs text-slate-300 mb-6 leading-relaxed">¿Ya monitoreaste el equipo?</p>
             <div class="flex space-x-3 w-full">
@@ -120,9 +128,6 @@
     <!-- MODAL DE CIERRE DEFINITIVO DE MONITOREO -->
     <div id="cierre-monitoreo-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 industrial-shadow flex flex-col items-center text-center">
-            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
-                <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
-            </div>
             <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider mb-2">¡PERFECTO, REGRESA EL DÍA DE MAÑANA!</h3>
             <p class="text-xs text-slate-300 mb-6 leading-relaxed">Has completado todas las actividades del turno correctamente.</p>
             <button type="button" onclick="cerrarModalMonitoreoFinal()" class="w-full bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Entendido</button>
@@ -133,8 +138,7 @@
     <div id="confirmacion-anomalia-modal" style="display: none;" class="fixed inset-0 z-[80] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-2xl w-full p-7 industrial-shadow">
             <div class="text-center mb-5">
-                <div class="w-14 h-14 mx-auto rounded-full bg-amber-500/10 border border-amber-500/40 flex items-center justify-center text-2xl mb-3">⚠</div>
-                <h3 class="text-sm font-black text-white uppercase tracking-wider">¿ESTÁS SEGURO DE REPORTAR UNA ANOMALÍA?</h3>
+                <h3 class="text-sm font-black text-white uppercase tracking-wider mb-2">¿ESTÁS SEGURO DE REPORTAR UNA ANOMALÍA?</h3>
                 <p class="text-xs text-slate-400 mt-2 leading-relaxed">Antes de generar el reporte, confirma que la condición encontrada realmente requiere una intervención de mantenimiento.</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -157,9 +161,6 @@
     <!-- MODAL DE REPORTAR ANOMALÍA -->
     <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 industrial-shadow flex flex-col md:flex-row gap-6 items-center">
-            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg flex-shrink-0">
-                <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
-            </div>
             <div class="flex-1 w-full">
                 <div class="flex items-center space-x-3 mb-4 border-b border-[rgba(0,102,204,0.3)] pb-3">
                     <div><h3 class="text-xs font-bold text-white uppercase tracking-wider">Reportar anomalía de equipo</h3><p class="text-[11px] text-rose-400 font-mono mt-0.5" id="modal-anomalia-info">Sistema - L-001</p></div>
@@ -176,7 +177,7 @@
                             <div id="tipo-dano-resultados" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-[#1E2330] border border-slate-600 rounded-xl z-[90] shadow-2xl"></div>
                         </div>
                         <input type="hidden" id="tipo-dano-seleccionado">
-                        <p class="text-[10px] text-slate-500 mt-1">Puede buscar por una palabra y seleccionar el daño correspondiente.</p>
+                        <p class="text-[10px] text-slate-500 mt-1">Escriba para filtrar y seleccione el daño correspondiente.</p>
                     </div>
                     <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Descripción detallada</label><textarea id="texto-anomalia" rows="2" placeholder="Describa la condición encontrada..." class="w-full bg-[#141821] industrial-border rounded-xl p-3 text-sm text-white focus:outline-none focus:border-ind-accent"></textarea></div>
                     <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Evidencia fotográfica</label><div class="flex items-center space-x-2"><label class="flex-1 bg-[#141821] hover:bg-[#2A3142] industrial-border rounded-xl px-3 py-2 text-center cursor-pointer transition text-slate-300 text-xs font-medium"><span>📷 + Adjuntar foto</span><input type="file" id="foto-anomalia" accept="image/*" class="hidden" onchange="mostrarNombreArchivo(this)"></label><span id="nombre-archivo" class="text-slate-400 truncate max-w-[120px]">Sin archivo</span></div></div>
@@ -189,10 +190,6 @@
     <!-- MODAL DE REGISTRAR OBSERVACIÓN -->
     <div id="observacion-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 industrial-shadow flex flex-col md:flex-row gap-6 items-center">
-            <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg flex-shrink-0">
-                <img src="WhatsApp Image 2026-09-23 at 10.31.08.jpeg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
-            </div>
-
             <div class="flex-1 w-full">
                 <div class="flex items-center space-x-3 mb-4 border-b border-[rgba(0,102,204,0.3)] pb-3">
                     <div>
@@ -232,14 +229,6 @@
                 <span id="display-operator" class="block text-xs font-bold text-slate-200">Operador: --</span>
                 <span id="display-turno" class="block text-[10px] text-slate-400 font-mono uppercase">TURNO 1 - ACTIVO</span>
             </div>
-            <div class="hidden text-right bg-[#141821] px-4 py-2 rounded-xl industrial-border">
-                <span id="reloj-en-vivo" class="block text-xs font-bold text-ind-accent font-mono">--:--:--</span>
-                <span class="block text-[10px] text-slate-400 font-mono">HORA ACTUAL</span>
-            </div>
-            <div class="hidden text-right bg-[#141821] px-4 py-2 rounded-xl industrial-border">
-                <span id="display-fecha" class="block text-xs font-bold text-ind-accent font-mono">--/--/----</span>
-                <span class="block text-[10px] text-slate-400 font-mono">FECHA ACTUAL</span>
-            </div>
             <button type="button" onclick="cambiarOperador()" class="text-xs bg-[#141821] hover:bg-[#323743] text-slate-300 px-4 py-3 rounded-xl industrial-border transition font-bold shadow-sm cursor-pointer">Cambiar</button>
         </div>
     </header>
@@ -273,7 +262,7 @@
 
             <div class="flex flex-wrap items-center gap-4 justify-end">
                 <div id="tpm-alerta-calendario" class="bg-blue-950/30 border border-blue-600/50 px-4 py-2 rounded-xl text-xs text-blue-300 font-mono">
-                    <span id="tpm-estado-texto">DÍAS ACTIVIDADES SEMANALES: 7 DÍAS | DIAS PARA ACTIVIDADES MENSUALES: 30 DÍAS</span>
+                    <span id="tpm-estado-texto">DÍA/S PARA LAS ACTIVIDADES SEMANALES: 7 | DÍA/S PARA LAS ACTIVIDADES MENSUALES: 30</span>
                 </div>
                 <div class="text-right">
                     <span id="texto-progreso-num" class="text-xs font-bold text-slate-200 font-mono">0 de 16 puntos - 0%</span>
@@ -396,7 +385,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT ORIGINAL RESTAURADO -->
+    <!-- SCRIPT TÉCNICO INDUSTRIAL -->
     <script>
         let globalTurno = 1;
         let globalOperador = "";
@@ -407,9 +396,10 @@
         let globalEstados = {}; 
         let globalModelo3D = null;
         let camera, renderer, scene;
+        let fechasEjecucionUnica = {};
         let globalTimer = { key: null, interval: null, countdownInterval: null, elapsed: 0, estimated: 0, running: false, startMs: null };
 
-        const fechaArranqueTPM = new Date(2026, 8, 17);
+        const fechaArranqueTPM = new Date(2026, 8, 24); // INICIO HOY 24/09/2026
 
         function mostrarAlertaIndustrial(mensaje) {
             document.getElementById('alerta-texto').innerText = mensaje;
@@ -431,26 +421,16 @@
             return `hsl(${hue}, 75%, 48%)`;
         }
 
-        function actualizarReloj() {
-            const relojEl = document.getElementById('reloj-en-vivo');
-            if(relojEl) {
-                relojEl.innerText = new Date().toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            }
-        }
-        setInterval(actualizarReloj, 1000);
-
         function calcularEstadoCalendarioTPM() {
             const hoy = new Date();
             const diferenciaTiempo = hoy.getTime() - fechaArranqueTPM.getTime();
-            const diasTranscurridos = Math.floor(diferenciaTiempo / (1000 * 3600 * 24));
+            const diasTranscurridos = Math.max(0, Math.floor(diferenciaTiempo / (1000 * 3600 * 24)));
             
-            let diasParaSemanal = 7 - (diasTranscurridos % 7);
-            if (diasParaSemanal === 7) diasParaSemanal = 0;
+            // CONTEO REGRESIVO EXÁCTO DESDE HOY 24/09 (7 días para semanal, 30 días para mensual)
+            let diasParaSemanal = Math.max(0, 7 - diasTranscurridos);
+            let diasParaMensual = Math.max(0, 30 - diasTranscurridos);
             
-            let diasParaMensual = 30 - (diasTranscurridos % 30);
-            if (diasParaMensual === 30) diasParaMensual = 0;
-            
-            const textoEstado = `DÍAS ACTIVIDADES SEMANALES: ${diasParaSemanal} DÍAS | DIAS PARA ACTIVIDADES MENSUALES: ${diasParaMensual} DÍAS`;
+            const textoEstado = `DÍA/S PARA LAS ACTIVIDADES SEMANALES: ${diasParaSemanal} | DÍA/S PARA LAS ACTIVIDADES MENSUALES: ${diasParaMensual}`;
 
             document.getElementById('tpm-estado-texto').innerText = textoEstado;
             return { diasTranscurridos, diasParaSemanal, diasParaMensual };
@@ -487,7 +467,7 @@
             });
         }
 
-        // LOGIN ORIGINAL RESTAURADO CON VALIDACIÓN CORRECTA
+        // LOGIN ORIGINAL RESTAURADO CON VALIDACIÓN ESTRICTA DE OPERADOR
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             if (codigoOp === "") {
@@ -504,6 +484,14 @@
             const modal = document.getElementById('setup-modal');
             if (modal) modal.style.display = 'none';
 
+            // MOSTRAR PANTALLA DE FAMILIARIZACIÓN ANTES DE ENTRAR A L-001
+            const famModal = document.getElementById('familiarizacion-modal');
+            if (famModal) famModal.style.display = 'flex';
+        }
+
+        function cerrarFamiliarizacion() {
+            const famModal = document.getElementById('familiarizacion-modal');
+            if (famModal) famModal.style.display = 'none';
             poblarFiltroSistemas();
             calcularEstadoCalendarioTPM();
             actualizarInterfaz();
@@ -515,7 +503,6 @@
             if(codeInput) codeInput.value = '';
             if(passInput) passInput.value = '';
             configurarEquipoQR();
-            actualizarReloj();
 
             const btnIniciar = document.getElementById('btn-iniciar');
             if(btnIniciar) btnIniciar.onclick = appIniciarSesion;
@@ -550,7 +537,7 @@
         ];
 
         const datosMonitoreo = [
-            {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", time: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación"},
+            {codigo: "I-001", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Succionador", periodicidad: "Diaria", estandar: "Verificar la correcta carga de material y ausencia de alarmas durante la operación.", anormal: "Baja succión, alarmas, ruidos anormales o interrupciones de carga.", material: "Visual", tiempo: "3 min", img1: "Succionador Externo.jpg", label1: "Monitoreo", img2: "Succionador Detalle.jpg", label2: "Operación"},
             {codigo: "I-002", sistema: "ALIMENTACIÓN DE MATERIAL", componente: "Manguera de succión", periodicidad: "Diaria", estandar: "Verificar integridad y conexión.", anormal: "Roturas, fugas o desgaste.", material: "Visual", time: "3 min", img1: "Succionador Externo.jpg", label1: "Manguera", img2: "Succionador Detalle.jpg", label2: "Conexión"},
             {codigo: "I-003", sistema: "SISTEMA DE INYECCIÓN", componente: "Boquilla", periodicidad: "Diaria", estandar: "Verificar fugas y estado físico.", anormal: "Goteo o desgaste.", material: "HMI", time: "3 min", img1: "Zona de boquilla externa.jpg", label1: "Boquilla", img2: "Zona de boquilla detalle.jpg", label2: "Estado"},
             {codigo: "I-004", sistema: "SISTEMA DE INYECCIÓN", componente: "Zonas 1-2-3-4 de tornillo y cilindro", periodicidad: "Diaria", estandar: "Comparar temperatura real versus objetivo del proceso.", anormal: "Alarmas, fallas de calidad en PT.", material: "Visual", time: "3 min", img1: "Controlador de temperatura Externa.jpg", label1: "Zonas", img2: "Controlador de temperatura Detalle.jpg", label2: "Temperaturas"},
@@ -616,16 +603,13 @@
             const hoy = new Date();
             const diasTranscurridos = Math.floor((hoy.getTime() - fechaArranqueTPM.getTime()) / (1000 * 3600 * 24));
             
-            let diasParaSemanal = 7 - (diasTranscurridos % 7);
-            if (diasParaSemanal === 7) diasParaSemanal = 0;
-            
-            let diasParaMensual = 30 - (diasTranscurridos % 30);
-            if (diasParaMensual === 30) diasParaMensual = 0;
+            let diasParaSemanal = Math.max(0, 7 - (diasTranscurridos % 7));
+            let diasParaMensual = Math.max(0, 30 - (diasTranscurridos % 30));
 
-            if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 0 && diasParaSemanal !== 7) {
-                mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES SEMANALES!\nFaltan ${diasParaSemanal} días para el ciclo correspondiente.`);
-            } else if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 0 && diasParaMensual !== 30) {
-                mostrarAlertaIndustrial(`¡AÚN NO ES TIEMPO DE REALIZAR LAS ACTIVIDADES MENSUALES!\nFaltan ${diasParaMensual} días para el ciclo correspondiente.`);
+            if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 0) {
+                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades semanales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 7 (Faltan ${diasParaSemanal} días).`);
+            } else if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 0) {
+                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades mensuales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 30 (Faltan ${diasParaMensual} días).`);
             }
 
             actualizarInterfaz();
@@ -648,25 +632,36 @@
             document.getElementById('contador-filtro-badge').innerText = `${listaFiltrada.length} puntos`;
 
             let completadosTotales = 0;
-            let completadosFrecuenciaActual = 0;
+            let completadosLimpiezaDiarias = 0;
+            let completadosMonitoreoDiarias = 0;
+
+            datosLimpieza.forEach((item, idx) => {
+                if(item.periodicidad === 'Diaria' && globalEstados[`limpieza_${idx}`] && globalEstados[`limpieza_${idx}`].status !== 'pendiente') {
+                    completadosLimpiezaDiarias++;
+                }
+            });
+
+            datosMonitoreo.forEach((item, idx) => {
+                if(item.periodicidad === 'Diaria' && globalEstados[`monitoreo_${idx}`] && globalEstados[`monitoreo_${idx}`].status !== 'pendiente') {
+                    completadosMonitoreoDiarias++;
+                }
+            });
             
             listaOriginal.forEach((item, idx) => {
                 if(globalEstados[`${globalModo}_${idx}`] && globalEstados[`${globalModo}_${idx}`].status !== 'pendiente') {
                     completadosTotales++;
-                    if(item.periodicidad === frecuenciaSeleccionada) {
-                        completadosFrecuenciaActual++;
-                    }
                 }
             });
 
-            if (listaFiltrada.length > 0 && completadosFrecuenciaActual === listaFiltrada.length) {
-                if (globalModo === 'limpieza' && !window.modalLimpiezaMostrado) {
-                    window.modalLimpiezaMostrado = true;
-                    mostrarModalCierreLimpieza(frecuenciaSeleccionada);
-                } else if (globalModo === 'monitoreo' && !window.modalMonitoreoMostrado) {
-                    window.modalMonitoreoMostrado = true;
-                    mostrarModalMonitoreoFinal();
-                }
+            let totalDiariasLimpieza = datosLimpieza.filter(i => i.periodicidad === 'Diaria').length;
+            let totalDiariasMonitoreo = datosMonitoreo.filter(i => i.periodicidad === 'Diaria').length;
+
+            if (globalModo === 'limpieza' && completadosLimpiezaDiarias === totalDiariasLimpieza && !window.modalLimpiezaMostrado) {
+                window.modalLimpiezaMostrado = true;
+                mostrarModalCierreLimpieza('Diaria');
+            } else if (globalModo === 'monitoreo' && completadosLimpiezaDiarias === totalDiariasLimpieza && completadosMonitoreoDiarias === totalDiariasMonitoreo && !window.modalMonitoreoMostrado) {
+                window.modalMonitoreoMostrado = true;
+                mostrarModalMonitoreoFinal();
             }
 
             if(listaFiltrada.length === 0) {
@@ -688,16 +683,17 @@
                 let colorClass = "text-slate-400 bg-[#141821]/40 industrial-border hover:border-slate-400";
                 let textState = "PENDIENTE";
 
-                if(dataEstado && dataEstado.status === 'listo') {
-                    icon = '✓';
-                    colorClass = "text-emerald-400 bg-emerald-950/25 border-emerald-700/60";
-                    textState = "REALIZADO";
-                } else if(dataEstado && dataEstado.status === 'anomalia') {
+                // SEPARACIÓN ESTRICTA: ANOMALÍA MANTIENE ESTADO ROJO AUNQUE ESTÉ VERIFICADA
+                if(dataEstado && dataEstado.status === 'anomalia') {
                     icon = '!';
                     colorClass = "text-rose-400 bg-rose-950/25 border-rose-700/60";
                     textState = "ANOMALÍA";
+                } else if(dataEstado && dataEstado.status === 'listo') {
+                    icon = '✓';
+                    colorClass = "text-emerald-400 bg-emerald-950/25 border-emerald-700/60";
+                    textState = "REALIZADO";
                 } else if(dataEstado && dataEstado.status === 'observacion') {
-                    icon = 'ℹ';
+                    icon = 'i';
                     colorClass = "text-blue-400 bg-blue-950/25 border-blue-700/60";
                     textState = "OBSERVACIÓN";
                 }
@@ -807,14 +803,14 @@
             }
 
             const trazabilidadElem = document.getElementById('trazabilidad-estado');
-            if(dataEstado && dataEstado.status === 'listo') {
-                trazabilidadElem.innerHTML = `✓ Verificación registrada - ${globalOperador || 'Operador'}`;
-                trazabilidadElem.className = "text-xs text-emerald-400 font-mono font-bold";
-            } else if(dataEstado && dataEstado.status === 'anomalia') {
-                trazabilidadElem.innerHTML = `⚠ Anomalía reportada - ${dataEstado.tipo || 'Sin tipo'}`;
+            if(dataEstado && dataEstado.status === 'anomalia') {
+                trazabilidadElem.innerHTML = `ANOMALÍA REPORTADA - ${dataEstado.tipo || 'Sin tipo'}`;
                 trazabilidadElem.className = "text-xs text-rose-400 font-mono font-bold";
+            } else if(dataEstado && dataEstado.status === 'listo') {
+                trazabilidadElem.innerHTML = `VERIFICACIÓN REGISTRADA - ${globalOperador || 'Operador'}`;
+                trazabilidadElem.className = "text-xs text-emerald-400 font-mono font-bold";
             } else if(dataEstado && dataEstado.status === 'observacion') {
-                trazabilidadElem.innerHTML = `ℹ Observación registrada - ${dataEstado.com}`;
+                trazabilidadElem.innerHTML = `OBSERVACIÓN REGISTRADA - ${dataEstado.com}`;
                 trazabilidadElem.className = "text-xs text-blue-400 font-mono font-bold";
             } else {
                 trazabilidadElem.innerHTML = `Estado: Pendiente de inspección`;
@@ -913,6 +909,23 @@
         function marcarEstado(estado) {
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
+
+            const hoy = new Date();
+            const diasTranscurridos = Math.floor((hoy.getTime() - fechaArranqueTPM.getTime()) / (1000 * 3600 * 24));
+            
+            let diasParaSemanal = Math.max(0, 7 - (diasTranscurridos % 7));
+            let diasParaMensual = Math.max(0, 30 - (diasTranscurridos % 30));
+
+            // BLOQUEO ESTRICTO SI NO CUMPLE LOS DÍAS REQUERIDOS
+            if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 0) {
+                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades semanales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 7 (Faltan ${diasParaSemanal} días).`);
+                return;
+            }
+
+            if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 0) {
+                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades mensuales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 30 (Faltan ${diasParaMensual} días).`);
+                return;
+            }
 
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
@@ -1126,13 +1139,6 @@
             actualizarInterfaz();
         }
 
-        function actualizarFechaActual() {
-            const opciones = { year: 'numeric', month: '2-digit', day: '2-digit' };
-            const fechaStr = new Date().toLocaleDateString('es-EC', opciones);
-            const elem = document.getElementById('display-fecha');
-            if(elem) elem.innerText = fechaStr;
-        }
-
         // CARGADOR 3D LIMPIO CON ROTACIÓN POR SISTEMA
         const container = document.getElementById('canvas-container');
         scene = new THREE.Scene();
@@ -1213,7 +1219,6 @@
         window.onload = () => {
             configurarEquipoQR();
             poblarFiltroSistemas();
-            actualizarFechaActual();
             calcularEstadoCalendarioTPM();
         };
     </script>
