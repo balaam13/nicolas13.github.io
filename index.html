@@ -410,6 +410,8 @@
         let globalModelo3D = null;
         let camera, renderer, scene;
         let globalTimer = { key: null, interval: null, countdownInterval: null, elapsed: 0, estimated: 0, running: false, startMs: null };
+        // Guarda el avance del temporizador por actividad durante la sesión.
+        const globalTimersPorActividad = {};
 
         const fechaArranqueTPM = new Date(2026, 8, 24); // 24 Septiembre 2026
         const CLAVE_FAMILIARIZACION = 'ma_familiarizado_v1';
@@ -976,7 +978,22 @@
             establecerBotonesActividad(globalTimer.running === true);
         }
 
-        function detenerTemporizador() {
+        function guardarTemporizadorActual() {
+            if (!globalTimer.key) return;
+            let elapsed = Number(globalTimer.elapsed) || 0;
+            if (globalTimer.running && globalTimer.startMs) {
+                elapsed = Math.max(elapsed, Math.floor((Date.now() - globalTimer.startMs) / 1000));
+            }
+            globalTimersPorActividad[globalTimer.key] = {
+                ...(globalTimersPorActividad[globalTimer.key] || {}),
+                elapsed,
+                estimated: globalTimer.estimated,
+                estado: globalTimer.running ? 'pausado' : (globalTimersPorActividad[globalTimer.key]?.estado || 'pausado')
+            };
+        }
+
+        function detenerTemporizador(guardarAvance = true) {
+            if (guardarAvance) guardarTemporizadorActual();
             if (globalTimer.interval) clearInterval(globalTimer.interval);
             if (globalTimer.countdownInterval) clearInterval(globalTimer.countdownInterval);
             globalTimer.interval = null;
@@ -987,42 +1004,69 @@
         }
 
         function iniciarTemporizadorActividad(item, key) {
-            if (!item || globalTimer.key === key) return;
-            detenerTemporizador();
+            if (!item) return;
+            if (globalTimer.key === key && (globalTimer.running || globalTimer.countdownInterval)) return;
+
+            // Al cambiar de punto se conserva el tiempo alcanzado en el anterior.
+            if (globalTimer.key && globalTimer.key !== key) detenerTemporizador(true);
+
             const frecuenciaItem = item.periodicidad || 'Diaria';
             if (!frecuenciaEstaHabilitada(frecuenciaItem)) {
+                globalTimer.key = key;
+                globalTimer.estimated = segundosDesdeTexto(item.tiempo);
+                globalTimer.elapsed = 0;
+                globalTimer.running = false;
+                establecerBotonesActividad(false);
+                actualizarTemporizadorUI();
+                return;
+            }
+
+            const estadoActividad = globalEstados[key];
+            const guardado = globalTimersPorActividad[key];
+            const estimado = segundosDesdeTexto(item.tiempo);
+            globalTimer.key = key;
+            globalTimer.estimated = guardado?.estimated || estimado;
+            globalTimer.elapsed = guardado?.elapsed || estadoActividad?.tiempoReal || 0;
+            globalTimer.running = false;
+            globalTimer.startMs = null;
+
+            document.getElementById('tiempo-estimado').innerText = formatearDuracion(globalTimer.estimated);
+            document.getElementById('temporizador-reloj').innerText = formatearDuracion(globalTimer.elapsed);
+
+            // Si ya fue registrada, solo mostramos el tiempo registrado/alcanzado.
+            // No iniciamos un nuevo ciclo ni reiniciamos el contador.
+            if (estadoActividad?.actividadEjecutada) {
+                globalTimersPorActividad[key] = {
+                    ...(guardado || {}),
+                    elapsed: globalTimer.elapsed,
+                    estimated: globalTimer.estimated,
+                    estado: 'finalizado'
+                };
+                const estado = document.getElementById('temporizador-estado');
+                if (estado) estado.innerText = 'ACTIVIDAD REGISTRADA';
+                actualizarTemporizadorUI();
                 establecerBotonesActividad(false);
                 return;
             }
-            globalTimer.key = key;
-            globalTimer.estimated = segundosDesdeTexto(item.tiempo);
-            globalTimer.elapsed = 0;
-            globalTimer.running = false;
-            document.getElementById('tiempo-estimado').innerText = formatearDuracion(globalTimer.estimated);
-            document.getElementById('temporizador-reloj').innerText = '00:00:00';
-            
-            // BLOQUEO INICIAL OBLIGATORIO DURANTE LA CUENTA REGRESIVA DE PREPARACIÓN
-            establecerBotonesActividad(false);
 
+            // Si ya había avance, continuamos desde ese punto; no volvemos a 00:00:00.
+            establecerBotonesActividad(false);
             let cuenta = 5;
             const estado = document.getElementById('temporizador-estado');
-            if (estado) estado.innerText = `PREPÁRATE — INICIA EN ${cuenta}`;
+            if (estado) estado.innerText = globalTimer.elapsed > 0 ? `ACTIVIDAD PAUSADA — REANUDA EN ${cuenta}` : `PREPÁRATE — INICIA EN ${cuenta}`;
             globalTimer.countdownInterval = setInterval(() => {
                 cuenta--;
                 if (cuenta > 0) {
-                    estado.innerText = `PREPÁRATE — INICIA EN ${cuenta}`;
+                    if (estado) estado.innerText = globalTimer.elapsed > 0 ? `ACTIVIDAD PAUSADA — REANUDA EN ${cuenta}` : `PREPÁRATE — INICIA EN ${cuenta}`;
                 } else {
                     clearInterval(globalTimer.countdownInterval);
                     globalTimer.countdownInterval = null;
                     globalTimer.running = true;
                     globalTimer.startMs = Date.now();
-                    
-                    // HABILITAR BOTONES SÓLO CUANDO INICIA LA EJECUCIÓN
                     establecerBotonesActividad(true);
-                    
-                    estado.innerText = 'ACTIVIDAD EN EJECUCIÓN';
+                    if (estado) estado.innerText = 'ACTIVIDAD EN EJECUCIÓN';
                     globalTimer.interval = setInterval(() => {
-                        globalTimer.elapsed = Math.floor((Date.now() - globalTimer.startMs) / 1000);
+                        globalTimer.elapsed = Math.floor((Date.now() - globalTimer.startMs) / 1000) + (globalTimersPorActividad[key]?.elapsed || 0);
                         actualizarTemporizadorUI();
                     }, 250);
                     actualizarTemporizadorUI();
@@ -1042,9 +1086,13 @@
             if (!item || item.periodicidad !== frecuenciaSeleccionada || bloquearFrecuenciaNoHabilitada(frecuenciaSeleccionada)) return;
             const anterior = actual.ejecuciones || 0;
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const tiempoRealActividad = globalTimer.elapsed;
+            let tiempoRealActividad = Number(globalTimer.elapsed) || 0;
+            if (globalTimer.running && globalTimer.startMs) {
+                tiempoRealActividad = Math.max(tiempoRealActividad, Math.floor((Date.now() - globalTimer.startMs) / 1000) + (globalTimersPorActividad[estadoKey]?.elapsed || 0));
+            }
             const tiempoEstimado = globalTimer.estimated;
-            detenerTemporizador();
+            globalTimersPorActividad[estadoKey] = { elapsed: tiempoRealActividad, estimated: tiempoEstimado, estado: 'finalizado' };
+            detenerTemporizador(false);
             globalEstados[estadoKey] = { ...actual, status: estado, actividadEjecutada: true, condicion: actual.condicion === 'anomalia' ? 'anomalia' : 'normal', tipo: actual.tipo || 'Normal', sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: anterior + 1, ultimoTiempo: horaActual, com: actual.com || '', foto: actual.foto || null, tiempoReal: tiempoRealActividad, tiempoEstimado };
             actualizarInterfaz();
             const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
@@ -1202,9 +1250,13 @@
             const fotoNombre = fileInput.files.length > 0 ? fileInput.files[0].name : null;
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const anterior = globalEstados[estadoKey] || {};
-            const tiempoRealActividad = globalTimer.elapsed;
+            let tiempoRealActividad = Number(globalTimer.elapsed) || 0;
+            if (globalTimer.running && globalTimer.startMs) {
+                tiempoRealActividad = Math.max(tiempoRealActividad, Math.floor((Date.now() - globalTimer.startMs) / 1000) + (globalTimersPorActividad[estadoKey]?.elapsed || 0));
+            }
             const tiempoEstimado = globalTimer.estimated;
-            detenerTemporizador();
+            globalTimersPorActividad[estadoKey] = { elapsed: tiempoRealActividad, estimated: tiempoEstimado, estado: 'finalizado' };
+            detenerTemporizador(false);
             globalEstados[estadoKey] = { ...anterior, status: 'anomalia', actividadEjecutada: true, condicion: 'anomalia', tipo: tipoDano, sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: (anterior.ejecuciones || 0) + 1, ultimoTiempo: horaActual, com, foto: fotoNombre, tiempoReal: tiempoRealActividad, tiempoEstimado };
             cerrarModalAnomalia();
             mostrarAlertaIndustrial("ANOMALÍA REGISTRADA CORRECTAMENTE\n\nLa solicitud queda lista para integración con el sistema de mantenimiento.", 'ok');
@@ -1214,14 +1266,18 @@
         function guardarObservacion() {
             const com = document.getElementById('texto-observacion').value.trim();
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const tiempoRealActividad = globalTimer.elapsed;
+            let tiempoRealActividad = Number(globalTimer.elapsed) || 0;
+            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
+            if (globalTimer.running && globalTimer.startMs) {
+                tiempoRealActividad = Math.max(tiempoRealActividad, Math.floor((Date.now() - globalTimer.startMs) / 1000) + (globalTimersPorActividad[estadoKey]?.elapsed || 0));
+            }
             if(!com) {
                 mostrarAlertaIndustrial("Por favor ingrese una observación.");
                 return;
             }
-            detenerTemporizador();
+            globalTimersPorActividad[estadoKey] = { elapsed: tiempoRealActividad, estimated: globalTimer.estimated, estado: 'finalizado' };
+            detenerTemporizador(false);
 
-            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
 
             globalEstados[estadoKey] = { 
