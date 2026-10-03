@@ -47,7 +47,10 @@
     <!-- MODAL DE ALERTA INDUSTRIAL PERSONALIZADA -->
     <div id="alerta-modal" style="display: none;" class="fixed inset-0 z-[999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-6 industrial-shadow flex flex-col items-center text-center">
-            <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-2">AVISO DEL SISTEMA TPM</h3>
+            <div class="w-28 h-28 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
+                <img id="alerta-mascota" src="mascota-error.png" alt="Mascota del sistema" class="max-h-full max-w-full object-contain" onerror="this.src='ChatGPT Image 23 sept 2026, 12_46_01.jpg'">
+            </div>
+            <h3 id="alerta-titulo" class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-2">AVISO DEL SISTEMA TPM</h3>
             <p class="text-xs text-slate-200 mb-6 leading-relaxed font-medium whitespace-pre-line" id="alerta-texto">Mensaje de advertencia...</p>
             <button type="button" onclick="cerrarAlertaModal()" class="w-full bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Aceptar</button>
         </div>
@@ -130,6 +133,9 @@
     <!-- MODAL DE CIERRE DEFINITIVO DE MONITOREO -->
     <div id="cierre-monitoreo-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-7 industrial-shadow flex flex-col items-center text-center">
+            <div class="w-28 h-28 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
+                <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota de actividad completada" class="max-h-full max-w-full object-contain">
+            </div>
             <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider mb-2">¡PERFECTO, REGRESA EL DÍA DE MAÑANA!</h3>
             <p class="text-xs text-slate-300 mb-6 leading-relaxed">Has completado todas las actividades del turno correctamente.</p>
             <button type="button" onclick="cerrarModalMonitoreoFinal()" class="w-full bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Entendido</button>
@@ -139,6 +145,11 @@
     <!-- MODAL DE CONFIRMACIÓN ANTES DE REPORTAR ANOMALÍA -->
     <div id="confirmacion-anomalia-modal" style="display: none;" class="fixed inset-0 z-[80] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-2xl w-full p-7 industrial-shadow">
+            <div class="flex justify-center mb-4">
+                <div class="w-24 h-24 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 shadow-lg">
+                    <img src="mascota-error.png" alt="Mascota de anomalía" class="max-h-full max-w-full object-contain" onerror="this.src='ChatGPT Image 23 sept 2026, 12_46_01.jpg'">
+                </div>
+            </div>
             <div class="text-center mb-5">
                 <h3 class="text-sm font-black text-white uppercase tracking-wider mb-2">¿ESTÁS SEGURO DE REPORTAR UNA ANOMALÍA?</h3>
                 <p class="text-xs text-slate-400 mt-2 leading-relaxed">Antes de generar el reporte, confirma que la condición encontrada realmente requiere una intervención de mantenimiento.</p>
@@ -182,7 +193,7 @@
                         <p class="text-[10px] text-slate-500 mt-1">Escriba para filtrar y haga clic en la opción deseada para seleccionarla.</p>
                     </div>
                     <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Descripción detallada</label><textarea id="texto-anomalia" rows="2" placeholder="Describa la condición encontrada..." class="w-full bg-[#141821] industrial-border rounded-xl p-3 text-sm text-white focus:outline-none focus:border-ind-accent"></textarea></div>
-                    <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Evidencia fotográfica</label><div class="flex items-center space-x-2"><label class="flex-1 bg-[#141821] hover:bg-[#2A3142] industrial-border rounded-xl px-3 py-2 text-center cursor-pointer transition text-slate-300 text-xs font-medium"><span>📷 + Adjuntar foto</span><input type="file" id="foto-anomalia" accept="image/*" class="hidden" onchange="mostrarNombreArchivo(this)"></label><span id="nombre-archivo" class="text-slate-400 truncate max-w-[120px]">Sin archivo</span></div></div>
+                    <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Evidencia fotográfica</label><div class="flex items-center space-x-2"><label class="flex-1 bg-[#141821] hover:bg-[#2A3142] industrial-border rounded-xl px-3 py-2 text-center cursor-pointer transition text-slate-300 text-xs font-medium"><span>+ Adjuntar foto</span><input type="file" id="foto-anomalia" accept="image/*" class="hidden" onchange="mostrarNombreArchivo(this)"></label><span id="nombre-archivo" class="text-slate-400 truncate max-w-[120px]">Sin archivo</span></div></div>
                     <div class="flex space-x-2 pt-2"><button type="button" onclick="guardarAnomalia()" class="flex-1 bg-rose-700 hover:bg-rose-600 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Registrar anomalía</button><button type="button" onclick="cerrarModalAnomalia()" class="bg-[#141821] hover:bg-[#2A3142] text-slate-300 px-4 py-3 rounded-xl text-xs uppercase tracking-widest transition industrial-border cursor-pointer">Cancelar</button></div>
                 </div>
             </div>
@@ -401,9 +412,38 @@
         let globalTimer = { key: null, interval: null, countdownInterval: null, elapsed: 0, estimated: 0, running: false, startMs: null };
 
         const fechaArranqueTPM = new Date(2026, 8, 24); // 24 Septiembre 2026
+        const CLAVE_FAMILIARIZACION = 'ma_familiarizado_v1';
 
-        function mostrarAlertaIndustrial(mensaje) {
-            document.getElementById('alerta-texto').innerText = mensaje;
+        function obtenerFechaSinHora(fecha) {
+            return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+        }
+
+        function obtenerDiasCalendarioDesdeInicio() {
+            const hoy = obtenerFechaSinHora(new Date());
+            const inicio = obtenerFechaSinHora(fechaArranqueTPM);
+            const diferenciaMs = hoy.getTime() - inicio.getTime();
+            return Math.max(0, Math.floor(diferenciaMs / 86400000));
+        }
+
+        function obtenerEstadoFrecuencias() {
+            const diasTranscurridos = obtenerDiasCalendarioDesdeInicio();
+            return {
+                diasTranscurridos,
+                diasParaSemanal: Math.max(0, 7 - diasTranscurridos),
+                diasParaMensual: Math.max(0, 30 - diasTranscurridos)
+            };
+        }
+
+        function mostrarAlertaIndustrial(mensaje, tipo = 'error') {
+            const texto = document.getElementById('alerta-texto');
+            const titulo = document.getElementById('alerta-titulo');
+            const mascota = document.getElementById('alerta-mascota');
+            if (texto) texto.innerText = mensaje;
+            if (titulo) {
+                titulo.innerText = tipo === 'ok' ? 'REGISTRO DEL SISTEMA TPM' : 'AVISO DEL SISTEMA TPM';
+                titulo.className = tipo === 'ok' ? 'text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2' : 'text-xs font-bold text-rose-400 uppercase tracking-wider mb-2';
+            }
+            if (mascota) mascota.src = tipo === 'ok' ? 'ChatGPT Image 23 sept 2026, 12_46_01.jpg' : 'mascota-error.png';
             document.getElementById('alerta-modal').style.display = 'flex';
         }
 
@@ -423,17 +463,11 @@
         }
 
         function calcularEstadoCalendarioTPM() {
-            const hoy = new Date();
-            const diferenciaTiempo = hoy.getTime() - fechaArranqueTPM.getTime();
-            const diasTranscurridos = Math.max(0, Math.floor(diferenciaTiempo / (1000 * 3600 * 24)));
-            
-            let diasParaSemanal = Math.max(0, 7 - diasTranscurridos);
-            let diasParaMensual = Math.max(0, 30 - diasTranscurridos);
-            
-            const textoEstado = `DÍA/S PARA LAS ACTIVIDADES SEMANALES: ${diasParaSemanal} | DÍA/S PARA LAS ACTIVIDADES MENSUALES: ${diasParaMensual}`;
-
-            document.getElementById('tpm-estado-texto').innerText = textoEstado;
-            return { diasTranscurridos, diasParaSemanal, diasParaMensual };
+            const estado = obtenerEstadoFrecuencias();
+            const textoEstado = `DÍA/S PARA LAS ACTIVIDADES SEMANALES: ${estado.diasParaSemanal} | DÍA/S PARA LAS ACTIVIDADES MENSUALES: ${estado.diasParaMensual}`;
+            const indicador = document.getElementById('tpm-estado-texto');
+            if (indicador) indicador.innerText = textoEstado;
+            return estado;
         }
 
         const EQUIPO_QR_DEFAULT = { maquina: "Bole 2600 EK-2", area: "Inyeccion Convencional" };
@@ -467,6 +501,12 @@
             });
         }
 
+        function iniciarInterfazMantenimiento() {
+            poblarFiltroSistemas();
+            calcularEstadoCalendarioTPM();
+            actualizarInterfaz();
+        }
+
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             if (codigoOp === "") {
@@ -481,15 +521,19 @@
             if (modal) modal.style.display = 'none';
 
             const famModal = document.getElementById('familiarizacion-modal');
-            if (famModal) famModal.style.display = 'flex';
+            const yaFamiliarizado = localStorage.getItem(CLAVE_FAMILIARIZACION) === '1';
+            if (famModal && !yaFamiliarizado) {
+                famModal.style.display = 'flex';
+            } else {
+                iniciarInterfazMantenimiento();
+            }
         }
 
         function cerrarFamiliarizacion() {
             const famModal = document.getElementById('familiarizacion-modal');
             if (famModal) famModal.style.display = 'none';
-            poblarFiltroSistemas();
-            calcularEstadoCalendarioTPM();
-            actualizarInterfaz();
+            localStorage.setItem(CLAVE_FAMILIARIZACION, '1');
+            iniciarInterfazMantenimiento();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -502,7 +546,24 @@
             const btnIniciar = document.getElementById('btn-iniciar');
             if(btnIniciar) btnIniciar.onclick = appIniciarSesion;
 
-            document.getElementById('tipo-dano-input')?.addEventListener('input', mostrarResultadosTipoDano);
+            const tipoDanoInput = document.getElementById('tipo-dano-input');
+            const tipoDanoCaja = document.getElementById('tipo-dano-resultados');
+            tipoDanoInput?.addEventListener('input', mostrarResultadosTipoDano);
+            tipoDanoInput?.addEventListener('focus', mostrarResultadosTipoDano);
+            tipoDanoCaja?.addEventListener('pointerdown', (e) => {
+                const opcion = e.target.closest('.tipo-dano-opcion');
+                if (!opcion) return;
+                e.preventDefault(); e.stopPropagation();
+                const tipo = tiposDanio[Number(opcion.dataset.tipoIndex)];
+                if (tipo) seleccionarTipoDano(tipo);
+            });
+            tipoDanoCaja?.addEventListener('click', (e) => {
+                const opcion = e.target.closest('.tipo-dano-opcion');
+                if (!opcion) return;
+                e.preventDefault(); e.stopPropagation();
+                const tipo = tiposDanio[Number(opcion.dataset.tipoIndex)];
+                if (tipo) seleccionarTipoDano(tipo);
+            });
             document.addEventListener('click', (e) => {
                 const caja = document.getElementById('tipo-dano-resultados');
                 const input = document.getElementById('tipo-dano-input');
@@ -593,20 +654,34 @@
             actualizarInterfaz();
         }
 
-        function filtrarPorFrecuencia() {
-            const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
-            const hoy = new Date();
-            const diasTranscurridos = Math.floor((hoy.getTime() - fechaArranqueTPM.getTime()) / (1000 * 3600 * 24));
-            
-            let diasParaSemanal = Math.max(0, 7 - diasTranscurridos);
-            let diasParaMensual = Math.max(0, 30 - diasTranscurridos);
+        function frecuenciaEstaHabilitada(frecuencia) {
+            const estado = obtenerEstadoFrecuencias();
+            if (frecuencia === 'Semanal') return estado.diasParaSemanal === 0;
+            if (frecuencia === 'Mensual') return estado.diasParaMensual === 0;
+            return true;
+        }
 
-            if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 0) {
-                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades semanales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 7 (Faltan ${diasParaSemanal} días).`);
-            } else if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 0) {
-                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades mensuales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 30 (Faltan ${diasParaMensual} días).`);
+        function bloquearFrecuenciaNoHabilitada(frecuencia) {
+            const estado = obtenerEstadoFrecuencias();
+            if (frecuencia === 'Semanal' && estado.diasParaSemanal > 0) {
+                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades semanales todavía no se encuentran habilitadas.\nDías restantes: ${estado.diasParaSemanal}`);
+                return true;
             }
+            if (frecuencia === 'Mensual' && estado.diasParaMensual > 0) {
+                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades mensuales todavía no se encuentran habilitadas.\nDías restantes: ${estado.diasParaMensual}`);
+                return true;
+            }
+            return false;
+        }
 
+        function filtrarPorFrecuencia() {
+            const selector = document.getElementById('select-frecuencia-filtro');
+            const frecuenciaSeleccionada = selector.value;
+            if (bloquearFrecuenciaNoHabilitada(frecuenciaSeleccionada)) {
+                selector.value = 'Diaria';
+                actualizarInterfaz();
+                return;
+            }
             actualizarInterfaz();
         }
 
@@ -617,6 +692,13 @@
             
             const grid = document.getElementById('puntos-grid');
             grid.innerHTML = '';
+
+            if (!frecuenciaEstaHabilitada(frecuenciaSeleccionada)) {
+                grid.innerHTML = `<div class="p-5 text-xs text-slate-400 text-center industrial-border rounded-xl bg-[#141821]/50">ACTIVIDAD NO DISPONIBLE<br><span class="text-slate-500">Esta frecuencia todavía no está habilitada.</span></div>`;
+                document.getElementById('contador-filtro-badge').innerText = '0 puntos';
+                establecerBotonesActividad(false);
+                return;
+            }
 
             let listaFiltrada = listaOriginal.filter(item => {
                 const matchSistema = (sistemaSeleccionado === "TODOS" || item.sistema === sistemaSeleccionado);
@@ -631,19 +713,19 @@
             let completadosMonitoreoDiarias = 0;
 
             datosLimpieza.forEach((item, idx) => {
-                if(item.periodicidad === 'Diaria' && globalEstados[`limpieza_${idx}`] && globalEstados[`limpieza_${idx}`].status !== 'pendiente') {
+                if(item.periodicidad === 'Diaria' && globalEstados[`limpieza_${idx}`] && globalEstados[`limpieza_${idx}`].actividadEjecutada === true) {
                     completadosLimpiezaDiarias++;
                 }
             });
 
             datosMonitoreo.forEach((item, idx) => {
-                if(item.periodicidad === 'Diaria' && globalEstados[`monitoreo_${idx}`] && globalEstados[`monitoreo_${idx}`].status !== 'pendiente') {
+                if(item.periodicidad === 'Diaria' && globalEstados[`monitoreo_${idx}`] && globalEstados[`monitoreo_${idx}`].actividadEjecutada === true) {
                     completadosMonitoreoDiarias++;
                 }
             });
             
             listaOriginal.forEach((item, idx) => {
-                if(globalEstados[`${globalModo}_${idx}`] && globalEstados[`${globalModo}_${idx}`].status !== 'pendiente') {
+                if(globalEstados[`${globalModo}_${idx}`] && globalEstados[`${globalModo}_${idx}`].actividadEjecutada === true) {
                     completadosTotales++;
                 }
             });
@@ -674,26 +756,22 @@
                 const estadoKey = `${globalModo}_${idxReal}`;
                 const dataEstado = globalEstados[estadoKey];
                 
-                let icon = '○';
                 let colorClass = "text-slate-400 bg-[#141821]/40 industrial-border hover:border-slate-400";
                 let textState = "PENDIENTE";
 
-                if(dataEstado && dataEstado.status === 'anomalia') {
-                    icon = '!';
+                if(dataEstado && dataEstado.actividadEjecutada && dataEstado.condicion === 'anomalia') {
                     colorClass = "text-rose-400 bg-rose-950/25 border-rose-700/60";
                     textState = "ANOMALÍA";
-                } else if(dataEstado && dataEstado.status === 'listo') {
-                    icon = '✓';
+                } else if(dataEstado && dataEstado.actividadEjecutada && dataEstado.condicion === 'normal' && dataEstado.status === 'listo') {
                     colorClass = "text-emerald-400 bg-emerald-950/25 border-emerald-700/60";
                     textState = "REALIZADO";
-                } else if(dataEstado && dataEstado.status === 'observacion') {
-                    icon = 'i';
+                } else if(dataEstado && dataEstado.actividadEjecutada && dataEstado.status === 'observacion') {
                     colorClass = "text-blue-400 bg-blue-950/25 border-blue-700/60";
                     textState = "OBSERVACIÓN";
                 }
 
                 let estiloUrgencia = '';
-                if (item.periodicidad === 'Diaria' && (!dataEstado || dataEstado.status === 'pendiente')) {
+                if (item.periodicidad === 'Diaria' && (!dataEstado || dataEstado.actividadEjecutada !== true)) {
                     estiloUrgencia = `border-left: 4px solid ${colorUrgenciaPorHora()};`;
                 }
 
@@ -710,7 +788,7 @@
                 div.style = estiloUrgencia;
                 div.innerHTML = `
                     <div class="flex items-center space-x-3 truncate">
-                        <span class="font-bold w-4 text-center">${icon}</span>
+                        <span class="w-4 text-center"></span>
                         <span class="font-bold text-white">${item.codigo}</span>
                         <span class="text-slate-300 truncate font-sans font-medium">${item.componente}</span>
                     </div>
@@ -799,21 +877,21 @@
             const trazabilidadElem = document.getElementById('trazabilidad-estado');
             const btnVerificacion = document.getElementById('btn-verificacion');
 
-            if(dataEstado && dataEstado.status === 'anomalia') {
+            if(dataEstado && dataEstado.actividadEjecutada && dataEstado.condicion === 'anomalia') {
                 trazabilidadElem.innerHTML = `ANOMALÍA REPORTADA - ${dataEstado.tipo || 'Sin tipo'}`;
                 trazabilidadElem.className = "text-xs text-rose-400 font-mono font-bold";
                 if(btnVerificacion) {
                     btnVerificacion.disabled = true;
                     btnVerificacion.title = "No se puede verificar un punto reportado con anomalía.";
                 }
-            } else if(dataEstado && dataEstado.status === 'listo') {
+            } else if(dataEstado && dataEstado.actividadEjecutada && dataEstado.status === 'listo') {
                 trazabilidadElem.innerHTML = `VERIFICACIÓN REGISTRADA - ${globalOperador || 'Operador'}`;
                 trazabilidadElem.className = "text-xs text-emerald-400 font-mono font-bold";
                 if(btnVerificacion) {
-                    btnVerificacion.disabled = true; // REGLA: BLOQUEO ESTRICTO DE DOBLE VERIFICACIÓN
+                    btnVerificacion.disabled = true;
                     btnVerificacion.title = "Esta actividad ya fue verificada en este ciclo.";
                 }
-            } else if(dataEstado && dataEstado.status === 'observacion') {
+            } else if(dataEstado && dataEstado.actividadEjecutada && dataEstado.status === 'observacion') {
                 trazabilidadElem.innerHTML = `OBSERVACIÓN REGISTRADA - ${dataEstado.com}`;
                 trazabilidadElem.className = "text-xs text-blue-400 font-mono font-bold";
                 if(btnVerificacion) {
@@ -828,6 +906,7 @@
                     btnVerificacion.title = "";
                 }
             }
+            refrescarDisponibilidadAcciones();
         }
 
         function segundosDesdeTexto(texto) {
@@ -867,19 +946,34 @@
             }
         }
 
-        // BLOQUEO ESTRICTO DE BOTONES HASTA QUE EL TEMPORIZADOR ESTÉ EN EJECUCIÓN
+        // Los botones dependen del temporizador, la frecuencia y el estado del punto.
         function establecerBotonesActividad(habilitados) {
+            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
+            const st = globalEstados[estadoKey];
+            const frecuencia = document.getElementById('select-frecuencia-filtro')?.value || 'Diaria';
+            const frecuenciaDisponible = frecuenciaEstaHabilitada(frecuencia);
+            const puedeActuar = habilitados && frecuenciaDisponible && !(st && st.actividadEjecutada && st.condicion === 'anomalia');
+
             ['btn-verificacion','btn-observacion','btn-anomalia'].forEach(id => {
                 const b = document.getElementById(id);
-                if (b) {
-                    if (id === 'btn-verificacion' && habilitados) {
-                        const estadoKey = `${globalModo}_${globalPuntoIdx}`;
-                        const st = globalEstados[estadoKey];
-                        if (st && (st.status === 'listo' || st.status === 'anomalia')) return;
-                    }
-                    b.disabled = !habilitados;
+                if (!b) return;
+                if (id === 'btn-verificacion' && st && st.actividadEjecutada && st.status === 'listo') {
+                    b.disabled = true;
+                    b.title = "Esta actividad ya fue verificada en este ciclo.";
+                    return;
                 }
+                if (id === 'btn-verificacion' && st && st.actividadEjecutada && st.condicion === 'anomalia') {
+                    b.disabled = true;
+                    b.title = "No se puede verificar un punto reportado con anomalía.";
+                    return;
+                }
+                b.disabled = !puedeActuar;
+                b.title = puedeActuar ? '' : (frecuenciaDisponible ? "Inicie la actividad para habilitar las acciones." : "Esta frecuencia todavía no está habilitada.");
             });
+        }
+
+        function refrescarDisponibilidadAcciones() {
+            establecerBotonesActividad(globalTimer.running === true);
         }
 
         function detenerTemporizador() {
@@ -889,14 +983,19 @@
             globalTimer.countdownInterval = null;
             globalTimer.running = false;
             actualizarTemporizadorUI();
-            establecerBotonesActividad(true);
+            refrescarDisponibilidadAcciones();
         }
 
         function iniciarTemporizadorActividad(item, key) {
             if (!item || globalTimer.key === key) return;
             detenerTemporizador();
+            const frecuenciaItem = item.periodicidad || 'Diaria';
+            if (!frecuenciaEstaHabilitada(frecuenciaItem)) {
+                establecerBotonesActividad(false);
+                return;
+            }
             globalTimer.key = key;
-            globalTimer.estimated = segundosDesdeTexto(item.tiempo || item.time);
+            globalTimer.estimated = segundosDesdeTexto(item.tiempo);
             globalTimer.elapsed = 0;
             globalTimer.running = false;
             document.getElementById('tiempo-estimado').innerText = formatearDuracion(globalTimer.estimated);
@@ -934,77 +1033,29 @@
 
         function marcarEstado(estado) {
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
-            const estadoActual = globalEstados[estadoKey] ? globalEstados[estadoKey].status : null;
-
-            if (estadoActual === 'anomalia') {
-                mostrarAlertaIndustrial("Este punto tiene registrada una anomalía activa. No puede ser sobrescrito a verificado.");
-                return;
-            }
-            if (estadoActual === 'listo') {
-                mostrarAlertaIndustrial("Esta actividad ya fue verificada en este ciclo. Evite registros duplicados.");
-                return;
-            }
-
+            const actual = globalEstados[estadoKey] || {};
+            if (actual.actividadEjecutada && actual.condicion === 'anomalia') { mostrarAlertaIndustrial("Este punto tiene registrada una anomalía activa. No puede ser sobrescrito a verificado."); return; }
+            if (actual.actividadEjecutada && actual.status === 'listo') { mostrarAlertaIndustrial("Esta actividad ya fue verificada en este ciclo. Evite registros duplicados."); return; }
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const item = listaOriginal[globalPuntoIdx];
             const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
-
-            const hoy = new Date();
-            const diasTranscurridos = Math.floor((hoy.getTime() - fechaArranqueTPM.getTime()) / (1000 * 3600 * 24));
-            
-            let diasParaSemanal = Math.max(0, 7 - diasTranscurridos);
-            let diasParaMensual = Math.max(0, 30 - diasTranscurridos);
-
-            if (frecuenciaSeleccionada === "Semanal" && diasParaSemanal !== 0) {
-                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades semanales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 7 (Faltan ${diasParaSemanal} días).`);
-                return;
-            }
-
-            if (frecuenciaSeleccionada === "Mensual" && diasParaMensual !== 0) {
-                mostrarAlertaIndustrial(`ACTIVIDAD NO DISPONIBLE\n\nLas actividades mensuales todavía no se encuentran habilitadas.\nDías transcurridos: ${diasTranscurridos}\nDías requeridos para el ciclo: 30 (Faltan ${diasParaMensual} días).`);
-                return;
-            }
-
-            const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
+            if (!item || item.periodicidad !== frecuenciaSeleccionada || bloquearFrecuenciaNoHabilitada(frecuenciaSeleccionada)) return;
+            const anterior = actual.ejecuciones || 0;
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const tiempoRealActividad = globalTimer.elapsed;
+            const tiempoEstimado = globalTimer.estimated;
             detenerTemporizador();
-
-            let estadoFinal = estado;
-            if (estadoActual === 'anomalia') {
-                estadoFinal = 'anomalia';
-            }
-
-            globalEstados[estadoKey] = { 
-                status: estadoFinal, 
-                tipo: (globalEstados[estadoKey] && globalEstados[estadoKey].tipo) || 'Normal', 
-                ejecuciones: anterior + 1, 
-                ultimoTiempo: horaActual,
-                com: (globalEstados[estadoKey] && globalEstados[estadoKey].com) || '',
-                foto: null,
-                tiempoReal: tiempoRealActividad,
-                tiempoEstimado: globalTimer.estimated
-            };
-            
+            globalEstados[estadoKey] = { ...actual, status: estado, actividadEjecutada: true, condicion: actual.condicion === 'anomalia' ? 'anomalia' : 'normal', tipo: actual.tipo || 'Normal', sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: anterior + 1, ultimoTiempo: horaActual, com: actual.com || '', foto: actual.foto || null, tiempoReal: tiempoRealActividad, tiempoEstimado };
             actualizarInterfaz();
-            
             const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
-
             let siguienteIdx = -1;
             for (let i = globalPuntoIdx + 1; i < listaOriginal.length; i++) {
-                const item = listaOriginal[i];
-                const matchSistema = (sistemaSeleccionado === "TODOS" || item.sistema === sistemaSeleccionado);
-                const matchFrecuencia = (item.periodicidad === frecuenciaSeleccionada);
-                if (matchSistema && matchFrecuencia) {
-                    siguienteIdx = i;
-                    break;
-                }
+                const siguiente = listaOriginal[i];
+                const matchSistema = (sistemaSeleccionado === "TODOS" || siguiente.sistema === sistemaSeleccionado);
+                const matchFrecuencia = (siguiente.periodicidad === frecuenciaSeleccionada);
+                if (matchSistema && matchFrecuencia) { siguienteIdx = i; break; }
             }
-
-            if(siguienteIdx !== -1) {
-                globalPuntoIdx = siguienteIdx;
-                mostrarFicha(globalPuntoIdx);
-                actualizarInterfaz();
-            }
+            if(siguienteIdx !== -1) { globalPuntoIdx = siguienteIdx; mostrarFicha(globalPuntoIdx); actualizarInterfaz(); }
         }
 
         function mostrarModalCierreLimpieza(frecuencia) {
@@ -1062,16 +1113,21 @@
             const input = document.getElementById('tipo-dano-input');
             const caja = document.getElementById('tipo-dano-resultados');
             if (!input || !caja) return;
+            document.getElementById('tipo-dano-seleccionado').value = '';
             const q = normalizarBusqueda(input.value.trim());
             const resultados = q ? tiposDanio.filter(t => normalizarBusqueda(t).includes(q)) : tiposDanio;
-            caja.innerHTML = resultados.slice(0, 40).map(t => `<div class="w-full text-left px-3.5 py-2.5 text-xs text-slate-200 hover:bg-ind-accent/40 hover:text-white border-b border-slate-700/40 last:border-0 cursor-pointer" onmousedown="seleccionarTipoDano(${JSON.stringify(t)})">${t}</div>`).join('');
+            caja.innerHTML = resultados.slice(0, 40).map(t => { const idx = tiposDanio.indexOf(t); return `<button type="button" class="tipo-dano-opcion w-full text-left px-3.5 py-2.5 text-xs text-slate-200 hover:bg-ind-accent/40 hover:text-white border-b border-slate-700/40 last:border-0 cursor-pointer" data-tipo-index="${idx}">${t}</button>`; }).join('');
             caja.classList.toggle('hidden', resultados.length === 0);
         }
 
         function seleccionarTipoDano(tipo) {
-            document.getElementById('tipo-dano-input').value = tipo;
-            document.getElementById('tipo-dano-seleccionado').value = tipo;
-            document.getElementById('tipo-dano-resultados').classList.add('hidden');
+            const input = document.getElementById('tipo-dano-input');
+            const seleccionado = document.getElementById('tipo-dano-seleccionado');
+            const caja = document.getElementById('tipo-dano-resultados');
+            if (!input || !seleccionado || !caja) return;
+            input.value = tipo;
+            seleccionado.value = tipo;
+            caja.classList.add('hidden');
         }
 
         function abrirConfirmacionAnomalia() {
@@ -1137,19 +1193,21 @@
         function guardarAnomalia() {
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const item = listaOriginal[globalPuntoIdx];
-            const tipoDano = document.getElementById('tipo-dano-seleccionado').value.trim() || document.getElementById('tipo-dano-input').value.trim();
+            const tipoDano = document.getElementById('tipo-dano-seleccionado').value.trim();
             const com = document.getElementById('texto-anomalia').value.trim();
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            if(!tipoDano) { mostrarAlertaIndustrial("Seleccione el tipo de daño encontrado."); return; }
+            if(!tipoDano) { mostrarAlertaIndustrial("Seleccione una opción de la lista de tipo de daño."); return; }
             if(!com) { mostrarAlertaIndustrial("Por favor ingrese una descripción detallada de la anomalía."); return; }
             const fileInput = document.getElementById('foto-anomalia');
             const fotoNombre = fileInput.files.length > 0 ? fileInput.files[0].name : null;
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
-            const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
+            const anterior = globalEstados[estadoKey] || {};
+            const tiempoRealActividad = globalTimer.elapsed;
+            const tiempoEstimado = globalTimer.estimated;
             detenerTemporizador();
-            globalEstados[estadoKey] = { status: 'anomalia', tipo: tipoDano, sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: anterior + 1, ultimoTiempo: horaActual, com: com, foto: fotoNombre, tiempoReal: globalTimer.elapsed };
+            globalEstados[estadoKey] = { ...anterior, status: 'anomalia', actividadEjecutada: true, condicion: 'anomalia', tipo: tipoDano, sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: (anterior.ejecuciones || 0) + 1, ultimoTiempo: horaActual, com, foto: fotoNombre, tiempoReal: tiempoRealActividad, tiempoEstimado };
             cerrarModalAnomalia();
-            mostrarAlertaIndustrial("ANOMALÍA REGISTRADA CORRECTAMENTE\n\nLa solicitud queda lista para integración con el sistema de mantenimiento.");
+            mostrarAlertaIndustrial("ANOMALÍA REGISTRADA CORRECTAMENTE\n\nLa solicitud queda lista para integración con el sistema de mantenimiento.", 'ok');
             actualizarInterfaz();
         }
 
@@ -1167,7 +1225,10 @@
             const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
 
             globalEstados[estadoKey] = { 
+                ...(globalEstados[estadoKey] || {}),
                 status: 'observacion', 
+                actividadEjecutada: true,
+                condicion: 'normal',
                 tipo: 'Observación', 
                 ejecuciones: anterior + 1,
                 ultimoTiempo: horaActual,
@@ -1259,7 +1320,6 @@
 
         window.onload = () => {
             configurarEquipoQR();
-            poblarFiltroSistemas();
             calcularEstadoCalendarioTPM();
         };
     </script>
