@@ -1072,7 +1072,7 @@
             actualizarTemporizadorUI();
         }
 
-        // MARCAR ESTADO CONECTADO A SUPABASE
+       // MARCAR ESTADO CONECTADO A SUPABASE (CON HORA DE INICIO Y HORA LOCAL CORRECTAS)
         async function marcarEstado(estado) {
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const actual = globalEstados[estadoKey] || {};
@@ -1094,10 +1094,14 @@
                 const { data: opData } = await supabaseClient.from('operadores').select('id').eq('codigo', globalOperador).single();
                 const operadorId = opData ? opData.id : 1;
 
+                const fechaFinMs = Date.now();
+                const fechaInicioMs = fechaFinMs - (tiempoRealActividad * 1000);
+
                 const { error } = await supabaseClient.from('ejecuciones').insert([{
                     id_actividad: item.id,
                     id_operador: operadorId,
-                    hora_fin: new Date().toISOString(),
+                    hora_inicio: new Date(fechaInicioMs).toISOString(),
+                    hora_fin: new Date(fechaFinMs).toISOString(),
                     tiempo_real_seg: tiempoRealActividad,
                     actividad_ejecutada: true,
                     condicion: 'normal',
@@ -1130,7 +1134,6 @@
                 mostrarAlertaIndustrial("Error al registrar la ejecución en la base de datos.");
             }
         }
-
         function mostrarModalCierreLimpieza(frecuencia) {
             let nombreFreq = frecuencia.toLowerCase() === 'diaria' ? 'ACTIVIDADES DIARIAS' : (frecuencia.toUpperCase() + 'S');
             document.getElementById('cierre-titulo').innerText = `¡HAS TERMINADO LA JORNADA DE ${nombreFreq}!`;
