@@ -1072,12 +1072,20 @@
             actualizarTemporizadorUI();
         }
 
-       // MARCAR ESTADO CONECTADO A SUPABASE (CON HORA DE INICIO Y HORA LOCAL CORRECTAS)
+    // FUNCIÓN AUXILIAR PARA OBTENER LA HORA LOCAL EXACTA DE ECUADOR EN FORMATO ISO
+        function obtenerHoraLocalISO(desplazamientoSegundos = 0) {
+            const fecha = new Date(Date.now() - (desplazamientoSegundos * 1000));
+            // Resta el desfase de la zona horaria local para guardarla correctamente compensada
+            const offsetMs = fecha.getTimezoneOffset() * 60000;
+            return new Date(fecha.getTime() - offsetMs).toISOString().slice(0, -1) + '-05:00'; 
+        }
+
+        // 1. MARCAR ESTADO (VERIFICACIÓN NORMAL)
         async function marcarEstado(estado) {
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const actual = globalEstados[estadoKey] || {};
-            if (actual.actividadEjecutada && actual.condicion === 'anomalia') { mostrarAlertaIndustrial("Este punto tiene registrada una anomalía activa. No puede ser sobrescrito a verificado."); return; }
-            if (actual.actividadEjecutada && actual.status === 'listo') { mostrarAlertaIndustrial("Esta actividad ya fue verificada en este ciclo. Evite registros duplicados."); return; }
+            if (actual.actividadEjecutada && actual.condicion === 'anomalia') { mostrarAlertaIndustrial("Este punto tiene registrada una anomalía activa."); return; }
+            if (actual.actividadEjecutada && actual.status === 'listo') { mostrarAlertaIndustrial("Esta actividad ya fue verificada en este ciclo."); return; }
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const item = listaOriginal[globalPuntoIdx];
             const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
@@ -1090,18 +1098,14 @@
             }
 
             try {
-                // Registrar ejecución real en Supabase
                 const { data: opData } = await supabaseClient.from('operadores').select('id').eq('codigo', globalOperador).single();
                 const operadorId = opData ? opData.id : 1;
-
-                const fechaFinMs = Date.now();
-                const fechaInicioMs = fechaFinMs - (tiempoRealActividad * 1000);
 
                 const { error } = await supabaseClient.from('ejecuciones').insert([{
                     id_actividad: item.id,
                     id_operador: operadorId,
-                    hora_inicio: new Date(fechaInicioMs).toISOString(),
-                    hora_fin: new Date(fechaFinMs).toISOString(),
+                    hora_inicio: obtenerHoraLocalISO(tiempoRealActividad),
+                    hora_fin: obtenerHoraLocalISO(0),
                     tiempo_real_seg: tiempoRealActividad,
                     actividad_ejecutada: true,
                     condicion: 'normal',
@@ -1110,11 +1114,8 @@
 
                 if (error) throw error;
 
-                const anterior = actual.ejecuciones || 0;
-                const tiempoEstimado = globalTimer.estimated;
-                globalTimersPorActividad[estadoKey] = { elapsed: tiempoRealActividad, estimated: tiempoEstimado, estado: 'finalizado' };
                 detenerTemporizador(false);
-                globalEstados[estadoKey] = { ...actual, status: estado, actividadEjecutada: true, condicion: actual.condicion === 'anomalia' ? 'anomalia' : 'normal', tipo: actual.tipo || 'Normal', sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: anterior + 1, ultimoTiempo: horaActual, com: actual.com || '', foto: actual.foto || null, tiempoReal: tiempoRealActividad, tiempoEstimado };
+                globalEstados[estadoKey] = { ...actual, status: estado, actividadEjecutada: true, condicion: 'normal', tipo: 'Normal', sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: (actual.ejecuciones || 0) + 1, ultimoTiempo: horaActual, tiempoReal: tiempoRealActividad };
                 
                 actualizarInterfaz();
                 mostrarAlertaIndustrial("Verificación realizada y guardada en Supabase con éxito.", "ok");
@@ -1132,6 +1133,109 @@
             } catch (err) {
                 console.error("Error al guardar en Supabase:", err);
                 mostrarAlertaIndustrial("Error al registrar la ejecución en la base de datos.");
+            }
+        }
+
+        // 2. GUARDAR ANOMALÍA (TARJETA ROJA/AZUL)
+        async function guardarAnomalia() {
+            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const item = listaOriginal[globalPuntoIdx];
+            const tipoDano = document.getElementById('tipo-dano-seleccionado').value.trim();
+            const com = document.getElementById('texto-anomalia').value.trim();
+            if(!tipoDano) { mostrarAlertaIndustrial("Seleccione una opción de la lista de tipo de daño."); return; }
+            if(!com) { mostrarAlertaIndustrial("Por favor ingrese una descripción detallada de la anomalía."); return; }
+
+            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
+            const anterior = globalEstados[estadoKey] || {};
+            let tiempoRealActividad = Number(globalTimer.elapsed) || 0;
+            if (globalTimer.running && globalTimer.startMs) {
+                tiempoRealActividad = Math.max(tiempoRealActividad, Math.floor((Date.now() - globalTimer.startMs) / 1000) + (globalTimersPorActividad[estadoKey]?.elapsed || 0));
+            }
+
+            try {
+                const { data: opData } = await supabaseClient.from('operadores').select('id').eq('codigo', globalOperador).single();
+                const operadorId = opData ? opData.id : 1;
+
+                const { data: ejecData, error: ejecError } = await supabaseClient.from('ejecuciones').insert([{
+                    id_actividad: item.id,
+                    id_operador: operadorId,
+                    hora_inicio: obtenerHoraLocalISO(tiempoRealActividad),
+                    hora_fin: obtenerHoraLocalISO(0),
+                    tiempo_real_seg: tiempoRealActividad,
+                    actividad_ejecutada: true,
+                    condicion: 'anomalia',
+                    resultado: 'completado',
+                    observacion: com
+                }]).select().single();
+
+                if (ejecError) throw ejecError;
+
+                await supabaseClient.from('anomalias').insert([{
+                    id_ejecucion: ejecData.id,
+                    tipo_dano: tipoDano,
+                    sistema: item.sistema,
+                    componente: item.componente,
+                    descripcion: com,
+                    estado: 'ABIERTA'
+                }]);
+
+                detenerTemporizador(false);
+                globalEstados[estadoKey] = { ...anterior, status: 'anomalia', actividadEjecutada: true, condicion: 'anomalia', tipo: tipoDano, sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: (anterior.ejecuciones || 0) + 1, ultimoTiempo: new Date().toLocaleTimeString(), com };
+                
+                cerrarModalAnomalia();
+                mostrarAlertaIndustrial("ANOMALÍA REGISTRADA Y GUARDADA EN SUPABASE", 'ok');
+                actualizarInterfaz();
+            } catch (err) {
+                console.error("Error al guardar anomalía:", err);
+                mostrarAlertaIndustrial("Error al registrar la anomalía en la base de datos.");
+            }
+        }
+
+        // 3. GUARDAR OBSERVACIÓN DE TURNO
+        async function guardarObservacion() {
+            const com = document.getElementById('texto-observacion').value.trim();
+            if(!com) { mostrarAlertaIndustrial("Por favor ingrese una observación."); return; }
+            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
+            let tiempoRealActividad = Number(globalTimer.elapsed) || 0;
+            if (globalTimer.running && globalTimer.startMs) {
+                tiempoRealActividad = Math.max(tiempoRealActividad, Math.floor((Date.now() - globalTimer.startMs) / 1000) + (globalTimersPorActividad[estadoKey]?.elapsed || 0));
+            }
+
+            try {
+                const { data: opData } = await supabaseClient.from('operadores').select('id').eq('codigo', globalOperador).single();
+                const operadorId = opData ? opData.id : 1;
+                const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+                const item = listaOriginal[globalPuntoIdx];
+
+                const { data: ejecData, error: ejecError } = await supabaseClient.from('ejecuciones').insert([{
+                    id_actividad: item.id,
+                    id_operador: operadorId,
+                    hora_inicio: obtenerHoraLocalISO(tiempoRealActividad),
+                    hora_fin: obtenerHoraLocalISO(0),
+                    tiempo_real_seg: tiempoRealActividad,
+                    actividad_ejecutada: true,
+                    condicion: 'normal',
+                    resultado: 'completado',
+                    observacion: com
+                }]).select().single();
+
+                if (ejecError) throw ejecError;
+
+                await supabaseClient.from('observaciones').insert([{
+                    id_ejecucion: ejecData.id,
+                    descripcion: com
+                }]);
+
+                detenerTemporizador(false);
+                const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
+                globalEstados[estadoKey] = { ...(globalEstados[estadoKey] || {}), status: 'observacion', actividadEjecutada: true, condicion: 'normal', tipo: 'Observación', ejecuciones: anterior + 1, ultimoTiempo: new Date().toLocaleTimeString(), com };
+                
+                cerrarModalObservacion();
+                actualizarInterfaz();
+                mostrarAlertaIndustrial("Observación guardada correctamente en Supabase.", "ok");
+            } catch (err) {
+                console.error("Error al guardar observación:", err);
+                mostrarAlertaIndustrial("Error al registrar la observación.");
             }
         }
         function mostrarModalCierreLimpieza(frecuencia) {
