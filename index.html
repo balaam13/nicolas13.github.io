@@ -253,8 +253,8 @@
         <div class="max-w-[1900px] mx-auto flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
             <div class="flex flex-wrap items-center gap-4">
                 <div class="flex space-x-2">
-                    <button type="button" onclick="cambiarModo('limpieza')" id="tab-limpieza" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-ind-accent-gradient text-white transition shadow cursor-pointer">Limpieza</button>
-                    <button type="button" onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer">Monitoreo</button>
+                    <button type="button" onclick="cambiarModo('limpieza')" id="tab-limpieza" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-ind-accent-gradient text-white transition shadow cursor-pointer">Limpieza (16)</button>
+                    <button type="button" onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer">Monitoreo (22)</button>
                 </div>
                 <div class="h-6 w-px bg-[rgba(0,102,204,0.3)] hidden xl:block"></div>
                 
@@ -280,7 +280,7 @@
                     <span id="tpm-estado-texto">DÍA/S PARA LAS ACTIVIDADES SEMANALES: 7 | DÍA/S PARA LAS ACTIVIDADES MENSUALES: 30</span>
                 </div>
                 <div class="text-right">
-                    <span id="texto-progreso-num" class="text-xs font-bold text-slate-200 font-mono">0 de 0 puntos - 0%</span>
+                    <span id="texto-progreso-num" class="text-xs font-bold text-slate-200 font-mono">0 de 16 puntos - 0%</span>
                 </div>
                 <div class="w-48 bg-[#141821] h-3 rounded-full overflow-hidden industrial-border">
                     <div id="barra-progreso-fill" class="bg-ind-accent h-full transition-all duration-300" style="width: 0%;"></div>
@@ -298,7 +298,7 @@
                 <div id="canvas-container" class="absolute inset-0"></div>
                 <div class="absolute top-3 left-3 bg-[#141821]/90 backdrop-blur px-3.5 py-2 rounded-xl industrial-border text-xs font-mono text-slate-200 shadow flex items-center space-x-2 pointer-events-none z-30">
                     <span class="w-2.5 h-2.5 rounded-full bg-ind-accent animate-pulse"></span>
-                    <span id="indicador-3d-texto">Vista general de máquina - Supabase Conectado</span>
+                    <span id="indicador-3d-texto">Vista general de máquina - Sincronizado</span>
                 </div>
                 <div class="absolute bottom-3 right-3 bg-black/50 px-3.5 py-1.5 rounded-xl industrial-border text-[11px] text-slate-400 pointer-events-none font-mono z-30">
                     Rotar: Click + Arrastrar | Zoom: Rueda
@@ -308,10 +308,10 @@
             <div class="bg-ind-panel industrial-border rounded-2xl p-5 flex-1 flex flex-col shadow-md">
                 <div class="flex items-center justify-between mb-3.5 border-b border-[rgba(0,102,204,0.3)] pb-3">
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Puntos de verificación</h3>
-                    <span id="contador-filtro-badge" class="text-xs text-ind-accent font-mono uppercase font-bold">0 puntos</span>
+                    <span id="contador-filtro-badge" class="text-xs text-ind-accent font-mono uppercase font-bold">16 puntos</span>
                 </div>
                 <div id="puntos-grid" class="flex flex-col space-y-2.5 overflow-y-auto max-h-[340px] custom-scrollbar pr-1">
-                    <!-- Dinámico desde Supabase -->
+                    <!-- Generado por JS -->
                 </div>
             </div>
         </div>
@@ -322,15 +322,15 @@
                 <div class="border-b border-[rgba(0,102,204,0.3)] pb-4 mb-5">
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="text-xs font-mono text-ind-accent font-extrabold" id="ficha-codigo">-</span>
+                            <span class="text-xs font-mono text-ind-accent font-extrabold" id="ficha-codigo">L-001</span>
                             <span class="text-xs text-slate-500 mx-2">|</span>
-                            <span class="text-sm font-extrabold text-white tracking-wide" id="ficha-componente">SELECCIONE UN PUNTO</span>
+                            <span class="text-sm font-extrabold text-white tracking-wide" id="ficha-componente">TOLVA DE ALIMENTACIÓN</span>
                         </div>
-                        <span class="text-xs font-mono bg-[#141821] industrial-border px-3.5 py-1.5 rounded-lg text-slate-300 uppercase font-semibold" id="ficha-sistema-badge">-</span>
+                        <span class="text-xs font-mono bg-[#141821] industrial-border px-3.5 py-1.5 rounded-lg text-slate-300 uppercase font-semibold" id="ficha-sistema-badge">ALIMENTACIÓN DE MATERIAL</span>
                     </div>
                     <div class="flex items-center justify-between mt-2">
                         <p class="text-xs text-slate-400 font-medium">Punto de verificación - Limpieza TPM</p>
-                        <span id="ficha-periodicidad-badge" class="text-xs font-bold font-mono px-3 py-1 rounded border">Frecuencia: -</span>
+                        <span id="ficha-periodicidad-badge" class="text-xs font-bold font-mono px-3 py-1 rounded border">Frecuencia: Diario</span>
                     </div>
                 </div>
 
@@ -348,13 +348,13 @@
                         <div class="h-52 bg-[#141821] relative flex items-center justify-center p-2">
                             <img id="ficha-imagen-1" src="" alt="Foto 1" class="max-h-full max-w-full object-contain rounded-lg">
                         </div>
-                        <div class="p-3 bg-[#141821] border-t border-[rgba(0,102,204,0.3)] text-xs font-medium text-slate-300 text-center truncate" id="ficha-label-1">Vista general</div>
+                        <div class="p-3 bg-[#141821] border-t border-[rgba(0,102,204,0.3)] text-xs font-medium text-slate-300 text-center truncate" id="ficha-label-1">Tolva Externa</div>
                     </div>
                     <div id="card-foto-2" class="bg-[#141821] industrial-border rounded-xl overflow-hidden flex flex-col shadow-md p-1">
                         <div class="h-52 bg-[#141821] relative flex items-center justify-center p-2">
                             <img id="ficha-imagen-2" src="" alt="Foto 2" class="max-h-full max-w-full object-contain rounded-lg">
                         </div>
-                        <div class="p-3 bg-[#141821] border-t border-[rgba(0,102,204,0.3)] text-xs font-medium text-slate-300 text-center truncate" id="ficha-label-2">Vista en detalle</div>
+                        <div class="p-3 bg-[#141821] border-t border-[rgba(0,102,204,0.3)] text-xs font-medium text-slate-300 text-center truncate" id="ficha-label-2">Tolva Detalle</div>
                     </div>
                 </div>
 
@@ -400,9 +400,9 @@
         </div>
     </main>
 
-    <!-- SCRIPT TÉCNICO INDUSTRIAL CONECTADO A SUPABASE -->
+    <!-- SCRIPT TÉCNICO INDUSTRIAL -->
     <script>
-        // Inicialización de Supabase
+        // CLIENTE SUPABASE
         const SUPABASE_URL = 'https://cwacaqewinvuyunjprwd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_E6pV0fQw-a0jhmW61X_aVg_igoPZ2G3';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -419,7 +419,7 @@
         let globalTimer = { key: null, interval: null, countdownInterval: null, elapsed: 0, estimated: 0, running: false, startMs: null };
         const globalTimersPorActividad = {};
 
-        // Arreglos que se llenarán dinámicamente desde Supabase
+        // Arreglos que se cargarán desde Supabase manteniendo la estructura original
         let datosLimpieza = [];
         let datosMonitoreo = [];
 
@@ -513,7 +513,7 @@
             });
         }
 
-        // CARGA DESDE SUPABASE
+        // CARGA DESDE SUPABASE MANTENIENDO EL FORMATO DE TUS ARREGLOS
         async function cargarActividadesDesdeSupabase() {
             try {
                 const { data, error } = await supabaseClient
@@ -542,14 +542,14 @@
                 datosLimpieza = mapeadas.filter(i => i.codigo.startsWith('L'));
                 datosMonitoreo = mapeadas.filter(i => i.codigo.startsWith('I'));
 
-                iniciarэrInterfazMantenimientoReal();
+                iniciarInterfazMantenimiento();
             } catch (err) {
                 console.error("Error al cargar actividades de Supabase:", err);
                 mostrarAlertaIndustrial("Error al conectar con la base de datos de Supabase.");
             }
         }
 
-        function iniciarэrInterfazMantenimientoReal() {
+        function iniciarInterfazMantenimiento() {
             poblarFiltroSistemas();
             calcularEstadoCalendarioTPM();
             actualizarInterfaz();
@@ -862,6 +862,12 @@
                 card2.style.display = 'none';
             }
 
+            if (item.img1 && item.img2 && item.img1.trim() !== '' && item.img2.trim() !== '') {
+                contenedorFotos.className = "grid grid-cols-1 md:grid-cols-2 gap-5 mb-6";
+            } else {
+                contenedorFotos.className = "grid grid-cols-1 gap-5 mb-6";
+            }
+
             const estadoKey = `${globalModo}_${idx}`;
             const dataEstado = globalEstados[estadoKey];
             const contadorElem = document.getElementById('ficha-contador');
@@ -965,6 +971,7 @@
                     return;
                 }
                 b.disabled = !puedeActuar;
+                b.title = puedeActuar ? '' : (frecuenciaDisponible ? "Inicie la actividad para habilitar las acciones." : "Esta frecuencia todavía no está habilitada.");
             });
         }
 
@@ -982,7 +989,7 @@
                 ...(globalTimersPorActividad[globalTimer.key] || {}),
                 elapsed,
                 estimated: globalTimer.estimated,
-                estado: globalTimer.running ? 'pausado' : 'pausado'
+                estado: globalTimer.running ? 'pausado' : (globalTimersPorActividad[globalTimer.key]?.estado || 'pausado')
             };
         }
 
@@ -1000,6 +1007,7 @@
         function iniciarTemporizadorActividad(item, key) {
             if (!item) return;
             if (globalTimer.key === key && (globalTimer.running || globalTimer.countdownInterval)) return;
+
             if (globalTimer.key && globalTimer.key !== key) detenerTemporizador(true);
 
             const frecuenciaItem = item.periodicidad || 'Diaria';
@@ -1026,7 +1034,12 @@
             document.getElementById('temporizador-reloj').innerText = formatearDuracion(globalTimer.elapsed);
 
             if (estadoActividad?.actividadEjecutada) {
-                globalTimersPorActividad[key] = { ...(guardado || {}), elapsed: globalTimer.elapsed, estimated: globalTimer.estimated, estado: 'finalizado' };
+                globalTimersPorActividad[key] = {
+                    ...(guardado || {}),
+                    elapsed: globalTimer.elapsed,
+                    estimated: globalTimer.estimated,
+                    estado: 'finalizado'
+                };
                 const estado = document.getElementById('temporizador-estado');
                 if (estado) estado.innerText = 'ACTIVIDAD REGISTRADA';
                 actualizarTemporizadorUI();
@@ -1059,13 +1072,12 @@
             actualizarTemporizadorUI();
         }
 
-        // MARCAR ESTADO Y GUARDAR EJECUCIÓN EN SUPABASE
+        // MARCAR ESTADO CONECTADO A SUPABASE
         async function marcarEstado(estado) {
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const actual = globalEstados[estadoKey] || {};
-            if (actual.actividadEjecutada && actual.condicion === 'anomalia') { mostrarAlertaIndustrial("Este punto tiene registrada una anomalía activa."); return; }
-            if (actual.actividadEjecutada && actual.status === 'listo') { mostrarAlertaIndustrial("Esta actividad ya fue verificada en este ciclo."); return; }
-            
+            if (actual.actividadEjecutada && actual.condicion === 'anomalia') { mostrarAlertaIndustrial("Este punto tiene registrada una anomalía activa. No puede ser sobrescrito a verificado."); return; }
+            if (actual.actividadEjecutada && actual.status === 'listo') { mostrarAlertaIndustrial("Esta actividad ya fue verificada en este ciclo. Evite registros duplicados."); return; }
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const item = listaOriginal[globalPuntoIdx];
             const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
@@ -1078,11 +1090,10 @@
             }
 
             try {
-                // Obtener ID del operador conectado
+                // Registrar ejecución real en Supabase
                 const { data: opData } = await supabaseClient.from('operadores').select('id').eq('codigo', globalOperador).single();
                 const operadorId = opData ? opData.id : 1;
 
-                // Guardar en Supabase
                 const { error } = await supabaseClient.from('ejecuciones').insert([{
                     id_actividad: item.id,
                     id_operador: operadorId,
@@ -1095,15 +1106,17 @@
 
                 if (error) throw error;
 
+                const anterior = actual.ejecuciones || 0;
+                const tiempoEstimado = globalTimer.estimated;
+                globalTimersPorActividad[estadoKey] = { elapsed: tiempoRealActividad, estimated: tiempoEstimado, estado: 'finalizado' };
                 detenerTemporizador(false);
-                globalEstados[estadoKey] = { ...actual, status: estado, actividadEjecutada: true, condicion: 'normal', tipo: 'Normal', sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: (actual.ejecuciones || 0) + 1, ultimoTiempo: horaActual, tiempoReal: tiempoRealActividad };
+                globalEstados[estadoKey] = { ...actual, status: estado, actividadEjecutada: true, condicion: actual.condicion === 'anomalia' ? 'anomalia' : 'normal', tipo: actual.tipo || 'Normal', sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: anterior + 1, ultimoTiempo: horaActual, com: actual.com || '', foto: actual.foto || null, tiempoReal: tiempoRealActividad, tiempoEstimado };
                 
                 actualizarInterfaz();
-                mostrarAlertaIndustrial("¡Verificación registrada en Supabase exitosamente!", "ok");
+                mostrarAlertaIndustrial("Verificación realizada y guardada en Supabase con éxito.", "ok");
 
-                // Pasar al siguiente punto automáticamente
-                let siguienteIdx = -1;
                 const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
+                let siguienteIdx = -1;
                 for (let i = globalPuntoIdx + 1; i < listaOriginal.length; i++) {
                     const siguiente = listaOriginal[i];
                     const matchSistema = (sistemaSeleccionado === "TODOS" || siguiente.sistema === sistemaSeleccionado);
@@ -1124,10 +1137,22 @@
             document.getElementById('cierre-jornada-modal').style.display = 'flex';
         }
 
-        function cerrarModalCierre() { document.getElementById('cierre-jornada-modal').style.display = 'none'; }
-        function irAMonitoreo() { cerrarModalCierre(); cambiarModo('monitoreo'); }
-        function mostrarModalMonitoreoFinal() { document.getElementById('cierre-monitoreo-modal').style.display = 'flex'; }
-        function cerrarModalMonitoreoFinal() { document.getElementById('cierre-monitoreo-modal').style.display = 'none'; }
+        function cerrarModalCierre() {
+            document.getElementById('cierre-jornada-modal').style.display = 'none';
+        }
+
+        function irAMonitoreo() {
+            cerrarModalCierre();
+            cambiarModo('monitoreo');
+        }
+
+        function mostrarModalMonitoreoFinal() {
+            document.getElementById('cierre-monitoreo-modal').style.display = 'flex';
+        }
+
+        function cerrarModalMonitoreoFinal() {
+            document.getElementById('cierre-monitoreo-modal').style.display = 'none';
+        }
 
         const tiposDanio = [
             "Fuga aceite Tuberia metalica", "Fuga aceite cilindro Hidraulico", "Fuga aceite manguera",
@@ -1153,7 +1178,9 @@
             "Falla sobre corriente", "Falla de alimentacion", "Fuga", "Temperatura", "Termocupla", "Quemada lampara"
         ].filter((v, i, a) => a.indexOf(v) === i);
 
-        function normalizarBusqueda(texto) { return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+        function normalizarBusqueda(texto) {
+            return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
 
         function mostrarResultadosTipoDano() {
             const input = document.getElementById('tipo-dano-input');
@@ -1176,10 +1203,22 @@
             caja.classList.add('hidden');
         }
 
-        function abrirConfirmacionAnomalia() { document.getElementById('confirmacion-anomalia-modal').style.display = 'flex'; }
-        function cancelarConfirmacionAnomalia() { document.getElementById('confirmacion-anomalia-modal').style.display = 'none'; }
-        function confirmarAperturaAnomalia() { document.getElementById('confirmacion-anomalia-modal').style.display = 'none'; abrirFormularioAnomalia(); }
-        function abrirModalAnomalia() { abrirConfirmacionAnomalia(); }
+        function abrirConfirmacionAnomalia() {
+            document.getElementById('confirmacion-anomalia-modal').style.display = 'flex';
+        }
+
+        function cancelarConfirmacionAnomalia() {
+            document.getElementById('confirmacion-anomalia-modal').style.display = 'none';
+        }
+
+        function confirmarAperturaAnomalia() {
+            document.getElementById('confirmacion-anomalia-modal').style.display = 'none';
+            abrirFormularioAnomalia();
+        }
+
+        function abrirModalAnomalia() {
+            abrirConfirmacionAnomalia();
+        }
 
         function abrirFormularioAnomalia() {
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
@@ -1195,139 +1234,131 @@
             document.getElementById('anomalia-modal').style.display = 'flex';
         }
 
-        function cerrarModalAnomalia() { document.getElementById('anomalia-modal').style.display = 'none'; }
+        function cerrarModalAnomalia() {
+            const modalAnom = document.getElementById('anomalia-modal');
+            if(modalAnom) modalAnom.style.display = 'none';
+        }
+
         function abrirModalObservacion() {
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const item = listaOriginal[globalPuntoIdx];
+            
             document.getElementById('modal-observacion-info').innerText = `${item.sistema} - ${item.codigo}`;
             document.getElementById('texto-observacion').value = '';
-            document.getElementById('observacion-modal').style.display = 'flex';
-        }
-        function cerrarModalObservacion() { document.getElementById('observacion-modal').style.display = 'none'; }
-        function mostrarNombreArchivo(input) {
-            if(input.files && input.files[0]) document.getElementById('nombre-archivo').innerText = input.files[0].name;
-            else document.getElementById('nombre-archivo').innerText = 'Sin archivo';
+            
+            const modalObs = document.getElementById('observacion-modal');
+            if(modalObs) modalObs.style.display = 'flex';
         }
 
-        async function guardarAnomalia() {
+        function cerrarModalObservacion() {
+            const modalObs = document.getElementById('observacion-modal');
+            if(modalObs) modalObs.style.display = 'none';
+        }
+
+        function mostrarNombreArchivo(input) {
+            if(input.files && input.files[0]) {
+                document.getElementById('nombre-archivo').innerText = input.files[0].name;
+            } else {
+                document.getElementById('nombre-archivo').innerText = 'Sin archivo';
+            }
+        }
+
+        function guardarAnomalia() {
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const item = listaOriginal[globalPuntoIdx];
             const tipoDano = document.getElementById('tipo-dano-seleccionado').value.trim();
             const com = document.getElementById('texto-anomalia').value.trim();
+            const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             if(!tipoDano) { mostrarAlertaIndustrial("Seleccione una opción de la lista de tipo de daño."); return; }
             if(!com) { mostrarAlertaIndustrial("Por favor ingrese una descripción detallada de la anomalía."); return; }
-
+            const fileInput = document.getElementById('foto-anomalia');
+            const fotoNombre = fileInput.files.length > 0 ? fileInput.files[0].name : null;
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const anterior = globalEstados[estadoKey] || {};
             let tiempoRealActividad = Number(globalTimer.elapsed) || 0;
-
-            try {
-                const { data: opData } = await supabaseClient.from('operadores').select('id').eq('codigo', globalOperador).single();
-                const operadorId = opData ? opData.id : 1;
-
-                // 1. Guardar ejecución con condición anómala
-                const { data: ejecData, error: ejecError } = await supabaseClient.from('ejecuciones').insert([{
-                    id_actividad: item.id,
-                    id_operador: operadorId,
-                    hora_fin: new Date().toISOString(),
-                    tiempo_real_seg: tiempoRealActividad,
-                    actividad_ejecutada: true,
-                    condicion: 'anomalia',
-                    resultado: 'completado',
-                    observacion: com
-                }]).select().single();
-
-                if (ejecError) throw ejecError;
-
-                // 2. Guardar anomalía relacionada
-                await supabaseClient.from('anomalias').insert([{
-                    id_ejecucion: ejecData.id,
-                    tipo_dano: tipoDano,
-                    sistema: item.sistema,
-                    componente: item.componente,
-                    descripcion: com,
-                    estado: 'ABIERTA'
-                }]);
-
-                detenerTemporizador(false);
-                globalEstados[estadoKey] = { ...anterior, status: 'anomalia', actividadEjecutada: true, condicion: 'anomalia', tipo: tipoDano, sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: (anterior.ejecuciones || 0) + 1, ultimoTiempo: new Date().toLocaleTimeString(), com };
-                
-                cerrarModalAnomalia();
-                mostrarAlertaIndustrial("ANOMALÍA REGISTRADA Y GUARDADA EN SUPABASE", 'ok');
-                actualizarInterfaz();
-            } catch (err) {
-                console.error("Error al guardar anomalía:", err);
-                mostrarAlertaIndustrial("Error al registrar la anomalía en la base de datos.");
+            if (globalTimer.running && globalTimer.startMs) {
+                tiempoRealActividad = Math.max(tiempoRealActividad, Math.floor((Date.now() - globalTimer.startMs) / 1000) + (globalTimersPorActividad[estadoKey]?.elapsed || 0));
             }
+            const tiempoEstimado = globalTimer.estimated;
+            globalTimersPorActividad[estadoKey] = { elapsed: tiempoRealActividad, estimated: tiempoEstimado, estado: 'finalizado' };
+            detenerTemporizador(false);
+            globalEstados[estadoKey] = { ...anterior, status: 'anomalia', actividadEjecutada: true, condicion: 'anomalia', tipo: tipoDano, sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: (anterior.ejecuciones || 0) + 1, ultimoTiempo: horaActual, com, foto: fotoNombre, tiempoReal: tiempoRealActividad, tiempoEstimado };
+            cerrarModalAnomalia();
+            mostrarAlertaIndustrial("ANOMALÍA REGISTRADA CORRECTAMENTE\n\nLa solicitud queda lista para integración con el sistema de mantenimiento.", 'ok');
+            actualizarInterfaz();
         }
 
-        async function guardarObservacion() {
+        function guardarObservacion() {
             const com = document.getElementById('texto-observacion').value.trim();
-            if(!com) { mostrarAlertaIndustrial("Por favor ingrese una observación."); return; }
-            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
+            const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             let tiempoRealActividad = Number(globalTimer.elapsed) || 0;
-
-            try {
-                const { data: opData } = await supabaseClient.from('operadores').select('id').eq('codigo', globalOperador).single();
-                const operadorId = opData ? opData.id : 1;
-                const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
-                const item = listaOriginal[globalPuntoIdx];
-
-                const { data: ejecData, error: ejecError } = await supabaseClient.from('ejecuciones').insert([{
-                    id_actividad: item.id,
-                    id_operador: operadorId,
-                    hora_fin: new Date().toISOString(),
-                    tiempo_real_seg: tiempoRealActividad,
-                    actividad_ejecutada: true,
-                    condicion: 'normal',
-                    resultado: 'completado',
-                    observacion: com
-                }]).select().single();
-
-                if (ejecError) throw ejecError;
-
-                await supabaseClient.from('observaciones').insert([{
-                    id_ejecucion: ejecData.id,
-                    descripcion: com
-                }]);
-
-                detenerTemporizador(false);
-                const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
-                globalEstados[estadoKey] = { ...(globalEstados[estadoKey] || {}), status: 'observacion', actividadEjecutada: true, condicion: 'normal', tipo: 'Observación', ejecuciones: anterior + 1, ultimoTiempo: new Date().toLocaleTimeString(), com };
-                
-                cerrarModalObservacion();
-                actualizarInterfaz();
-                mostrarAlertaIndustrial("Observación guardada correctamente en Supabase.", "ok");
-            } catch (err) {
-                console.error("Error al guardar observación:", err);
-                mostrarAlertaIndustrial("Error al registrar la observación.");
+            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
+            if (globalTimer.running && globalTimer.startMs) {
+                tiempoRealActividad = Math.max(tiempoRealActividad, Math.floor((Date.now() - globalTimer.startMs) / 1000) + (globalTimersPorActividad[estadoKey]?.elapsed || 0));
             }
+            if(!com) {
+                mostrarAlertaIndustrial("Por favor ingrese una observación.");
+                return;
+            }
+            globalTimersPorActividad[estadoKey] = { elapsed: tiempoRealActividad, estimated: globalTimer.estimated, estado: 'finalizado' };
+            detenerTemporizador(false);
+
+            const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
+
+            globalEstados[estadoKey] = { 
+                ...(globalEstados[estadoKey] || {}),
+                status: 'observacion', 
+                actividadEjecutada: true,
+                condicion: 'normal',
+                tipo: 'Observación', 
+                ejecuciones: anterior + 1,
+                ultimoTiempo: horaActual,
+                com: com,
+                foto: null,
+                tiempoReal: tiempoRealActividad,
+                tiempoEstimado: globalTimer.estimated
+            };
+            cerrarModalObservacion();
+            actualizarInterfaz();
         }
 
-        // CARGADOR 3D
+        // CARGADOR 3D LIMPIO CON ROTACIÓN POR SISTEMA
         const container = document.getElementById('canvas-container');
         scene = new THREE.Scene();
+
         camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.shadowMap.enabled = true;
         container.appendChild(renderer.domElement);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
         const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
         dirLight.position.set(10, 20, 15);
+        dirLight.castShadow = true;
         scene.add(dirLight);
 
         const loader = new THREE.GLTFLoader();
         loader.load('máquina.glb', function (gltf) {
             globalModelo3D = gltf.scene;
+            
             const box = new THREE.Box3().setFromObject(globalModelo3D);
             const center = box.getCenter(new THREE.Vector3());
             const size = box.getSize(new THREE.Vector3());
-            globalModelo3D.position.set(-center.x, -center.y, -center.z);
+            
+            globalModelo3D.position.x = -center.x;
+            globalModelo3D.position.y = -center.y;
+            globalModelo3D.position.z = -center.z;
+            
             scene.add(globalModelo3D);
-            camera.position.set(0, size.y * 0.25, size.z * 0.75);
+
+            const maxDim = Math.max(size.x, size.y, size.z);
+            camera.position.set(0, maxDim * 0.25, maxDim * 0.75);
             camera.lookAt(0, 0, 0);
+        }, undefined, function (error) {
+            console.error('Error al cargar la máquina 3D:', error);
         });
 
         function enfocarSistemaEn3D(sistema) {
@@ -1336,12 +1367,14 @@
             if (sistema.includes("ALIMENTACIÓN")) rotacionY = 0.8;
             else if (sistema.includes("INYECCIÓN")) rotacionY = -0.3;
             else if (sistema.includes("EXPULSOR") || sistema.includes("CIERRE")) rotacionY = 1.8;
-            else rotacionY = -1.8;
+            else if (sistema.includes("HIDRÁULICO") || sistema.includes("ELÉCTRICO")) rotacionY = -1.8;
+
             globalModelo3D.rotation.y = rotacionY;
         }
 
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
+
         container.addEventListener('mousedown', (e) => { isDragging = true; previousMousePosition = { x: e.clientX, y: e.clientY }; });
         container.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
@@ -1351,11 +1384,25 @@
         });
         window.addEventListener('mouseup', () => { isDragging = false; });
 
+        container.addEventListener('touchstart', (e) => { isDragging = true; previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY }; });
+        container.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const deltaX = e.touches[0].clientX - previousMousePosition.x;
+            if(globalModelo3D) globalModelo3D.rotation.y += deltaX * 0.01;
+            previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        });
+        window.addEventListener('touchend', () => { isDragging = false; });
+
         function animate() {
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
         }
         animate();
+
+        window.onload = () => {
+            configurarEquipoQR();
+            calcularEstadoCalendarioTPM();
+        };
     </script>
 </body>
 </html>
