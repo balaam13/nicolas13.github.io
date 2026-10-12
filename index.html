@@ -465,7 +465,7 @@
         let globalTimer = { key: null, interval: null, countdownInterval: null, elapsed: 0, estimated: 0, running: false, startMs: null };
         const globalTimersPorActividad = {};
 
-        // Arreglos que se cargarán desde Supabase manteniendo la estructura original
+        // Arreglos que se cargarán desde Supabase
         let datosLimpieza = [];
         let datosMonitoreo = [];
 
@@ -559,7 +559,7 @@
             });
         }
 
-  // CARGA DESDE SUPABASE MAPEANDO LAS FOTOS EXACTAS DE CADA COMPONENTE
+        // CARGA DESDE SUPABASE MAPEANDO LAS FOTOS EXACTAS Y CORREGIDAS
         async function cargarActividadesDesdeSupabase() {
             try {
                 const { data, error } = await supabaseClient
@@ -569,9 +569,7 @@
 
                 if (error) throw error;
 
-                // Diccionario exacto con los nombres de tus archivos subidos al repositorio
                 const diccionarioFotos = {
-                    // LIMPIEZA
                     'L-001': { img1: 'imagen(166).jpg', label1: 'Tolva Externa', img2: 'imagen(167).jpg', label2: 'Tolva Detalle' },
                     'L-002': { img1: 'Succionador Externo.jpg', label1: 'Succionador Externo', img2: 'Succionador Detalle.jpg', label2: 'Succionador Detalle' },
                     'L-003': { img1: 'Filtro Externo.jpg', label1: 'Filtro Externo', img2: 'Filtro Detalle.jpg', label2: 'Filtro Detalle' },
@@ -589,7 +587,6 @@
                     'L-015': { img1: 'Estructura Externa.jpg', label1: 'Estructura Externa', img2: 'Mangueras visibles Externa.jpeg', label2: 'Vista Lateral' },
                     'L-016': { img1: 'Piso Perimetral.jpg', label1: 'Piso perimetral', img2: '', label2: '' },
 
-                    // MONITOREO
                     'I-001': { img1: 'Succionador Externo.jpg', label1: 'Monitoreo', img2: 'Succionador Detalle.jpg', label2: 'Operación' },
                     'I-002': { img1: 'Manguera de Succion.jpg', label1: 'Manguera', img2: 'Manguera de Succión Detalle.jpg', label2: 'Conexión' },
                     'I-003': { img1: 'Zona de boquilla externa.jpg', label1: 'Boquilla', img2: 'Zona de boquilla detalle.jpg', label2: 'Estado' },
@@ -669,7 +666,7 @@
             if (!modal || !video || !mensaje) return;
             modal.style.display = 'flex';
             if (!('BarcodeDetector' in window)) {
-                mensaje.textContent = 'Este navegador no permite leer códigos QR directamente desde la cámara. Puedes abrir el enlace del QR con la cámara del teléfono y luego iniciar sesión.';
+                mensaje.textContent = 'Este navegador no permite leer códigos QR directamente desde la cámara.';
                 return;
             }
             try {
@@ -678,10 +675,10 @@
                 video.srcObject = qrStream;
                 await video.play();
                 qrScanActive = true;
-                mensaje.textContent = 'Buscando código QR… Mantén el código dentro del encuadre.';
+                mensaje.textContent = 'Buscando código QR…';
                 buscarCodigoQR();
             } catch (error) {
-                mensaje.textContent = 'No se pudo acceder a la cámara. Verifica los permisos del navegador y que la página esté publicada mediante HTTPS.';
+                mensaje.textContent = 'No se pudo acceder a la cámara.';
             }
         }
 
@@ -703,12 +700,8 @@
                             return;
                         }
                     } catch (_) {}
-                    if (mensaje) mensaje.textContent = 'El QR no contiene un enlace válido de la plataforma. Comprueba el código colocado en la máquina.';
-                    qrScanActive = true;
                 }
-            } catch (error) {
-                // Se continúa intentando mientras la cámara esté activa.
-            }
+            } catch (error) {}
             if (qrScanActive) requestAnimationFrame(buscarCodigoQR);
         }
 
@@ -1253,15 +1246,14 @@
             actualizarTemporizadorUI();
         }
 
-    // FUNCIÓN AUXILIAR PARA OBTENER LA HORA LOCAL EXACTA DE ECUADOR EN FORMATO ISO
+        // FUNCIÓN AUXILIAR HORA LOCAL ECUADOR
         function obtenerHoraLocalISO(desplazamientoSegundos = 0) {
             const fecha = new Date(Date.now() - (desplazamientoSegundos * 1000));
-            // Resta el desfase de la zona horaria local para guardarla correctamente compensada
             const offsetMs = fecha.getTimezoneOffset() * 60000;
             return new Date(fecha.getTime() - offsetMs).toISOString().slice(0, -1) + '-05:00'; 
         }
 
-        // 1. MARCAR ESTADO (VERIFICACIÓN NORMAL)
+        // 1. MARCAR ESTADO CONECTADO A SUPABASE
         async function marcarEstado(estado) {
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const actual = globalEstados[estadoKey] || {};
@@ -1318,7 +1310,7 @@
             }
         }
 
-        // 2. GUARDAR ANOMALÍA (TARJETA ROJA/AZUL)
+        // 2. GUARDAR ANOMALÍA
         async function guardarAnomalia() {
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const item = listaOriginal[globalPuntoIdx];
@@ -1373,7 +1365,7 @@
             }
         }
 
-        // 3. GUARDAR OBSERVACIÓN DE TURNO
+        // 3. GUARDAR OBSERVACIÓN
         async function guardarObservacion() {
             const com = document.getElementById('texto-observacion').value.trim();
             if(!com) { mostrarAlertaIndustrial("Por favor ingrese una observación."); return; }
@@ -1420,6 +1412,7 @@
                 mostrarAlertaIndustrial("Error al registrar la observación.");
             }
         }
+
         function mostrarModalCierreLimpieza(frecuencia) {
             let nombreFreq = frecuencia.toLowerCase() === 'diaria' ? 'ACTIVIDADES DIARIAS' : (frecuencia.toUpperCase() + 'S');
             document.getElementById('cierre-titulo').innerText = `¡HAS TERMINADO LA JORNADA DE ${nombreFreq}!`;
@@ -1549,7 +1542,6 @@
             const otroInputId = input.id === 'foto-anomalia-camara' ? 'foto-anomalia' : 'foto-anomalia-camara';
             const otroInput = document.getElementById(otroInputId);
             if (input.files && input.files[0]) {
-                // Mantener una sola evidencia seleccionada: la última acción del usuario.
                 if (otroInput) otroInput.value = '';
                 document.getElementById('nombre-archivo').innerText = input.files[0].name || 'Foto capturada';
             } else {
@@ -1560,68 +1552,7 @@
             }
         }
 
-        function guardarAnomalia() {
-            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
-            const item = listaOriginal[globalPuntoIdx];
-            const tipoDano = document.getElementById('tipo-dano-seleccionado').value.trim();
-            const com = document.getElementById('texto-anomalia').value.trim();
-            const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            if(!tipoDano) { mostrarAlertaIndustrial("Seleccione una opción de la lista de tipo de daño."); return; }
-            if(!com) { mostrarAlertaIndustrial("Por favor ingrese una descripción detallada de la anomalía."); return; }
-            const fileInput = document.getElementById('foto-anomalia');
-            const cameraInput = document.getElementById('foto-anomalia-camara');
-            const fotoSeleccionada = (cameraInput && cameraInput.files && cameraInput.files[0]) || (fileInput && fileInput.files && fileInput.files[0]);
-            const fotoNombre = fotoSeleccionada ? (fotoSeleccionada.name || 'Foto capturada') : null;
-            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
-            const anterior = globalEstados[estadoKey] || {};
-            let tiempoRealActividad = Number(globalTimer.elapsed) || 0;
-            if (globalTimer.running && globalTimer.startMs) {
-                tiempoRealActividad = Math.max(tiempoRealActividad, Math.floor((Date.now() - globalTimer.startMs) / 1000) + (globalTimersPorActividad[estadoKey]?.elapsed || 0));
-            }
-            const tiempoEstimado = globalTimer.estimated;
-            globalTimersPorActividad[estadoKey] = { elapsed: tiempoRealActividad, estimated: tiempoEstimado, estado: 'finalizado' };
-            detenerTemporizador(false);
-            globalEstados[estadoKey] = { ...anterior, status: 'anomalia', actividadEjecutada: true, condicion: 'anomalia', tipo: tipoDano, sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: (anterior.ejecuciones || 0) + 1, ultimoTiempo: horaActual, com, foto: fotoNombre, tiempoReal: tiempoRealActividad, tiempoEstimado };
-            cerrarModalAnomalia();
-            mostrarAlertaIndustrial("ANOMALÍA REGISTRADA CORRECTAMENTE\n\nLa solicitud queda lista para integración con el sistema de mantenimiento.", 'ok');
-            actualizarInterfaz();
-        }
-
-        function guardarObservacion() {
-            const com = document.getElementById('texto-observacion').value.trim();
-            const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            let tiempoRealActividad = Number(globalTimer.elapsed) || 0;
-            const estadoKey = `${globalModo}_${globalPuntoIdx}`;
-            if (globalTimer.running && globalTimer.startMs) {
-                tiempoRealActividad = Math.max(tiempoRealActividad, Math.floor((Date.now() - globalTimer.startMs) / 1000) + (globalTimersPorActividad[estadoKey]?.elapsed || 0));
-            }
-            if(!com) {
-                mostrarAlertaIndustrial("Por favor ingrese una observación.");
-                return;
-            }
-            globalTimersPorActividad[estadoKey] = { elapsed: tiempoRealActividad, estimated: globalTimer.estimated, estado: 'finalizado' };
-            detenerTemporizador(false);
-
-            const anterior = globalEstados[estadoKey] ? (globalEstados[estadoKey].ejecuciones || 0) : 0;
-
-            globalEstados[estadoKey] = { 
-                ...(globalEstados[estadoKey] || {}),
-                status: 'observacion', 
-                actividadEjecutada: true,
-                condicion: 'normal',
-                tipo: 'Observación', 
-                ejecuciones: anterior + 1,
-                ultimoTiempo: horaActual,
-                com: com,
-                foto: null,
-                tiempoReal: tiempoRealActividad,
-                tiempoEstimado: globalTimer.estimated
-            };
-            cerrarModalObservacion();
-            actualizarInterfaz();
-        }
-
-        // CARGADOR 3D LIMPIO CON ROTACIÓN POR SISTEMA
+        // CARGADOR 3D
         const container = document.getElementById('canvas-container');
         scene = new THREE.Scene();
 
