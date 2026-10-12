@@ -75,8 +75,54 @@
         </div>
     </div>
 
+    <!-- PANTALLA PRINCIPAL DE ACCESO -->
+    <div id="pantalla-principal" class="fixed inset-0 z-[60] bg-[#141821] flex items-center justify-center p-5">
+        <div class="w-full max-w-3xl bg-ind-panel industrial-border rounded-3xl p-7 sm:p-10 industrial-shadow">
+            <div class="flex flex-col items-center text-center border-b border-[rgba(0,102,204,0.3)] pb-7 mb-7">
+                <div class="w-full max-w-sm h-28 bg-white industrial-border rounded-xl overflow-hidden flex items-center justify-center px-4 py-3 mb-5 shadow-inner">
+                    <img src="imagen(162).jpg" alt="EMPAQPLAST S.A." class="h-full w-auto max-w-full object-contain rounded-lg" onerror="this.src='https://placehold.co/220x90/0066cc/ffffff?text=EMPAQPLAST'">
+                </div>
+                <p class="text-xs text-ind-accent font-bold tracking-[0.25em] uppercase mb-2">Sistema TPM</p>
+                <h1 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-wide">Mantenimiento Autónomo</h1>
+                <p class="text-sm text-slate-400 mt-3 max-w-xl">Selecciona cómo deseas ingresar a la plataforma.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button type="button" onclick="mostrarInicioSesion()" class="group text-left rounded-2xl border border-sky-500/60 bg-[#141821] hover:bg-sky-950/30 p-6 transition focus:outline-none focus:ring-2 focus:ring-sky-400">
+                    <div class="w-12 h-12 rounded-xl bg-sky-500/15 border border-sky-400/50 flex items-center justify-center mb-5">
+                        <svg viewBox="0 0 24 24" class="w-6 h-6 text-sky-300" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M16 11h6"/></svg>
+                    </div>
+                    <span class="block text-lg font-black text-white uppercase tracking-wide">Iniciar sesión</span>
+                    <span class="block text-sm text-slate-400 mt-2 leading-relaxed">Ingresa con tu código de operador y continúa con las actividades de mantenimiento.</span>
+                    <span class="block text-xs text-sky-300 font-bold uppercase tracking-widest mt-6">Continuar al acceso <span aria-hidden="true">→</span></span>
+                </button>
+                <button type="button" onclick="abrirEscanerQR()" class="group text-left rounded-2xl border border-emerald-500/50 bg-[#141821] hover:bg-emerald-950/20 p-6 transition focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-400/50 flex items-center justify-center mb-5">
+                        <svg viewBox="0 0 24 24" class="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7V4a1 1 0 0 1 1-1h3M17 3h3a1 1 0 0 1 1 1v3M21 17v3a1 1 0 0 1-1 1h-3M7 21H4a1 1 0 0 1-1-1v-3"/><rect x="7" y="7" width="4" height="4"/><rect x="15" y="7" width="2" height="2"/><rect x="7" y="15" width="2" height="2"/><path d="M14 14h3v3h-3zM19 14v2M17 19h4"/></svg>
+                    </div>
+                    <span class="block text-lg font-black text-white uppercase tracking-wide">Escanear código QR</span>
+                    <span class="block text-sm text-slate-400 mt-2 leading-relaxed">Identifica automáticamente el área y la máquina antes de iniciar sesión.</span>
+                    <span class="block text-xs text-emerald-300 font-bold uppercase tracking-widest mt-6">Abrir escáner <span aria-hidden="true">→</span></span>
+                </button>
+            </div>
+            <p class="text-[10px] text-slate-500 text-center uppercase tracking-widest mt-7">EMPAQPLAST S.A. · Eficiencia Operativa</p>
+        </div>
+    </div>
+
+    <!-- ESCÁNER QR -->
+    <div id="escaner-qr-modal" style="display:none;" class="fixed inset-0 z-[70] bg-[#141821]/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-6 industrial-shadow">
+            <div class="flex items-start justify-between gap-4 mb-4">
+                <div><h2 class="text-lg font-black text-white uppercase tracking-wide">Escanear código QR</h2><p class="text-xs text-slate-400 mt-1">Apunta la cámara al QR colocado en la máquina.</p></div>
+                <button type="button" onclick="cerrarEscanerQR()" class="industrial-border rounded-lg px-3 py-2 text-xs text-slate-300 hover:text-white">Cerrar</button>
+            </div>
+            <div class="rounded-xl overflow-hidden bg-black border border-slate-700 aspect-video flex items-center justify-center"><video id="qr-video" class="w-full h-full object-cover" autoplay muted playsinline></video></div>
+            <p id="qr-mensaje" class="text-xs text-slate-300 mt-4 leading-relaxed">Solicitaremos permiso para utilizar la cámara.</p>
+            <button type="button" onclick="mostrarInicioSesion(); cerrarEscanerQR();" class="w-full mt-4 rounded-xl py-3 text-xs font-bold uppercase tracking-widest industrial-border text-slate-300 hover:bg-[#141821]">Ingresar sin escanear</button>
+        </div>
+    </div>
+
     <!-- MODAL DE INICIO (LOGIN INDUSTRIAL) -->
-    <div id="setup-modal" class="fixed inset-0 z-50 bg-[#141821]/95 flex items-center justify-center p-4">
+    <div id="setup-modal" style="display:none;" class="fixed inset-0 z-50 bg-[#141821]/95 flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 industrial-shadow">
             <div class="flex flex-col items-center text-center mb-5 border-b border-[rgba(0,102,204,0.3)] pb-5">
                 <div class="w-full h-28 bg-white industrial-border rounded-xl overflow-hidden flex items-center justify-center px-4 py-3 mb-3 shadow-inner">
@@ -195,7 +241,7 @@
                         <p class="text-[10px] text-slate-500 mt-1">Escriba para filtrar y haga clic en la opción deseada para seleccionarla.</p>
                     </div>
                     <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Descripción detallada</label><textarea id="texto-anomalia" rows="2" placeholder="Describa la condición encontrada..." class="w-full bg-[#141821] industrial-border rounded-xl p-3 text-sm text-white focus:outline-none focus:border-ind-accent"></textarea></div>
-                    <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Evidencia fotográfica</label><div class="flex items-center space-x-2"><label class="flex-1 bg-[#141821] hover:bg-[#2A3142] industrial-border rounded-xl px-3 py-2 text-center cursor-pointer transition text-slate-300 text-xs font-medium"><span>+ Adjuntar foto</span><input type="file" id="foto-anomalia" accept="image/*" class="hidden" onchange="mostrarNombreArchivo(this)"></label><span id="nombre-archivo" class="text-slate-400 truncate max-w-[120px]">Sin archivo</span></div></div>
+                    <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Evidencia fotográfica</label><div class="grid grid-cols-2 gap-2"><label class="bg-rose-800 hover:bg-rose-700 rounded-xl px-3 py-3 text-center cursor-pointer transition text-white text-xs font-bold uppercase tracking-wide"><span>Tomar foto</span><input type="file" id="foto-anomalia-camara" accept="image/*" capture="environment" class="hidden" onchange="mostrarNombreArchivo(this)"></label><label class="bg-[#141821] hover:bg-[#2A3142] industrial-border rounded-xl px-3 py-3 text-center cursor-pointer transition text-slate-300 text-xs font-medium"><span>Elegir foto</span><input type="file" id="foto-anomalia" accept="image/*" class="hidden" onchange="mostrarNombreArchivo(this)"></label></div><p id="nombre-archivo" class="text-slate-400 truncate text-xs mt-2">Sin archivo</p></div>
                     <div class="flex space-x-2 pt-2"><button type="button" onclick="guardarAnomalia()" class="flex-1 bg-rose-700 hover:bg-rose-600 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Registrar anomalía</button><button type="button" onclick="cerrarModalAnomalia()" class="bg-[#141821] hover:bg-[#2A3142] text-slate-300 px-4 py-3 rounded-xl text-xs uppercase tracking-widest transition industrial-border cursor-pointer">Cancelar</button></div>
                 </div>
             </div>
@@ -555,6 +601,81 @@
             actualizarInterfaz();
         }
 
+        let qrStream = null;
+        let qrScanActive = false;
+        let qrDetector = null;
+
+        function mostrarInicioSesion() {
+            const principal = document.getElementById('pantalla-principal');
+            const login = document.getElementById('setup-modal');
+            if (principal) principal.style.display = 'none';
+            if (login) login.style.display = 'flex';
+            const code = document.getElementById('operator-code');
+            if (code) code.focus();
+        }
+
+        async function abrirEscanerQR() {
+            const modal = document.getElementById('escaner-qr-modal');
+            const video = document.getElementById('qr-video');
+            const mensaje = document.getElementById('qr-mensaje');
+            if (!modal || !video || !mensaje) return;
+            modal.style.display = 'flex';
+            if (!('BarcodeDetector' in window)) {
+                mensaje.textContent = 'Este navegador no permite leer códigos QR directamente desde la cámara. Puedes abrir el enlace del QR con la cámara del teléfono y luego iniciar sesión.';
+                return;
+            }
+            try {
+                qrDetector = new BarcodeDetector({ formats: ['qr_code'] });
+                qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+                video.srcObject = qrStream;
+                await video.play();
+                qrScanActive = true;
+                mensaje.textContent = 'Buscando código QR… Mantén el código dentro del encuadre.';
+                buscarCodigoQR();
+            } catch (error) {
+                mensaje.textContent = 'No se pudo acceder a la cámara. Verifica los permisos del navegador y que la página esté publicada mediante HTTPS.';
+            }
+        }
+
+        async function buscarCodigoQR() {
+            const video = document.getElementById('qr-video');
+            const mensaje = document.getElementById('qr-mensaje');
+            if (!qrScanActive || !video || video.readyState < 2 || !qrDetector) return;
+            try {
+                const codigos = await qrDetector.detect(video);
+                if (codigos && codigos.length) {
+                    const valor = codigos[0].rawValue;
+                    qrScanActive = false;
+                    if (mensaje) mensaje.textContent = 'Código leído. Abriendo el equipo…';
+                    try {
+                        const url = new URL(valor, window.location.href);
+                        if (url.origin === window.location.origin || valor.startsWith('http://') || valor.startsWith('https://')) {
+                            cerrarEscanerQR();
+                            window.location.href = url.href;
+                            return;
+                        }
+                    } catch (_) {}
+                    if (mensaje) mensaje.textContent = 'El QR no contiene un enlace válido de la plataforma. Comprueba el código colocado en la máquina.';
+                    qrScanActive = true;
+                }
+            } catch (error) {
+                // Se continúa intentando mientras la cámara esté activa.
+            }
+            if (qrScanActive) requestAnimationFrame(buscarCodigoQR);
+        }
+
+        function cerrarEscanerQR() {
+            qrScanActive = false;
+            if (qrStream) {
+                qrStream.getTracks().forEach(track => track.stop());
+                qrStream = null;
+            }
+            const video = document.getElementById('qr-video');
+            if (video) video.srcObject = null;
+            const modal = document.getElementById('escaner-qr-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
         function appIniciarSesion() {
             const codigoOp = document.getElementById('operator-code').value.trim();
             if (codigoOp === "") {
@@ -590,6 +711,18 @@
             if(codeInput) codeInput.value = '';
             if(passInput) passInput.value = '';
             configurarEquipoQR();
+
+            const parametrosQR = new URLSearchParams(window.location.search);
+            const vieneDeQR = parametrosQR.has('maquina') || parametrosQR.has('area');
+            const principal = document.getElementById('pantalla-principal');
+            const loginModal = document.getElementById('setup-modal');
+            if (vieneDeQR) {
+                if (principal) principal.style.display = 'none';
+                if (loginModal) loginModal.style.display = 'flex';
+            } else {
+                if (principal) principal.style.display = 'flex';
+                if (loginModal) loginModal.style.display = 'none';
+            }
 
             const btnIniciar = document.getElementById('btn-iniciar');
             if(btnIniciar) btnIniciar.onclick = appIniciarSesion;
@@ -1338,6 +1471,7 @@
             document.getElementById('texto-anomalia').value = '';
             document.getElementById('nombre-archivo').innerText = 'Sin archivo';
             document.getElementById('foto-anomalia').value = '';
+            document.getElementById('foto-anomalia-camara').value = '';
             document.getElementById('anomalia-modal').style.display = 'flex';
         }
 
@@ -1363,10 +1497,17 @@
         }
 
         function mostrarNombreArchivo(input) {
-            if(input.files && input.files[0]) {
-                document.getElementById('nombre-archivo').innerText = input.files[0].name;
+            const otroInputId = input.id === 'foto-anomalia-camara' ? 'foto-anomalia' : 'foto-anomalia-camara';
+            const otroInput = document.getElementById(otroInputId);
+            if (input.files && input.files[0]) {
+                // Mantener una sola evidencia seleccionada: la última acción del usuario.
+                if (otroInput) otroInput.value = '';
+                document.getElementById('nombre-archivo').innerText = input.files[0].name || 'Foto capturada';
             } else {
-                document.getElementById('nombre-archivo').innerText = 'Sin archivo';
+                const camara = document.getElementById('foto-anomalia-camara');
+                const archivo = document.getElementById('foto-anomalia');
+                const seleccionado = (camara && camara.files && camara.files[0]) || (archivo && archivo.files && archivo.files[0]);
+                document.getElementById('nombre-archivo').innerText = seleccionado ? (seleccionado.name || 'Foto capturada') : 'Sin archivo';
             }
         }
 
@@ -1379,7 +1520,9 @@
             if(!tipoDano) { mostrarAlertaIndustrial("Seleccione una opción de la lista de tipo de daño."); return; }
             if(!com) { mostrarAlertaIndustrial("Por favor ingrese una descripción detallada de la anomalía."); return; }
             const fileInput = document.getElementById('foto-anomalia');
-            const fotoNombre = fileInput.files.length > 0 ? fileInput.files[0].name : null;
+            const cameraInput = document.getElementById('foto-anomalia-camara');
+            const fotoSeleccionada = (cameraInput && cameraInput.files && cameraInput.files[0]) || (fileInput && fileInput.files && fileInput.files[0]);
+            const fotoNombre = fotoSeleccionada ? (fotoSeleccionada.name || 'Foto capturada') : null;
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const anterior = globalEstados[estadoKey] || {};
             let tiempoRealActividad = Number(globalTimer.elapsed) || 0;
