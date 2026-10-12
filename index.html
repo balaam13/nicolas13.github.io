@@ -569,6 +569,14 @@
 
                 if (error) throw error;
 
+                const primeraImagenDisponible = (fila, claves) => {
+                    for (const clave of claves) {
+                        const valor = fila?.[clave];
+                        if (typeof valor === 'string' && valor.trim()) return valor.trim();
+                    }
+                    return '';
+                };
+
                 const mapeadas = data.map(item => ({
                     id: item.id,
                     codigo: item.codigo,
@@ -579,10 +587,12 @@
                     anormal: item.condicion_anormal,
                     material: item.material_herramienta,
                     tiempo: `${Math.round((item.tiempo_estimado_seg || 300) / 60)} min`,
-                    img1: item.codigo.startsWith('L') ? 'imagen(166).jpg' : 'Succionador Externo.jpg',
-                    label1: 'Vista general',
-                    img2: item.codigo.startsWith('L') ? 'imagen(167).jpg' : 'Succionador Detalle.jpg',
-                    label2: 'Vista en detalle'
+                    // Prioriza las imágenes guardadas para cada actividad en Supabase.
+                    // No asignar una misma foto a todas las actividades por su modo.
+                    img1: primeraImagenDisponible(item, ['img1', 'imagen_1', 'imagen1', 'foto_url', 'imagen_url', 'url_imagen', 'foto_principal']),
+                    label1: item.label1 || item.etiqueta_imagen_1 || 'Vista general',
+                    img2: primeraImagenDisponible(item, ['img2', 'imagen_2', 'imagen2', 'foto_detalle_url', 'imagen_detalle_url', 'url_imagen_detalle', 'foto_secundaria']),
+                    label2: item.label2 || item.etiqueta_imagen_2 || 'Vista en detalle'
                 }));
 
                 datosLimpieza = mapeadas.filter(i => i.codigo.startsWith('L'));
@@ -1265,7 +1275,8 @@
 
             } catch (err) {
                 console.error("Error al guardar en Supabase:", err);
-                mostrarAlertaIndustrial("Error al registrar la ejecución en la base de datos.");
+                const detalle = err?.message || err?.details || err?.hint || "Error desconocido";
+                mostrarAlertaIndustrial(`Error al registrar la ejecución en la base de datos.\n\nDetalle: ${detalle}`);
             }
         }
 
