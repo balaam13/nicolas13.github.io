@@ -559,7 +559,7 @@
             });
         }
 
-        // CARGA DESDE SUPABASE MANTENIENDO EL FORMATO DE TUS ARREGLOS
+  // CARGA DESDE SUPABASE MAPEANDO LAS FOTOS EXACTAS DE CADA COMPONENTE
         async function cargarActividadesDesdeSupabase() {
             try {
                 const { data, error } = await supabaseClient
@@ -569,31 +569,75 @@
 
                 if (error) throw error;
 
-                const primeraImagenDisponible = (fila, claves) => {
-                    for (const clave of claves) {
-                        const valor = fila?.[clave];
-                        if (typeof valor === 'string' && valor.trim()) return valor.trim();
-                    }
-                    return '';
+                // Diccionario exacto con los nombres de tus archivos subidos al repositorio
+                const diccionarioFotos = {
+                    // LIMPIEZA
+                    'L-001': { img1: 'imagen(166).jpg', label1: 'Tolva Externa', img2: 'imagen(167).jpg', label2: 'Tolva Detalle' },
+                    'L-002': { img1: 'Succionador Externo.jpg', label1: 'Succionador Externo', img2: 'Succionador Detalle.jpg', label2: 'Succionador Detalle' },
+                    'L-003': { img1: 'Filtro Externo.jpg', label1: 'Filtro Externo', img2: 'Filtro Detalle.jpg', label2: 'Filtro Detalle' },
+                    'L-004': { img1: 'Zona de boquilla externa.jpg', label1: 'Boquilla Externa', img2: 'Zona de boquilla detalle.jpg', label2: 'Boquilla Detalle' },
+                    'L-005': { img1: 'Área de Expulsion.jpg', label1: 'Área de Expulsión externa', img2: '', label2: '' },
+                    'L-006': { img1: 'Platina Fija.jpg', label1: 'Platina fija externa', img2: '', label2: '' },
+                    'L-007': { img1: 'Platina móvil.jpg', label1: 'Platina móvil externa', img2: '', label2: '' },
+                    'L-008': { img1: 'Mangueras y distribuidor de agua.jpg', label1: 'Distribuidor de agua', img2: '', label2: '' },
+                    'L-009': { img1: 'Unidad de mantenimiento (FRL) Externa.jpg', label1: 'FRL Externa', img2: 'Unidad de mantenimiento (FRL) Detalle.jpg', label2: 'FRL Detalle' },
+                    'L-010': { img1: 'Mangueras visibles Externa.jpeg', label1: 'Mangueras Externa', img2: 'Mangueras visibles Detalle.jpg', label2: 'Mangueras Detalle' },
+                    'L-011': { img1: 'Controlador de temperatura Externa.jpg', label1: 'Controlador Externo', img2: 'Controlador de temperatura Detalle.jpg', label2: 'Controlador Detalle' },
+                    'L-012': { img1: 'HMI Externo.jpg', label1: 'HMI Externo', img2: 'HMI Detalle.jpg', label2: 'HMI Detalle' },
+                    'L-013': { img1: 'Superficie tablero electrico Externo.jpg', label1: 'Tablero Externo', img2: '', label2: '' },
+                    'L-014': { img1: 'Filtros del tablero eléctrico Externo.jpg', label1: 'Filtros Tablero Ext.', img2: 'Filtros del tablero eléctrico Detalle.jpg', label2: 'Filtros Tablero Det.' },
+                    'L-015': { img1: 'Estructura Externa.jpg', label1: 'Estructura Externa', img2: 'Mangueras visibles Externa.jpeg', label2: 'Vista Lateral' },
+                    'L-016': { img1: 'Piso Perimetral.jpg', label1: 'Piso perimetral', img2: '', label2: '' },
+
+                    // MONITOREO
+                    'I-001': { img1: 'Succionador Externo.jpg', label1: 'Monitoreo', img2: 'Succionador Detalle.jpg', label2: 'Operación' },
+                    'I-002': { img1: 'Manguera de Succion.jpg', label1: 'Manguera', img2: 'Manguera de Succión Detalle.jpg', label2: 'Conexión' },
+                    'I-003': { img1: 'Zona de boquilla externa.jpg', label1: 'Boquilla', img2: 'Zona de boquilla detalle.jpg', label2: 'Estado' },
+                    'I-004': { img1: 'Controlador de temperatura Externa.jpg', label1: 'Zonas', img2: 'Controlador de temperatura Detalle.jpg', label2: 'Temperaturas' },
+                    'I-005': { img1: 'Área de Expulsion.jpg', label1: 'Expulsor', img2: 'Área de Expulsion.jpg', label2: 'Recorrido' },
+                    'I-006': { img1: 'Área de Expulsion.jpg', label1: 'Área', img2: 'Área de Expulsion.jpg', label2: 'Libre' },
+                    'I-007': { img1: 'Platina móvil.jpg', label1: 'Placas', img2: 'Platina móvil.jpg', label2: 'Inspección' },
+                    'I-008': { img1: 'Mangueras visibles Externa.jpeg', label1: 'Nivel', img2: 'Mangueras visibles Detalle.jpg', label2: 'Apariencia' },
+                    'I-009': { img1: 'Mangueras visibles Externa.jpeg', label1: 'Mangueras', img2: 'Mangueras visibles Detalle.jpg', label2: 'Válvulas' },
+                    'I-010': { img1: 'Mangueras visibles Externa.jpeg', label1: 'Bombas', img2: 'Mangueras visibles Detalle.jpg', label2: 'Operación' },
+                    'I-011': { img1: 'Mangueras visibles Externa.jpeg', label1: 'Válvulas', img2: 'Mangueras visibles Detalle.jpg', label2: 'Banco' },
+                    'I-012': { img1: 'Mangueras y distribuidor de agua.jpg', label1: 'Enfriamiento', img2: 'Mangueras visibles Detalle.jpg', label2: 'Acoples' },
+                    'I-013': { img1: 'Controlador de temperatura Externa.jpg', label1: 'Controlador', img2: 'Controlador de temperatura Detalle.jpg', label2: 'PV / SV' },
+                    'I-014': { img1: 'Superficie tablero electrico Externo.jpg', label1: 'Cableado', img2: 'Filtros del tablero eléctrico Detalle.jpg', label2: 'Conectores' },
+                    'I-015': { img1: 'HMI Externo.jpg', label1: 'Sensores', img2: 'HMI Detalle.jpg', label2: 'Fijación' },
+                    'I-016': { img1: 'Platina móvil.jpg', label1: 'Platina móvil', img2: 'Platina móvil.jpg', label2: 'Guías' },
+                    'I-017': { img1: 'Platina Fija.jpg', label1: 'Platina fija', img2: 'Platina Fija.jpg', label2: 'Cierre' },
+                    'I-018': { img1: 'Estructura Externa.jpg', label1: 'Tornillería', img2: 'Estructura Detalle.jpg', label2: 'Pernos' },
+                    'I-019': { img1: 'Mangueras visibles Externa.jpeg', label1: 'Presión', img2: 'Mangueras visibles Detalle.jpg', label2: 'Manómetro' },
+                    'I-020': { img1: 'Estructura Externa.jpg', label1: 'Puertas', img2: 'Estructura Detalle.jpg', label2: 'Seguridad' },
+                    'I-021': { img1: 'Estructura Externa.jpg', label1: 'Guardas', img2: 'Estructura Detalle.jpg', label2: 'Fijación' },
+                    'I-022': { img1: 'Estructura Externa.jpg', label1: 'Señalética', img2: 'Estructura Detalle.jpg', label2: 'Etiquetas' }
                 };
 
-                const mapeadas = data.map(item => ({
-                    id: item.id,
-                    codigo: item.codigo,
-                    sistema: item.sistema,
-                    componente: item.componente,
-                    periodicidad: item.frecuencia,
-                    estandar: item.estandar_ejecucion,
-                    anormal: item.condicion_anormal,
-                    material: item.material_herramienta,
-                    tiempo: `${Math.round((item.tiempo_estimado_seg || 300) / 60)} min`,
-                    // Prioriza las imágenes guardadas para cada actividad en Supabase.
-                    // No asignar una misma foto a todas las actividades por su modo.
-                    img1: primeraImagenDisponible(item, ['img1', 'imagen_1', 'imagen1', 'foto_url', 'imagen_url', 'url_imagen', 'foto_principal']),
-                    label1: item.label1 || item.etiqueta_imagen_1 || 'Vista general',
-                    img2: primeraImagenDisponible(item, ['img2', 'imagen_2', 'imagen2', 'foto_detalle_url', 'imagen_detalle_url', 'url_imagen_detalle', 'foto_secundaria']),
-                    label2: item.label2 || item.etiqueta_imagen_2 || 'Vista en detalle'
-                }));
+                const mapeadas = data.map(item => {
+                    const fotosDef = diccionarioFotos[item.codigo] || { 
+                        img1: 'Estructura Externa.jpg', 
+                        label1: 'Vista general', 
+                        img2: 'Estructura Detalle.jpg', 
+                        label2: 'Detalle' 
+                    };
+
+                    return {
+                        id: item.id,
+                        codigo: item.codigo,
+                        sistema: item.sistema,
+                        componente: item.componente,
+                        periodicidad: item.frecuencia,
+                        estandar: item.estandar_ejecucion,
+                        anormal: item.condicion_anormal,
+                        material: item.material_herramienta,
+                        tiempo: `${Math.round((item.tiempo_estimado_seg || 300) / 60)} min`,
+                        img1: fotosDef.img1,
+                        label1: fotosDef.label1,
+                        img2: fotosDef.img2,
+                        label2: fotosDef.label2
+                    };
+                });
 
                 datosLimpieza = mapeadas.filter(i => i.codigo.startsWith('L'));
                 datosMonitoreo = mapeadas.filter(i => i.codigo.startsWith('I'));
@@ -604,13 +648,7 @@
                 mostrarAlertaIndustrial("Error al conectar con la base de datos de Supabase.");
             }
         }
-
-        function iniciarInterfazMantenimiento() {
-            poblarFiltroSistemas();
-            calcularEstadoCalendarioTPM();
-            actualizarInterfaz();
-        }
-
+        
         let qrStream = null;
         let qrScanActive = false;
         let qrDetector = null;
