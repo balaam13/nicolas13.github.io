@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <!-- PANTALLA DE FAMILIARIZACIÓN INICIAL (CON LA MASCOTA RESTAURADA) -->
+    <!-- PANTALLA DE FAMILIARIZACIÓN INICIAL -->
     <div id="familiarizacion-modal" style="display: none;" class="fixed inset-0 z-[90] bg-[#141821]/95 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-8 industrial-shadow flex flex-col items-center text-center">
             <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
@@ -465,11 +465,11 @@
         let globalTimer = { key: null, interval: null, countdownInterval: null, elapsed: 0, estimated: 0, running: false, startMs: null };
         const globalTimersPorActividad = {};
 
-        // Arreglos que se cargarán desde Supabase
+        // Arreglos cargados desde Supabase
         let datosLimpieza = [];
         let datosMonitoreo = [];
 
-        const fechaArranqueTPM = new Date(2026, 8, 24); // 24 Septiembre 2026
+        const fechaArranqueTPM = new Date(2026, 8, 24);
         const CLAVE_FAMILIARIZACION = 'ma_familiarizado_v1';
 
         function obtenerFechaSinHora(fecha) {
@@ -559,7 +559,7 @@
             });
         }
 
-        // CARGA DESDE SUPABASE MAPEANDO LAS FOTOS EXACTAS Y CORREGIDAS
+        // CARGA AUTOMÁTICA Y DIRECTA DESDE SUPABASE
         async function cargarActividadesDesdeSupabase() {
             try {
                 const { data, error } = await supabaseClient
@@ -615,8 +615,8 @@
                     const fotosDef = diccionarioFotos[item.codigo] || { 
                         img1: 'Estructura Externa.jpg', 
                         label1: 'Vista general', 
-                        img2: 'Estructura Detalle.jpg', 
-                        label2: 'Detalle' 
+                        img2: '', 
+                        label2: '' 
                     };
 
                     return {
@@ -639,7 +639,9 @@
                 datosLimpieza = mapeadas.filter(i => i.codigo.startsWith('L'));
                 datosMonitoreo = mapeadas.filter(i => i.codigo.startsWith('I'));
 
-                iniciarInterfazMantenimiento();
+                // LLAMADA AUTOMÁTICA A LA INTERFAZ
+                poblarFiltroSistemas();
+                actualizarInterfaz();
             } catch (err) {
                 console.error("Error al cargar actividades de Supabase:", err);
                 mostrarAlertaIndustrial("Error al conectar con la base de datos de Supabase.");
@@ -1246,14 +1248,12 @@
             actualizarTemporizadorUI();
         }
 
-        // FUNCIÓN AUXILIAR HORA LOCAL ECUADOR
         function obtenerHoraLocalISO(desplazamientoSegundos = 0) {
             const fecha = new Date(Date.now() - (desplazamientoSegundos * 1000));
             const offsetMs = fecha.getTimezoneOffset() * 60000;
             return new Date(fecha.getTime() - offsetMs).toISOString().slice(0, -1) + '-05:00'; 
         }
 
-        // 1. MARCAR ESTADO CONECTADO A SUPABASE
         async function marcarEstado(estado) {
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const actual = globalEstados[estadoKey] || {};
@@ -1310,7 +1310,6 @@
             }
         }
 
-        // 2. GUARDAR ANOMALÍA
         async function guardarAnomalia() {
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const item = listaOriginal[globalPuntoIdx];
@@ -1365,7 +1364,6 @@
             }
         }
 
-        // 3. GUARDAR OBSERVACIÓN
         async function guardarObservacion() {
             const com = document.getElementById('texto-observacion').value.trim();
             if(!com) { mostrarAlertaIndustrial("Por favor ingrese una observación."); return; }
@@ -1502,12 +1500,16 @@
             abrirConfirmacionAnomalia();
         }
 
+        // FORMULARIO DE ANOMALÍA CORREGIDO (Sin el código en el componente)
         function abrirFormularioAnomalia() {
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const item = listaOriginal[globalPuntoIdx];
             document.getElementById('modal-anomalia-info').innerText = `${item.sistema} - ${item.codigo}`;
             document.getElementById('anomalia-sistema-auto').innerText = item.sistema;
-            document.getElementById('anomalia-componente-auto').innerText = `${item.codigo} ${item.componente}`;
+            
+            // CORRECCIÓN: Muestra solo el componente sin anteponer item.codigo
+            document.getElementById('anomalia-componente-auto').innerText = item.componente;
+            
             document.getElementById('tipo-dano-input').value = '';
             document.getElementById('tipo-dano-seleccionado').value = '';
             document.getElementById('texto-anomalia').value = '';
