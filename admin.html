@@ -69,7 +69,7 @@
                 <div><span class="text-slate-400">Máquina asignada:</span> <strong id="maquinaDetectada" class="text-purple-300 font-mono">HUSKY 3</strong></div>
             </div>
 
-            <button onclick="subirActividadesASupabase()" class="w-full mt-4 bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">
+            <button id="btnImportar" onclick="subirActividadesASupabase()" class="w-full mt-4 bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">
                 IMPORTAR ACTIVIDADES A SUPABASE
             </button>
         </div>
@@ -86,15 +86,17 @@
         let actividadesExtraidas = [];
         let nombreMaquinaDetectada = "HUSKY 3";
 
-        function extraerValor(fila, campos) {
-            for (let c of campos) {
-                for (let k in fila) {
-                    if (k.trim().toLowerCase() === c.toLowerCase()) {
-                        return fila[k];
+        function obtenerValorColumna(fila, palabrasClave) {
+            const llaves = Object.keys(fila);
+            for (let llave of llaves) {
+                const llaveLimpia = llave.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                for (let pc of palabrasClave) {
+                    if (llaveLimpia.includes(pc)) {
+                        return fila[llave];
                     }
                 }
             }
-            return '';
+            return null;
         }
 
         function procesarArchivoExcel(e) {
@@ -117,29 +119,40 @@
 
                     actividadesExtraidas = [];
 
-                    // Recorrer las hojas del libro Excel
                     workbook.SheetNames.forEach(nombreHoja => {
                         const hoja = workbook.Sheets[nombreHoja];
-                        const filas = XLSX.utils.sheet_to_json(hoja);
+                        const filas = XLSX.utils.sheet_to_json(hoja, { defval: "" });
 
-                        filas.forEach(f => {
-                            const codigo = extraerValor(f, ['codigo', 'código', 'cod', 'item', 'no', 'n°']);
-                            const sistema = extraerValor(f, ['sistema', 'equipo', 'area', 'área']);
-                            const componente = extraerValor(f, ['componente', 'elemento', 'punto', 'parte', 'descripcion']);
-                            const frecuencia = extraerValor(f, ['frecuencia', 'periodicidad', 'frec']);
-                            const estandar = extraerValor(f, ['estandar', 'estándar', 'estandar_ejecucion', 'actividad']);
-                            const anormal = extraerValor(f, ['condicion_anormal', 'anormal', 'anomalia', 'condicion']);
-                            const material = extraerValor(f, ['material', 'herramienta', 'material_herramienta']);
+                        filas.forEach((f, idx) => {
+                            const codigo = String(obtenerValorColumna(f, ['codigo', 'cod', 'item', 'no', 'n°']) || `L-${idx + 1}`).trim();
+                            const sistema = String(obtenerValorColumna(f, ['sistema', 'equipo', 'area', 'área']) || 'General').trim();
+                            const componente = String(obtenerValorColumna(f, ['componente', 'elemento', 'punto', 'descripcion']) || 'Componente General').trim();
+                            
+                            let frecuencia = String(obtenerValorColumna(f, ['frecuencia', 'periodicidad', 'frec']) || 'Diaria').trim();
+                            if (!['Diaria', 'Semanal', 'Mensual'].includes(frecuencia)) {
+                                frecuencia = 'Diaria'; // Ajustar al CHECK del SQL
+                            }
 
-                            if (codigo || componente || estandar) {
+                            const estandar = String(obtenerValorColumna(f, ['estandar', 'estándar', 'actividad', 'ejecucion']) || '').trim();
+                            const anormal = String(obtenerValorColumna(f, ['anormal', 'anomalia', 'condicion']) || '').trim();
+                            const material = String(obtenerValorColumna(f, ['material', 'herramienta']) || '').trim();
+
+                            // Determinar MODO ('limpieza' o 'monitoreo') basado en el código o la hoja
+                            let modo = 'limpieza';
+                            if (codigo.toUpperCase().startsWith('I') || nombreHoja.toLowerCase().includes('monitoreo') || nombreHoja.toLowerCase().includes('inspeccion')) {
+                                modo = 'monitoreo';
+                            }
+
+                            if (estandar || componente || codigo) {
                                 actividadesExtraidas.push({
-                                    codigo: String(codigo || 'L-000').trim(),
-                                    sistema: String(sistema || 'General').trim(),
-                                    componente: String(componente || 'Sin nombre').trim(),
-                                    frecuencia: String(frecuencia || 'Diaria').trim(),
-                                    estandar_ejecucion: String(estandar || '').trim(),
-                                    condicion_anormal: String(anormal || '').trim(),
-                                    material_herramienta: String(material || '').trim(),
+                                    codigo: codigo,
+                                    modo: modo,
+                                    sistema: sistema,
+                                    componente: componente,
+                                    frecuencia: frecuencia,
+                                    estandar_ejecucion: estandar,
+                                    condicion_anormal: anormal,
+                                    material_herramienta: material,
                                     tiempo_estimado_seg: 300,
                                     activo: true
                                 });
@@ -151,66 +164,99 @@
                     document.getElementById('seccionPrevia').classList.remove('hidden');
 
                 } catch (err) {
-                    alert("Error al leer la estructura del Excel: " + err.message);
+                    alert("Error al leer el archivo Excel: " + err.message);
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        async function obtenerOCrearMaquina(nombre) {
-            let { data: maquina } = await supabaseClient
-                .from('maquinas')
+        // Obtener o Crear Área
+        async function obtenerOCrearArea(nombreArea = 'Inyección PET') {
+            let { data: area } = await supabaseClient
+                .from('areas')
                 .select('id')
-                .eq('nombre', nombre)
+                .eq('nombre', nombreArea)
                 .maybeSingle();
 
-            if (maquina) {
-                return maquina.id;
-            }
+            if (area) return area.id;
 
-            const { data: nuevaMaquina, error: insertError } = await supabaseClient
-                .from('maquinas')
-                .insert([{ nombre: nombre }])
+            const { data: nuevaArea, error } = await supabaseClient
+                .from('areas')
+                .insert([{ nombre: nombreArea, activo: true }])
                 .select('id')
                 .single();
 
-            if (insertError) {
-                throw new Error("Error al crear la máquina: " + insertError.message);
-            }
+            if (error) throw new Error("Error en tabla 'areas': " + error.message);
+            return nuevaArea.id;
+        }
 
+        // Obtener o Crear Máquina vinculada a un Área
+        async function obtenerOCrearMaquina(nombre, idArea) {
+            const codigoMaquina = nombre.toUpperCase().replace(/\s+/g, '-');
+
+            let { data: maquina } = await supabaseClient
+                .from('maquinas')
+                .select('id')
+                .eq('codigo', codigoMaquina)
+                .maybeSingle();
+
+            if (maquina) return maquina.id;
+
+            const { data: nuevaMaquina, error } = await supabaseClient
+                .from('maquinas')
+                .insert([{
+                    id_area: idArea,
+                    codigo: codigoMaquina,
+                    nombre: nombre,
+                    activo: true
+                }])
+                .select('id')
+                .single();
+
+            if (error) throw new Error("Error en tabla 'maquinas': " + error.message);
             return nuevaMaquina.id;
         }
 
         async function subirActividadesASupabase() {
             if (actividadesExtraidas.length === 0) return;
 
+            const btn = document.getElementById('btnImportar');
+            btn.disabled = true;
+
             const log = document.getElementById('logEstado');
             log.classList.remove('hidden');
-            log.innerText = `Procesando máquina "${nombreMaquinaDetectada}" en Supabase...`;
+            log.innerText = `Sincronizando estructura relacional (Áreas -> Máquina)...`;
             log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-[#0f111a] border border-purple-500/50 text-purple-300";
 
             try {
-                const idMaquina = await obtenerOCrearMaquina(nombreMaquinaDetectada);
+                // 1. Obtener/Crear Área
+                const idArea = await obtenerOCrearArea('Inyección PET');
 
-                log.innerText = `Vinculando ID (${idMaquina}) a las ${actividadesExtraidas.length} actividades...`;
+                // 2. Obtener/Crear Máquina
+                const idMaquina = await obtenerOCrearMaquina(nombreMaquinaDetectada, idArea);
 
+                log.innerText = `Asignando id_maquina (${idMaquina}) y subiendo ${actividadesExtraidas.length} actividades...`;
+
+                // 3. Vincular id_maquina
                 const actividadesConMaquina = actividadesExtraidas.map(act => ({
                     ...act,
                     id_maquina: idMaquina
                 }));
 
+                // 4. Insertar actividades
                 const { error: errorActividades } = await supabaseClient
                     .from('actividades')
                     .insert(actividadesConMaquina);
 
                 if (errorActividades) throw errorActividades;
 
-                log.innerText = `¡ÉXITO! Se vinculó la máquina "${nombreMaquinaDetectada}" (ID: ${idMaquina}) y se cargaron las ${actividadesExtraidas.length} actividades a la base de datos de Supabase.`;
+                log.innerText = `¡ÉXITO TOTAL! Se registró el área, la máquina "${nombreMaquinaDetectada}" (ID: ${idMaquina}) y se importaron las ${actividadesExtraidas.length} actividades en Supabase.`;
                 log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-emerald-950/40 border border-emerald-500/50 text-emerald-300";
 
             } catch (err) {
                 log.innerText = "Error al guardar en Supabase: " + err.message;
                 log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-rose-950/40 border border-rose-500/50 text-rose-300";
+                btn.disabled = false;
             }
         }
     </script>
