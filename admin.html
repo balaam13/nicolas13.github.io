@@ -1,4 +1,84 @@
-<script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMPAQPLAST S.A. | Panel Administrador TPM</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- SheetJS para procesar Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ind: {
+                            base: '#0f111a',
+                            panel: '#181b26',
+                            border: 'rgba(139, 92, 246, 0.4)',
+                            accent: '#8b5cf6',
+                            accentHover: '#7c3aed'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { background-color: #0f111a; color: #F3F4F6; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .industrial-border { border: 1.5px solid rgba(139, 92, 246, 0.4); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-6">
+
+    <!-- ENCABEZADO -->
+    <header class="bg-ind-panel industrial-border rounded-2xl p-5 mb-6 flex items-center justify-between shadow-lg">
+        <div class="flex items-center space-x-4">
+            <h1 class="text-xl font-black text-white uppercase tracking-wide">Panel Administrador TPM</h1>
+            <span class="text-xs bg-purple-950 text-purple-300 font-mono px-3 py-1 rounded-lg border border-purple-500/40">EMPAQPLAST S.A.</span>
+        </div>
+        <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-600 transition">
+            Ir a Vista Operario
+        </a>
+    </header>
+
+    <!-- PANEL PRINCIPAL -->
+    <main class="max-w-4xl mx-auto w-full bg-ind-panel industrial-border rounded-2xl p-8 shadow-2xl">
+        <h2 class="text-lg font-bold text-white mb-2 uppercase">Importar Excel de Máquina</h2>
+        <p class="text-xs text-slate-400 mb-6">Selecciona el archivo Excel (.xlsx) de la máquina para extraer automáticamente las actividades y cargarlas a Supabase.</p>
+
+        <!-- ZONA CARGA EXCEL -->
+        <div class="border-2 border-dashed border-purple-500/40 rounded-xl p-8 text-center bg-[#0f111a]/50 hover:border-purple-400 transition">
+            <input type="file" id="excelInput" accept=".xlsx, .xls" class="hidden" onchange="procesarArchivoExcel(event)">
+            <label for="excelInput" class="cursor-pointer bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs uppercase px-6 py-3 rounded-xl transition shadow-lg inline-block">
+                Seleccionar Excel (.xlsx)
+            </label>
+            <p id="nombreArchivo" class="text-xs text-slate-400 mt-3 font-mono">Ningún archivo seleccionado</p>
+        </div>
+
+        <!-- PREVISUALIZACIÓN -->
+        <div id="seccionPrevia" class="hidden mt-8 bg-[#0f111a] industrial-border rounded-xl p-6">
+            <h3 class="text-sm font-bold text-purple-300 uppercase mb-4 border-b border-purple-500/30 pb-2">Resumen detectado del Excel</h3>
+            
+            <div class="grid grid-cols-2 gap-4 text-xs mb-4">
+                <div><span class="text-slate-400">Total actividades leídas:</span> <strong id="totalActividades" class="text-white font-mono">0</strong></div>
+                <div><span class="text-slate-400">Máquina asignada:</span> <strong id="maquinaDetectada" class="text-purple-300 font-mono">HUSKY 3</strong></div>
+            </div>
+
+            <button onclick="subirActividadesASupabase()" class="w-full mt-4 bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">
+                Importar actividades a Supabase
+            </button>
+        </div>
+
+        <!-- MENSAJE DE ESTADO -->
+        <div id="logEstado" class="hidden mt-6 p-4 rounded-xl text-xs font-mono bg-[#0f111a] border border-slate-700"></div>
+    </main>
+
+    <script>
         // Credenciales de Supabase
         const SUPABASE_URL = 'https://cwacaqewinvuyunjprwd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_E6pV0fQw-a0jhmW61X_aVg_igoPZ2G3';
@@ -13,10 +93,11 @@
 
             document.getElementById('nombreArchivo').innerText = file.name;
 
-            // Extraer el nombre de la máquina desde el nombre del archivo (ej. "HUSKY 3 - ABE.xlsx")
+            // Intentar obtener el nombre de la máquina desde el nombre del archivo
             const nombreLimpio = file.name.split('-')[0].split('.')[0].trim();
             if (nombreLimpio) {
                 nombreMaquinaDetectada = nombreLimpio;
+                document.getElementById('maquinaDetectada').innerText = nombreMaquinaDetectada;
             }
 
             const reader = new FileReader();
@@ -47,7 +128,7 @@
         }
 
         async function obtenerOCrearMaquina(nombre) {
-            // 1. Buscar si la máquina ya existe en la tabla "maquinas"
+            // 1. Buscar si la máquina ya existe
             let { data: maquina } = await supabaseClient
                 .from('maquinas')
                 .select('id')
@@ -58,7 +139,7 @@
                 return maquina.id;
             }
 
-            // 2. Si no existe, crear la máquina en Supabase
+            // 2. Si no existe, crear la máquina
             const { data: nuevaMaquina, error: insertError } = await supabaseClient
                 .from('maquinas')
                 .insert([{ nombre: nombre, area: 'Inyección PET', activo: true }])
@@ -77,29 +158,29 @@
 
             const log = document.getElementById('logEstado');
             log.classList.remove('hidden');
-            log.innerText = `Vinculando máquina "${nombreMaquinaDetectada}"...`;
+            log.innerText = `Buscando o creando la máquina "${nombreMaquinaDetectada}"...`;
             log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-[#0f111a] border border-purple-500/50 text-purple-300";
 
             try {
-                // Paso A: Obtener el ID numérico de la máquina
+                // Paso A: Obtener el ID de la máquina
                 const idMaquina = await obtenerOCrearMaquina(nombreMaquinaDetectada);
 
-                log.innerText = `Asignando ID (${idMaquina}) a las ${actividadesExtraidas.length} actividades...`;
+                log.innerText = `Asignando ID de máquina (${idMaquina}) a las ${actividadesExtraidas.length} actividades...`;
 
-                // Paso B: Incluir id_maquina en cada registro
+                // Paso B: Vincular id_maquina a cada registro
                 const actividadesConMaquina = actividadesExtraidas.map(act => ({
                     ...act,
                     id_maquina: idMaquina
                 }));
 
-                // Paso C: Insertar registros en la tabla actividades
+                // Paso C: Insertar en la tabla actividades
                 const { error: errorActividades } = await supabaseClient
                     .from('actividades')
                     .insert(actividadesConMaquina);
 
                 if (errorActividades) throw errorActividades;
 
-                log.innerText = `¡Éxito! Se registró la máquina "${nombreMaquinaDetectada}" y se importaron las ${actividadesExtraidas.length} actividades correctamente.`;
+                log.innerText = `¡Éxito! Se vinculó la máquina "${nombreMaquinaDetectada}" y se importaron las ${actividadesExtraidas.length} actividades correctamente.`;
                 log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-emerald-950/40 border border-emerald-500/50 text-emerald-300";
 
             } catch (err) {
@@ -108,3 +189,5 @@
             }
         }
     </script>
+</body>
+</html>
