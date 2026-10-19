@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Lector de Excel para el módulo de conversión administrativa -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Three.js y GLTFLoader para el modelo 3D real (.glb) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -17,11 +19,11 @@
                 extend: {
                     colors: {
                         ind: {
-                            base: '#0f111a',
-                            panel: '#181b26',
-                            border: 'rgba(139, 92, 246, 0.4)',
-                            accent: '#8b5cf6',
-                            accentHover: '#7c3aed'
+                            base: '#141821',
+                            panel: '#1E2330',
+                            border: 'rgba(0, 102, 204, 0.4)',
+                            accent: '#0066cc',
+                            accentHover: '#0052a3'
                         }
                     }
                 }
@@ -30,16 +32,16 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { background-color: #0f111a; color: #F3F4F6; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-        .industrial-border { border: 1.5px solid rgba(139, 92, 246, 0.4); }
-        .industrial-border-active { border: 2px solid rgba(167, 139, 250, 0.8); }
-        .industrial-shadow { box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3); }
-        .bg-ind-accent-gradient { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+        body { background-color: #141821; color: #F3F4F6; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .industrial-border { border: 1.5px solid rgba(0, 102, 204, 0.4); }
+        .industrial-border-active { border: 2px solid rgba(0, 136, 255, 0.8); }
+        .industrial-shadow { box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.2); }
+        .bg-ind-accent-gradient { background: linear-gradient(135deg, #0080ff 0%, #0066cc 100%); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #0f111a; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #8b5cf6; border-radius: 3px; }
-        .action-button { box-shadow: 0 8px 18px rgba(0,0,0,.35); transform: translateY(0); }
-        .action-button:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(109, 40, 217, 0.35); }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #141821; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #0066cc; border-radius: 3px; }
+        .action-button { box-shadow: 0 8px 18px rgba(0,0,0,.28); transform: translateY(0); }
+        .action-button:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,.38); }
         .action-button:active { transform: translateY(0); }
         .action-button:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
     </style>
@@ -58,8 +60,8 @@
         </div>
     </div>
 
-    <!-- PANTALLA DE FAMILIARIZACIÓN INICIAL -->
-    <div id="familiarizacion-modal" style="display: none;" class="fixed inset-0 z-[90] bg-[#0f111a]/95 backdrop-blur-md flex items-center justify-center p-4">
+    <!-- PANTALLA DE FAMILIARIZACIÓN INICIAL (CON LA MASCOTA RESTAURADA) -->
+    <div id="familiarizacion-modal" style="display: none;" class="fixed inset-0 z-[90] bg-[#141821]/95 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-8 industrial-shadow flex flex-col items-center text-center">
             <div class="w-32 h-44 bg-white rounded-xl industrial-border overflow-hidden flex items-center justify-center p-2 mb-4 shadow-lg">
                 <img src="ChatGPT Image 23 sept 2026, 12_46_01.jpg" alt="Mascota EMPAQPLAST" class="max-h-full max-w-full object-contain">
@@ -75,90 +77,93 @@
         </div>
     </div>
 
-    <!-- PANTALLA PRINCIPAL INICIAL (SOLO ESCANEAR CÓDIGO QR DE MÁQUINA) -->
-    <div id="pantalla-principal" style="display: flex;" class="fixed inset-0 z-[60] bg-[#0f111a] flex items-center justify-center p-5">
-        <div class="w-full max-w-xl bg-ind-panel industrial-border rounded-3xl p-7 sm:p-10 industrial-shadow">
-            <div class="flex flex-col items-center text-center border-b border-purple-500/30 pb-7 mb-7">
+    <!-- PANTALLA PRINCIPAL DE ACCESO -->
+    <div id="pantalla-principal" class="fixed inset-0 z-[60] bg-[#141821] flex items-center justify-center p-5">
+        <div class="w-full max-w-3xl bg-ind-panel industrial-border rounded-3xl p-7 sm:p-10 industrial-shadow">
+            <div class="flex flex-col items-center text-center border-b border-[rgba(0,102,204,0.3)] pb-7 mb-7">
                 <div class="w-full max-w-sm h-28 bg-white industrial-border rounded-xl overflow-hidden flex items-center justify-center px-4 py-3 mb-5 shadow-inner">
-                    <img src="imagen(162).jpg" alt="EMPAQPLAST S.A." class="h-full w-auto max-w-full object-contain rounded-lg" onerror="this.src='https://placehold.co/220x90/8b5cf6/ffffff?text=EMPAQPLAST'">
+                    <img src="imagen(162).jpg" alt="EMPAQPLAST S.A." class="h-full w-auto max-w-full object-contain rounded-lg" onerror="this.src='https://placehold.co/220x90/0066cc/ffffff?text=EMPAQPLAST'">
                 </div>
                 <p class="text-xs text-ind-accent font-bold tracking-[0.25em] uppercase mb-2">Sistema TPM</p>
                 <h1 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-wide">Mantenimiento Autónomo</h1>
-                <p class="text-sm text-slate-400 mt-3 max-w-md">Escanea el código QR adherido a la máquina para comenzar la jornada.</p>
+                <p class="text-sm text-slate-400 mt-3 max-w-xl">Selecciona cómo deseas ingresar a la plataforma.</p>
             </div>
-            
-            <div class="flex flex-col items-center">
-                <button type="button" onclick="abrirEscanerQR()" class="w-full text-left rounded-2xl border-2 border-emerald-500/60 bg-[#0f111a] hover:bg-emerald-950/30 p-7 transition focus:outline-none focus:ring-2 focus:ring-emerald-400 group cursor-pointer shadow-lg">
-                    <div class="flex items-center gap-5">
-                        <div class="w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-400/50 flex items-center justify-center shrink-0">
-                            <svg viewBox="0 0 24 24" class="w-8 h-8 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V4a1 1 0 0 1 1-1h3M17 3h3a1 1 0 0 1 1 1v3M21 17v3a1 1 0 0 1-1 1h-3M7 21H4a1 1 0 0 1-1-1v-3"/><rect x="7" y="7" width="4" height="4"/><rect x="15" y="7" width="2" height="2"/><rect x="7" y="15" width="2" height="2"/><path d="M14 14h3v3h-3zM19 14v2M17 19h4"/></svg>
-                        </div>
-                        <div>
-                            <span class="block text-xl font-black text-white uppercase tracking-wide">Escanear Código QR</span>
-                            <span class="block text-xs text-slate-400 mt-1 leading-relaxed">Identifica automáticamente la máquina y carga sus actividades asociadas.</span>
-                        </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button type="button" onclick="mostrarInicioSesion()" class="group text-left rounded-2xl border border-sky-500/60 bg-[#141821] hover:bg-sky-950/30 p-6 transition focus:outline-none focus:ring-2 focus:ring-sky-400">
+                    <div class="w-12 h-12 rounded-xl bg-sky-500/15 border border-sky-400/50 flex items-center justify-center mb-5">
+                        <svg viewBox="0 0 24 24" class="w-6 h-6 text-sky-300" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M16 11h6"/></svg>
                     </div>
-                    <div class="mt-6 text-right">
-                        <span class="text-xs text-emerald-300 font-bold uppercase tracking-widest group-hover:translate-x-1 transition-transform inline-block">Abrir Escáner <span aria-hidden="true">→</span></span>
-                    </div>
+                    <span class="block text-lg font-black text-white uppercase tracking-wide">Iniciar sesión</span>
+                    <span class="block text-sm text-slate-400 mt-2 leading-relaxed">Ingresa con tu código de operador y continúa con las actividades de mantenimiento.</span>
+                    <span class="block text-xs text-sky-300 font-bold uppercase tracking-widest mt-6">Continuar al acceso <span aria-hidden="true">→</span></span>
                 </button>
+                <button type="button" onclick="abrirEscanerQR()" class="group text-left rounded-2xl border border-emerald-500/50 bg-[#141821] hover:bg-emerald-950/20 p-6 transition focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-400/50 flex items-center justify-center mb-5">
+                        <svg viewBox="0 0 24 24" class="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7V4a1 1 0 0 1 1-1h3M17 3h3a1 1 0 0 1 1 1v3M21 17v3a1 1 0 0 1-1 1h-3M7 21H4a1 1 0 0 1-1-1v-3"/><rect x="7" y="7" width="4" height="4"/><rect x="15" y="7" width="2" height="2"/><rect x="7" y="15" width="2" height="2"/><path d="M14 14h3v3h-3zM19 14v2M17 19h4"/></svg>
+                    </div>
+                    <span class="block text-lg font-black text-white uppercase tracking-wide">Escanear código QR</span>
+                    <span class="block text-sm text-slate-400 mt-2 leading-relaxed">Identifica automáticamente el área y la máquina antes de iniciar sesión.</span>
+                    <span class="block text-xs text-emerald-300 font-bold uppercase tracking-widest mt-6">Abrir escáner <span aria-hidden="true">→</span></span>
+                </button>
+            </div>
+            <div id="acceso-admin-contenedor" class="hidden text-center mt-5">
+                <button type="button" onclick="abrirImportadorExcel()" class="text-[10px] uppercase tracking-widest text-slate-400 hover:text-sky-300 underline underline-offset-4">Administración · Importar Excel</button>
             </div>
             <p class="text-[10px] text-slate-500 text-center uppercase tracking-widest mt-7">EMPAQPLAST S.A. · Eficiencia Operativa</p>
         </div>
     </div>
 
     <!-- ESCÁNER QR -->
-    <div id="escaner-qr-modal" style="display:none;" class="fixed inset-0 z-[70] bg-[#0f111a]/95 backdrop-blur-md flex items-center justify-center p-4">
+    <div id="escaner-qr-modal" style="display:none;" class="fixed inset-0 z-[70] bg-[#141821]/95 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-lg w-full p-6 industrial-shadow">
             <div class="flex items-start justify-between gap-4 mb-4">
-                <div><h2 class="text-lg font-black text-white uppercase tracking-wide">Escanear código QR</h2><p class="text-xs text-slate-400 mt-1">Apunta la cámara al QR colocado en la máquina (BOLE, HAITIAN, etc.).</p></div>
+                <div><h2 class="text-lg font-black text-white uppercase tracking-wide">Escanear código QR</h2><p class="text-xs text-slate-400 mt-1">Apunta la cámara al QR colocado en la máquina.</p></div>
                 <button type="button" onclick="cerrarEscanerQR()" class="industrial-border rounded-lg px-3 py-2 text-xs text-slate-300 hover:text-white">Cerrar</button>
             </div>
-            <div class="rounded-xl overflow-hidden bg-black border border-purple-900/60 aspect-video flex items-center justify-center"><video id="qr-video" class="w-full h-full object-cover" autoplay muted playsinline></video></div>
-            <p id="qr-mensaje" class="text-xs text-purple-300 mt-4 leading-relaxed font-mono">Solicitaremos permiso para utilizar la cámara.</p>
-            <button type="button" onclick="mostrarInicioSesion(); cerrarEscanerQR();" class="w-full mt-4 rounded-xl py-3 text-xs font-bold uppercase tracking-widest industrial-border text-slate-300 hover:bg-[#0f111a]">Continuar al formulario</button>
+            <div class="rounded-xl overflow-hidden bg-black border border-slate-700 aspect-video flex items-center justify-center"><video id="qr-video" class="w-full h-full object-cover" autoplay muted playsinline></video></div>
+            <p id="qr-mensaje" class="text-xs text-slate-300 mt-4 leading-relaxed">Solicitaremos permiso para utilizar la cámara.</p>
+            <button type="button" onclick="mostrarInicioSesion(); cerrarEscanerQR();" class="w-full mt-4 rounded-xl py-3 text-xs font-bold uppercase tracking-widest industrial-border text-slate-300 hover:bg-[#141821]">Ingresar sin escanear</button>
         </div>
     </div>
 
-    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL CON EQUIPO PRECARGADO) -->
-    <div id="setup-modal" style="display:none;" class="fixed inset-0 z-50 bg-[#0f111a]/95 flex items-center justify-center p-4">
+    <!-- MODAL DE INICIO (LOGIN INDUSTRIAL) -->
+    <div id="setup-modal" style="display:none;" class="fixed inset-0 z-50 bg-[#141821]/95 flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-md w-full p-7 industrial-shadow">
-            <div class="flex flex-col items-center text-center mb-5 border-b border-purple-500/30 pb-5">
+            <div class="flex flex-col items-center text-center mb-5 border-b border-[rgba(0,102,204,0.3)] pb-5">
                 <div class="w-full h-28 bg-white industrial-border rounded-xl overflow-hidden flex items-center justify-center px-4 py-3 mb-3 shadow-inner">
-                    <img src="imagen(162).jpg" alt="EMPAQPLAST S.A." class="h-full w-auto max-w-full object-contain rounded-lg" onerror="this.src='https://placehold.co/220x90/8b5cf6/ffffff?text=EMPAQPLAST'">
+                    <img src="imagen(162).jpg" alt="EMPAQPLAST S.A." class="h-full w-auto max-w-full object-contain rounded-lg" onerror="this.src='https://placehold.co/220x90/0066cc/ffffff?text=EMPAQPLAST'">
                 </div>
                 <h1 class="text-base font-black text-white tracking-wider uppercase">EMPAQPLAST S.A.</h1>
                 <p class="text-[11px] text-ind-accent font-semibold tracking-wide uppercase mt-0.5">Sistema de Mantenimiento Autónomo TPM</p>
             </div>
             
             <div class="space-y-3.5 text-xs">
-                <div class="bg-[#0f111a] rounded-xl border border-purple-500/40 p-4 shadow-inner">
+                <div class="bg-[#141821] rounded-xl industrial-border p-4 shadow-inner">
                     <div class="flex items-center justify-between gap-4">
                         <div>
-                            <span class="block text-[10px] font-bold text-purple-400 uppercase tracking-widest mb-1">Equipo identificado por QR</span>
+                            <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Equipo identificado por QR</span>
                             <span id="login-maquina" class="block text-sm font-black text-white uppercase">BOLE 2600 EK-2</span>
-                            <span id="login-area" class="block text-[10px] text-slate-400 font-semibold uppercase mt-0.5">Inyección Convencional</span>
+                            <span id="login-area" class="block text-[10px] text-ind-accent font-semibold uppercase mt-0.5">Inyección Convencional</span>
                         </div>
-                        <button type="button" onclick="abrirEscanerQR()" class="px-3.5 py-2 bg-purple-950/80 border border-purple-500/50 hover:bg-purple-900 rounded-xl text-[10px] text-purple-300 font-bold uppercase transition">Escanear otro QR</button>
                     </div>
-                    <p id="qr-estado" class="text-[10px] text-slate-500 mt-3 font-mono">Equipo definido por el código del QR.</p>
+                    <p id="qr-estado" class="text-[10px] text-slate-500 mt-3 font-mono">Equipo definido por el código de la URL del QR.</p>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Código operador:</label>
-                        <input type="text" id="operator-code" placeholder="Ej. op11" autocomplete="off" class="w-full bg-[#0f111a] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
+                        <input type="text" id="operator-code" placeholder="Ej. op11" autocomplete="off" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Contraseña:</label>
-                        <input type="password" id="operator-pass" placeholder="••••" autocomplete="current-password" class="w-full bg-[#0f111a] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
+                        <input type="password" id="operator-pass" placeholder="••••" autocomplete="current-password" class="w-full bg-[#141821] industrial-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent font-medium">
                     </div>
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Turno:</label>
                     <div class="grid grid-cols-3 gap-2">
                         <button type="button" onclick="appSetTurno(1)" id="btn-turno-1" class="py-2 px-2 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer">TURNO 1</button>
-                        <button type="button" onclick="appSetTurno(2)" id="btn-turno-2" class="py-2 px-2 rounded-xl text-xs font-bold industrial-border bg-[#0f111a] text-slate-400 transition hover:border-slate-400 cursor-pointer">TURNO 2</button>
-                        <button type="button" onclick="appSetTurno(3)" id="btn-turno-3" class="py-2 px-2 rounded-xl text-xs font-bold industrial-border bg-[#0f111a] text-slate-400 transition hover:border-slate-400 cursor-pointer">TURNO 3</button>
+                        <button type="button" onclick="appSetTurno(2)" id="btn-turno-2" class="py-2 px-2 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer">TURNO 2</button>
+                        <button type="button" onclick="appSetTurno(3)" id="btn-turno-3" class="py-2 px-2 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer">TURNO 3</button>
                     </div>
                 </div>
                 <button type="button" id="btn-iniciar" class="w-full mt-2 bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs tracking-widest uppercase transition shadow-xl cursor-pointer">Iniciar mantenimiento autónomo</button>
@@ -173,7 +178,7 @@
             <p class="text-xs text-slate-300 mb-6 leading-relaxed">¿Ya monitoreaste el equipo?</p>
             <div class="flex space-x-3 w-full">
                 <button type="button" onclick="irAMonitoreo()" class="flex-1 bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Sí, ir a Monitoreo</button>
-                <button type="button" onclick="cerrarModalCierre()" class="bg-[#0f111a] hover:bg-[#252a3b] text-slate-300 px-6 py-3 rounded-xl text-xs uppercase tracking-widest transition industrial-border cursor-pointer">Cerrar</button>
+                <button type="button" onclick="cerrarModalCierre()" class="bg-[#141821] hover:bg-[#2A3142] text-slate-300 px-6 py-3 rounded-xl text-xs uppercase tracking-widest transition industrial-border cursor-pointer">Cerrar</button>
             </div>
         </div>
     </div>
@@ -213,7 +218,7 @@
                 </div>
             </div>
             <div class="flex gap-3">
-                <button type="button" onclick="cancelarConfirmacionAnomalia()" class="flex-1 bg-[#0f111a] hover:bg-[#252a3b] text-slate-300 px-4 py-3.5 rounded-xl text-xs uppercase tracking-widest transition industrial-border font-bold shadow cursor-pointer">No, no estoy seguro</button>
+                <button type="button" onclick="cancelarConfirmacionAnomalia()" class="flex-1 bg-[#141821] hover:bg-[#2A3142] text-slate-300 px-4 py-3.5 rounded-xl text-xs uppercase tracking-widest transition industrial-border font-bold shadow cursor-pointer">No, no estoy seguro</button>
                 <button type="button" onclick="confirmarAperturaAnomalia()" class="flex-1 bg-rose-700 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Sí, sí quiero reportar</button>
             </div>
         </div>
@@ -223,26 +228,26 @@
     <div id="anomalia-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 industrial-shadow flex flex-col md:flex-row gap-6 items-center">
             <div class="flex-1 w-full">
-                <div class="flex items-center space-x-3 mb-4 border-b border-purple-500/30 pb-3">
-                    <div><h3 class="text-xs font-bold text-white uppercase tracking-wider">Reportar anomalía de equipo</h3><p class="text-[11px] text-purple-300 font-mono mt-0.5" id="modal-anomalia-info">Sistema - L-001</p></div>
+                <div class="flex items-center space-x-3 mb-4 border-b border-[rgba(0,102,204,0.3)] pb-3">
+                    <div><h3 class="text-xs font-bold text-white uppercase tracking-wider">Reportar anomalía de equipo</h3><p class="text-[11px] text-rose-400 font-mono mt-0.5" id="modal-anomalia-info">Sistema - L-001</p></div>
                 </div>
                 <div class="space-y-3 text-xs">
                     <div class="grid grid-cols-2 gap-3">
-                        <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Sistema</label><div id="anomalia-sistema-auto" class="w-full bg-[#0f111a]/80 industrial-border rounded-xl px-3 py-2.5 text-sm text-ind-accent font-mono font-bold">-</div></div>
-                        <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Componente</label><div id="anomalia-componente-auto" class="w-full bg-[#0f111a]/80 industrial-border rounded-xl px-3 py-2.5 text-sm text-white font-semibold">-</div></div>
+                        <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Sistema</label><div id="anomalia-sistema-auto" class="w-full bg-[#141821]/80 industrial-border rounded-xl px-3 py-2.5 text-sm text-ind-accent font-mono font-bold">-</div></div>
+                        <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Componente</label><div id="anomalia-componente-auto" class="w-full bg-[#141821]/80 industrial-border rounded-xl px-3 py-2.5 text-sm text-white font-semibold">-</div></div>
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Tipo de daño</label>
                         <div class="relative">
-                            <input type="text" id="tipo-dano-input" autocomplete="off" placeholder="Escriba para buscar: fuga, falla, daño..." class="w-full bg-[#0f111a] industrial-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent">
-                            <div id="tipo-dano-resultados" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-[#181b26] border border-purple-500/50 rounded-xl z-[9999] shadow-2xl"></div>
+                            <input type="text" id="tipo-dano-input" autocomplete="off" placeholder="Escriba para buscar: fuga, falla, daño..." class="w-full bg-[#141821] industrial-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-ind-accent">
+                            <div id="tipo-dano-resultados" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-[#1E2330] border border-slate-600 rounded-xl z-[9999] shadow-2xl"></div>
                         </div>
                         <input type="hidden" id="tipo-dano-seleccionado">
                         <p class="text-[10px] text-slate-500 mt-1">Escriba para filtrar y haga clic en la opción deseada para seleccionarla.</p>
                     </div>
-                    <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Descripción detallada</label><textarea id="texto-anomalia" rows="2" placeholder="Describa la condición encontrada..." class="w-full bg-[#0f111a] industrial-border rounded-xl p-3 text-sm text-white focus:outline-none focus:border-ind-accent"></textarea></div>
-                    <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Evidencia fotográfica</label><div class="grid grid-cols-2 gap-2"><label class="bg-rose-800 hover:bg-rose-700 rounded-xl px-3 py-3 text-center cursor-pointer transition text-white text-xs font-bold uppercase tracking-wide"><span>Tomar foto</span><input type="file" id="foto-anomalia-camara" accept="image/*" capture="environment" class="hidden" onchange="mostrarNombreArchivo(this)"></label><label class="bg-[#0f111a] hover:bg-[#252a3b] industrial-border rounded-xl px-3 py-3 text-center cursor-pointer transition text-slate-300 text-xs font-medium"><span>Elegir foto</span><input type="file" id="foto-anomalia" accept="image/*" class="hidden" onchange="mostrarNombreArchivo(this)"></label></div><p id="nombre-archivo" class="text-slate-400 truncate text-xs mt-2">Sin archivo</p></div>
-                    <div class="flex space-x-2 pt-2"><button type="button" onclick="guardarAnomalia()" class="flex-1 bg-rose-700 hover:bg-rose-600 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Registrar anomalía</button><button type="button" onclick="cerrarModalAnomalia()" class="bg-[#0f111a] hover:bg-[#252a3b] text-slate-300 px-4 py-3 rounded-xl text-xs uppercase tracking-widest transition industrial-border cursor-pointer">Cancelar</button></div>
+                    <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Descripción detallada</label><textarea id="texto-anomalia" rows="2" placeholder="Describa la condición encontrada..." class="w-full bg-[#141821] industrial-border rounded-xl p-3 text-sm text-white focus:outline-none focus:border-ind-accent"></textarea></div>
+                    <div><label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Evidencia fotográfica</label><div class="grid grid-cols-2 gap-2"><label class="bg-rose-800 hover:bg-rose-700 rounded-xl px-3 py-3 text-center cursor-pointer transition text-white text-xs font-bold uppercase tracking-wide"><span>Tomar foto</span><input type="file" id="foto-anomalia-camara" accept="image/*" capture="environment" class="hidden" onchange="mostrarNombreArchivo(this)"></label><label class="bg-[#141821] hover:bg-[#2A3142] industrial-border rounded-xl px-3 py-3 text-center cursor-pointer transition text-slate-300 text-xs font-medium"><span>Elegir foto</span><input type="file" id="foto-anomalia" accept="image/*" class="hidden" onchange="mostrarNombreArchivo(this)"></label></div><p id="nombre-archivo" class="text-slate-400 truncate text-xs mt-2">Sin archivo</p></div>
+                    <div class="flex space-x-2 pt-2"><button type="button" onclick="guardarAnomalia()" class="flex-1 bg-rose-700 hover:bg-rose-600 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Registrar anomalía</button><button type="button" onclick="cerrarModalAnomalia()" class="bg-[#141821] hover:bg-[#2A3142] text-slate-300 px-4 py-3 rounded-xl text-xs uppercase tracking-widest transition industrial-border cursor-pointer">Cancelar</button></div>
                 </div>
             </div>
         </div>
@@ -252,7 +257,7 @@
     <div id="observacion-modal" style="display: none;" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-ind-panel industrial-border rounded-2xl max-w-xl w-full p-7 industrial-shadow flex flex-col md:flex-row gap-6 items-center">
             <div class="flex-1 w-full">
-                <div class="flex items-center space-x-3 mb-4 border-b border-purple-500/30 pb-3">
+                <div class="flex items-center space-x-3 mb-4 border-b border-[rgba(0,102,204,0.3)] pb-3">
                     <div>
                         <h3 class="text-xs font-bold text-white uppercase tracking-wider">Registrar observación de turno</h3>
                         <p class="text-[11px] text-ind-accent font-mono mt-0.5" id="modal-observacion-info">Nota general de equipo</p>
@@ -262,12 +267,12 @@
                 <div class="space-y-3 text-xs">
                     <div>
                         <label class="block font-semibold text-slate-300 mb-1 uppercase tracking-wider">Escriba su observación:</label>
-                        <textarea id="texto-observacion" rows="3" placeholder="Ej. Equipo operando con normalidad..." class="w-full bg-[#0f111a] industrial-border rounded-xl p-3 text-sm text-white focus:outline-none focus:border-ind-accent"></textarea>
+                        <textarea id="texto-observacion" rows="3" placeholder="Ej. Equipo operando con normalidad..." class="w-full bg-[#141821] industrial-border rounded-xl p-3 text-sm text-white focus:outline-none focus:border-ind-accent"></textarea>
                     </div>
 
                     <div class="flex space-x-2 pt-2">
                         <button type="button" onclick="guardarObservacion()" class="flex-1 bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">Guardar</button>
-                        <button type="button" onclick="cerrarModalObservacion()" class="bg-[#0f111a] hover:bg-[#252a3b] text-slate-300 px-4 py-3 rounded-xl text-xs uppercase tracking-widest transition industrial-border cursor-pointer">Cancelar</button>
+                        <button type="button" onclick="cerrarModalObservacion()" class="bg-[#141821] hover:bg-[#2A3142] text-slate-300 px-4 py-3 rounded-xl text-xs uppercase tracking-widest transition industrial-border cursor-pointer">Cancelar</button>
                     </div>
                 </div>
             </div>
@@ -275,50 +280,45 @@
     </div>
 
     <!-- ENCABEZADO INDUSTRIAL PRINCIPAL -->
-    <header class="bg-ind-panel border-b border-purple-500/30 px-6 py-5 flex items-center justify-between shadow-lg">
+    <header class="bg-ind-panel border-b border-[rgba(0,102,204,0.3)] px-6 py-5 flex items-center justify-between shadow-lg">
         <div class="flex items-center space-x-8">
             <div class="w-56 h-14 bg-white industrial-border rounded-xl overflow-hidden flex items-center justify-center px-3 py-2 shadow-inner">
                 <img src="imagen(162).jpg" alt="EMPAQPLAST S.A." class="h-full w-auto max-w-full object-contain rounded-lg">
             </div>
-            <div class="border-l border-purple-500/30 pl-6">
+            <div class="border-l border-[rgba(0,102,204,0.3)] pl-6">
                 <h1 id="header-maq-title" class="text-xl font-black text-white tracking-tight">BOLE 2600 EK-2</h1>
                 <p id="header-area-title" class="text-xs text-ind-accent font-semibold tracking-wide uppercase mt-[-2px]">Inyección Convencional - EMPAQPLAST S.A.</p>
             </div>
         </div>
-        <div class="flex items-center space-x-3">
-            <div class="text-right bg-[#0f111a] px-4 py-2 rounded-xl industrial-border shadow-inner">
+        <div class="flex items-center space-x-4">
+            <div class="text-right bg-[#141821] px-4 py-2 rounded-xl industrial-border shadow-inner">
                 <span id="display-operator" class="block text-xs font-bold text-slate-200">Operador: --</span>
-                <span id="display-turno" class="block text-[10px] text-purple-400 font-mono uppercase">TURNO 1 - ACTIVO</span>
+                <span id="display-turno" class="block text-[10px] text-slate-400 font-mono uppercase">TURNO 1 - ACTIVO</span>
             </div>
-            <button type="button" onclick="abrirEscanerQR()" class="text-xs bg-purple-950/60 border border-purple-500/50 hover:bg-purple-900/60 text-purple-300 px-3.5 py-3 rounded-xl transition font-bold shadow-sm cursor-pointer flex items-center gap-1.5">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Escanear otro QR
-            </button>
-            <button type="button" onclick="cerrarSesion()" class="text-xs bg-rose-950/50 border border-rose-500/40 hover:bg-rose-900/50 text-rose-300 px-3.5 py-3 rounded-xl transition font-bold shadow-sm cursor-pointer">
-                Cerrar Sesión
-            </button>
+            <button type="button" onclick="cambiarOperador()" class="text-xs bg-[#141821] hover:bg-[#323743] text-slate-300 px-4 py-3 rounded-xl industrial-border transition font-bold shadow-sm cursor-pointer">Cambiar</button>
         </div>
     </header>
 
     <!-- BARRA DE CONTEXTO Y FILTROS -->
-    <section class="bg-ind-panel/40 border-b border-purple-500/30 px-6 py-4">
+    <section class="bg-ind-panel/40 border-b border-[rgba(0,102,204,0.3)] px-6 py-4">
         <div class="max-w-[1900px] mx-auto flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
             <div class="flex flex-wrap items-center gap-4">
                 <div class="flex space-x-2">
                     <button type="button" onclick="cambiarModo('limpieza')" id="tab-limpieza" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-ind-accent-gradient text-white transition shadow cursor-pointer">Limpieza (16)</button>
-                    <button type="button" onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#0f111a] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer">Monitoreo (22)</button>
+                    <button type="button" onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer">Monitoreo (22)</button>
                 </div>
-                <div class="h-6 w-px bg-purple-500/30 hidden xl:block"></div>
+                <div class="h-6 w-px bg-[rgba(0,102,204,0.3)] hidden xl:block"></div>
                 
                 <div class="flex items-center space-x-2">
                     <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Sistema:</span>
-                    <select id="select-sistema-filtro" onchange="filtrarPorSistema()" class="bg-[#0f111a] industrial-border text-xs text-white px-3.5 py-2.5 rounded-xl font-semibold focus:outline-none focus:border-ind-accent cursor-pointer">
+                    <select id="select-sistema-filtro" onchange="filtrarPorSistema()" class="bg-[#141821] industrial-border text-xs text-white px-3.5 py-2.5 rounded-xl font-semibold focus:outline-none focus:border-ind-accent cursor-pointer">
                         <option value="TODOS">-- Todos los sistemas --</option>
                     </select>
                 </div>
 
                 <div class="flex items-center space-x-2 ml-2">
                     <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Frecuencia:</span>
-                    <select id="select-frecuencia-filtro" onchange="filtrarPorFrecuencia()" class="bg-[#0f111a] industrial-border text-xs text-white px-3.5 py-2.5 rounded-xl font-semibold focus:outline-none focus:border-ind-accent cursor-pointer">
+                    <select id="select-frecuencia-filtro" onchange="filtrarPorFrecuencia()" class="bg-[#141821] industrial-border text-xs text-white px-3.5 py-2.5 rounded-xl font-semibold focus:outline-none focus:border-ind-accent cursor-pointer">
                         <option value="Diaria" selected>Diarias</option>
                         <option value="Semanal">Semanales</option>
                         <option value="Mensual">Mensuales</option>
@@ -327,13 +327,13 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-4 justify-end">
-                <div id="tpm-alerta-calendario" class="bg-purple-950/40 border border-purple-500/50 px-4 py-2 rounded-xl text-xs text-purple-300 font-mono">
+                <div id="tpm-alerta-calendario" class="bg-blue-950/30 border border-blue-600/50 px-4 py-2 rounded-xl text-xs text-blue-300 font-mono">
                     <span id="tpm-estado-texto">DÍA/S PARA LAS ACTIVIDADES SEMANALES: 7 | DÍA/S PARA LAS ACTIVIDADES MENSUALES: 30</span>
                 </div>
                 <div class="text-right">
                     <span id="texto-progreso-num" class="text-xs font-bold text-slate-200 font-mono">0 de 16 puntos - 0%</span>
                 </div>
-                <div class="w-48 bg-[#0f111a] h-3 rounded-full overflow-hidden industrial-border">
+                <div class="w-48 bg-[#141821] h-3 rounded-full overflow-hidden industrial-border">
                     <div id="barra-progreso-fill" class="bg-ind-accent h-full transition-all duration-300" style="width: 0%;"></div>
                 </div>
             </div>
@@ -347,7 +347,7 @@
         <div class="w-full xl:w-5/12 flex flex-col gap-5">
             <div class="relative bg-ind-panel industrial-border rounded-2xl overflow-hidden shadow-md h-[300px] flex items-center justify-center">
                 <div id="canvas-container" class="absolute inset-0"></div>
-                <div class="absolute top-3 left-3 bg-[#0f111a]/90 backdrop-blur px-3.5 py-2 rounded-xl industrial-border text-xs font-mono text-slate-200 shadow flex items-center space-x-2 pointer-events-none z-30">
+                <div class="absolute top-3 left-3 bg-[#141821]/90 backdrop-blur px-3.5 py-2 rounded-xl industrial-border text-xs font-mono text-slate-200 shadow flex items-center space-x-2 pointer-events-none z-30">
                     <span class="w-2.5 h-2.5 rounded-full bg-ind-accent animate-pulse"></span>
                     <span id="indicador-3d-texto">Vista general de máquina - Sincronizado</span>
                 </div>
@@ -357,7 +357,7 @@
             </div>
 
             <div class="bg-ind-panel industrial-border rounded-2xl p-5 flex-1 flex flex-col shadow-md">
-                <div class="flex items-center justify-between mb-3.5 border-b border-purple-500/30 pb-3">
+                <div class="flex items-center justify-between mb-3.5 border-b border-[rgba(0,102,204,0.3)] pb-3">
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Puntos de verificación</h3>
                     <span id="contador-filtro-badge" class="text-xs text-ind-accent font-mono uppercase font-bold">16 puntos</span>
                 </div>
@@ -370,14 +370,14 @@
         <!-- COLUMNA DERECHA: FICHA TÉCNICA ACTIVA -->
         <div class="w-full xl:w-7/12 bg-ind-panel industrial-border-active industrial-shadow rounded-2xl p-8 shadow-xl flex flex-col justify-between">
             <div id="ficha-content">
-                <div class="border-b border-purple-500/30 pb-4 mb-5">
+                <div class="border-b border-[rgba(0,102,204,0.3)] pb-4 mb-5">
                     <div class="flex items-center justify-between">
                         <div>
                             <span class="text-xs font-mono text-ind-accent font-extrabold" id="ficha-codigo">L-001</span>
                             <span class="text-xs text-slate-500 mx-2">|</span>
                             <span class="text-sm font-extrabold text-white tracking-wide" id="ficha-componente">TOLVA DE ALIMENTACIÓN</span>
                         </div>
-                        <span class="text-xs font-mono bg-[#0f111a] industrial-border px-3.5 py-1.5 rounded-lg text-purple-300 uppercase font-semibold" id="ficha-sistema-badge">ALIMENTACIÓN DE MATERIAL</span>
+                        <span class="text-xs font-mono bg-[#141821] industrial-border px-3.5 py-1.5 rounded-lg text-slate-300 uppercase font-semibold" id="ficha-sistema-badge">ALIMENTACIÓN DE MATERIAL</span>
                     </div>
                     <div class="flex items-center justify-between mt-2">
                         <p class="text-xs text-slate-400 font-medium">Punto de verificación - Limpieza TPM</p>
@@ -385,34 +385,34 @@
                     </div>
                 </div>
 
-                <div id="temporizador-panel" class="mb-5 rounded-xl border border-purple-500/40 bg-[#0f111a] p-4 shadow-inner">
+                <div id="temporizador-panel" class="mb-5 rounded-xl border border-sky-500/30 bg-[#141821] p-4 shadow-inner">
                     <div class="flex items-center justify-between gap-4">
-                        <div><span class="block text-[10px] text-slate-500 uppercase tracking-widest font-bold">Tiempo estimado</span><span id="tiempo-estimado" class="text-lg font-black text-purple-300 font-mono">05:00</span></div>
+                        <div><span class="block text-[10px] text-slate-500 uppercase tracking-widest font-bold">Tiempo estimado</span><span id="tiempo-estimado" class="text-lg font-black text-sky-300 font-mono">05:00</span></div>
                         <div class="text-right"><span id="temporizador-estado" class="block text-[10px] text-slate-500 uppercase tracking-widest font-bold">Preparando actividad</span><span id="temporizador-reloj" class="text-2xl font-black text-white font-mono">00:00:00</span></div>
                     </div>
-                    <div id="temporizador-barra" class="mt-3 h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="temporizador-fill" class="h-full bg-ind-accent transition-all" style="width:0%"></div></div>
+                    <div id="temporizador-barra" class="mt-3 h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="temporizador-fill" class="h-full bg-sky-500 transition-all" style="width:0%"></div></div>
                 </div>
 
                 <!-- CONTENEDOR DE FOTOS -->
                 <div id="contenedor-fotos" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-7">
-                    <div id="card-foto-1" class="bg-[#0f111a] industrial-border rounded-xl overflow-hidden flex flex-col shadow-md p-1">
-                        <div class="h-52 bg-[#0f111a] relative flex items-center justify-center p-2">
+                    <div id="card-foto-1" class="bg-[#141821] industrial-border rounded-xl overflow-hidden flex flex-col shadow-md p-1">
+                        <div class="h-52 bg-[#141821] relative flex items-center justify-center p-2">
                             <img id="ficha-imagen-1" src="" alt="Foto 1" class="max-h-full max-w-full object-contain rounded-lg">
                         </div>
-                        <div class="p-3 bg-[#0f111a] border-t border-purple-500/30 text-xs font-medium text-slate-300 text-center truncate" id="ficha-label-1">Tolva Externa</div>
+                        <div class="p-3 bg-[#141821] border-t border-[rgba(0,102,204,0.3)] text-xs font-medium text-slate-300 text-center truncate" id="ficha-label-1">Tolva Externa</div>
                     </div>
-                    <div id="card-foto-2" class="bg-[#0f111a] industrial-border rounded-xl overflow-hidden flex flex-col shadow-md p-1">
-                        <div class="h-52 bg-[#0f111a] relative flex items-center justify-center p-2">
+                    <div id="card-foto-2" class="bg-[#141821] industrial-border rounded-xl overflow-hidden flex flex-col shadow-md p-1">
+                        <div class="h-52 bg-[#141821] relative flex items-center justify-center p-2">
                             <img id="ficha-imagen-2" src="" alt="Foto 2" class="max-h-full max-w-full object-contain rounded-lg">
                         </div>
-                        <div class="p-3 bg-[#0f111a] border-t border-purple-500/30 text-xs font-medium text-slate-300 text-center truncate" id="ficha-label-2">Tolva Detalle</div>
+                        <div class="p-3 bg-[#141821] border-t border-[rgba(0,102,204,0.3)] text-xs font-medium text-slate-300 text-center truncate" id="ficha-label-2">Tolva Detalle</div>
                     </div>
                 </div>
 
-                <div class="space-y-4 text-xs border-t border-purple-500/30 pt-5">
+                <div class="space-y-4 text-xs border-t border-[rgba(0,102,204,0.3)] pt-5">
                     <div>
                         <span class="text-xs font-bold text-slate-400 block mb-1.5 uppercase tracking-wider">Estándar de ejecución (qué hacer)</span>
-                        <p class="text-slate-200 bg-[#0f111a] p-4 rounded-xl industrial-border leading-relaxed font-normal text-sm" id="ficha-estandar">-</p>
+                        <p class="text-slate-200 bg-[#141821] p-4 rounded-xl industrial-border leading-relaxed font-normal text-sm" id="ficha-estandar">-</p>
                     </div>
 
                     <div>
@@ -421,11 +421,11 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 pt-1">
-                        <div class="bg-[#0f111a] p-3.5 rounded-xl industrial-border">
+                        <div class="bg-[#141821] p-3.5 rounded-xl industrial-border">
                             <span class="text-[11px] text-slate-400 block font-semibold uppercase tracking-wider">Material / herramienta</span>
                             <span class="text-slate-200 font-semibold text-xs mt-1 block" id="ficha-material">-</span>
                         </div>
-                        <div class="bg-[#0f111a] p-3.5 rounded-xl industrial-border">
+                        <div class="bg-[#141821] p-3.5 rounded-xl industrial-border">
                             <span class="text-[11px] text-slate-400 block font-semibold uppercase tracking-wider">Ejecuciones registradas</span>
                             <span class="text-ind-accent font-bold text-xs mt-1 block font-mono" id="ficha-contador">0 registros</span>
                         </div>
@@ -434,13 +434,13 @@
             </div>
 
             <!-- BOTONES DE ACCIÓN PRINCIPALES -->
-            <div class="mt-7 pt-5 border-t border-purple-500/30 flex items-center justify-between">
+            <div class="mt-7 pt-5 border-t border-[rgba(0,102,204,0.3)] flex items-center justify-between">
                 <span id="trazabilidad-estado" class="text-xs text-slate-400 font-mono font-medium">Estado: Pendiente de inspección</span>
                 <div class="flex space-x-2.5">
                     <button id="btn-verificacion" type="button" onclick="marcarEstado('listo')" class="action-button bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3.5 px-5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg cursor-pointer">
                         Verificación realizada
                     </button>
-                    <button id="btn-observacion" type="button" onclick="abrirModalObservacion()" class="action-button bg-purple-900 hover:bg-purple-800 text-white font-bold py-3.5 px-5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg cursor-pointer">
+                    <button id="btn-observacion" type="button" onclick="abrirModalObservacion()" class="action-button bg-slate-700 hover:bg-slate-600 text-white font-bold py-3.5 px-5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg cursor-pointer">
                         Observación
                     </button>
                     <button id="btn-anomalia" type="button" onclick="abrirModalAnomalia()" class="action-button bg-rose-700 hover:bg-rose-600 text-white font-bold py-3.5 px-5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg cursor-pointer">
@@ -450,6 +450,29 @@
             </div>
         </div>
     </main>
+
+    <!-- IMPORTADOR DE EXCEL: módulo administrativo independiente de la pantalla BOLE -->
+    <div id="importador-excel-modal" style="display:none;" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-md items-center justify-center p-3 sm:p-6">
+        <section class="w-full max-w-6xl max-h-[94vh] overflow-hidden rounded-2xl border border-sky-500/40 bg-[#1E2330] shadow-2xl flex flex-col">
+            <header class="flex items-start justify-between gap-4 p-5 border-b border-slate-700">
+                <div><p class="text-[10px] font-bold tracking-[.22em] uppercase text-sky-300">Administración de equipos</p><h2 class="text-lg sm:text-xl font-black text-white mt-1">Conversor de Excel a Mantenimiento Autónomo</h2><p class="text-xs text-slate-400 mt-2">La BOLE no se modifica. Primero validamos los datos y su correspondencia antes de guardarlos.</p></div>
+                <button type="button" onclick="cerrarImportadorExcel()" class="rounded-lg border border-slate-600 px-3 py-2 text-xs text-slate-300 hover:text-white">Cerrar</button>
+            </header>
+            <div class="p-5 overflow-y-auto custom-scrollbar space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="rounded-xl border border-slate-700 bg-[#141821] p-4"><p class="text-xs font-bold text-slate-200">1. Seleccionar Excel</p><p class="text-[11px] text-slate-400 mt-1">Se procesa en este navegador; el archivo original no se publica en GitHub.</p><input id="excel-import-file" type="file" accept=".xlsx,.xls,.xlsm" class="mt-3 block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-xs file:font-bold file:text-white" onchange="analizarExcelMantenimiento(this.files?.[0])"></div>
+                    <div class="rounded-xl border border-slate-700 bg-[#141821] p-4"><p class="text-xs font-bold text-slate-200">2. Revisar equipo</p><label for="excel-nombre-equipo" class="block text-[11px] text-slate-400 mt-2">Nombre de la máquina</label><input id="excel-nombre-equipo" class="mt-1 w-full rounded-lg border border-slate-700 bg-[#1E2330] px-3 py-2 text-xs text-white" placeholder="Se detectará desde el Excel"><label for="excel-codigo-equipo" class="block text-[11px] text-slate-400 mt-3">Código del activo</label><input id="excel-codigo-equipo" class="mt-1 w-full rounded-lg border border-slate-700 bg-[#1E2330] px-3 py-2 text-xs text-white" placeholder="Código del activo"></div>
+                    <div class="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4"><p class="text-xs font-bold text-amber-300">3. Validación antes de guardar</p><p class="text-[11px] text-slate-300 mt-2">Este módulo genera una vista previa. La escritura en Supabase se habilitará cuando exista autenticación administrativa y políticas RLS que impidan importaciones por parte de operadores.</p><p id="excel-import-status" class="text-xs text-amber-200 mt-3">Esperando un archivo Excel…</p></div>
+                </div>
+                <div id="excel-hojas-resumen" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+                <div class="rounded-xl border border-slate-700 overflow-hidden">
+                    <div class="flex flex-wrap items-center justify-between gap-2 bg-[#141821] p-3"><div><h3 class="text-xs font-bold uppercase tracking-wider text-white">Vista previa de actividades detectadas</h3><p class="text-[11px] text-slate-400 mt-1">Se combinan los códigos de la carta con el estándar de la guía. Las imágenes se vincularán por código en una etapa de validación.</p></div><span id="excel-total-actividades" class="text-xs font-bold text-sky-300">0 actividades</span></div>
+                    <div class="max-h-[42vh] overflow-auto custom-scrollbar"><table class="min-w-[900px] w-full text-left text-[11px]"><thead class="sticky top-0 bg-[#252c3a] text-slate-300"><tr><th class="p-3">Código</th><th class="p-3">Modo</th><th class="p-3">Sistema</th><th class="p-3">Componente</th><th class="p-3">Frecuencia</th><th class="p-3">Estándar</th><th class="p-3">Condición anormal</th><th class="p-3">Material / herramienta</th></tr></thead><tbody id="excel-preview-body" class="divide-y divide-slate-800"><tr><td colspan="8" class="p-5 text-center text-slate-500">Selecciona un archivo para analizarlo.</td></tr></tbody></table></div>
+                </div>
+                <div class="flex flex-wrap justify-end gap-3"><button type="button" onclick="exportarVistaPreviaCSV()" id="excel-export-preview" disabled class="rounded-xl border border-slate-600 px-4 py-3 text-xs font-bold text-slate-300 disabled:opacity-40">Exportar vista previa CSV</button><button type="button" onclick="mostrarAlertaIndustrial('La importación a Supabase todavía está bloqueada hasta configurar una autenticación administrativa real y sus políticas de seguridad. La vista previa ya permite validar la conversión sin tocar los datos actuales.','error')" id="excel-save-disabled" disabled class="rounded-xl bg-sky-700 px-4 py-3 text-xs font-bold text-white opacity-50 cursor-not-allowed">Guardar en Supabase (pendiente de seguridad)</button></div>
+            </div>
+        </section>
+    </div>
 
     <!-- SCRIPT TÉCNICO INDUSTRIAL -->
     <script>
@@ -470,19 +493,12 @@
         let globalTimer = { key: null, interval: null, countdownInterval: null, elapsed: 0, estimated: 0, running: false, startMs: null };
         const globalTimersPorActividad = {};
 
-        // Arreglos que se cargarán desde Supabase
+        // Arreglos que se cargarán desde Supabase manteniendo la estructura original
         let datosLimpieza = [];
         let datosMonitoreo = [];
 
-        const fechaArranqueTPM = new Date(2026, 8, 24);
+        const fechaArranqueTPM = new Date(2026, 8, 24); // 24 Septiembre 2026
         const CLAVE_FAMILIARIZACION = 'ma_familiarizado_v1';
-
-        function cerrarSesion() {
-            globalOperador = "";
-            document.getElementById('display-operator').innerText = "Operador: --";
-            document.getElementById('pantalla-principal').style.display = 'flex';
-            document.getElementById('setup-modal').style.display = 'none';
-        }
 
         function obtenerFechaSinHora(fecha) {
             return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
@@ -567,10 +583,11 @@
                 if (!btn) return;
                 btn.className = (idx + 1) === t
                     ? "py-2 px-2 rounded-xl text-xs font-bold border border-ind-accent bg-ind-accent text-white transition shadow cursor-pointer"
-                    : "py-2 px-2 rounded-xl text-xs font-bold industrial-border bg-[#0f111a] text-slate-400 transition hover:border-slate-400 cursor-pointer";
+                    : "py-2 px-2 rounded-xl text-xs font-bold industrial-border bg-[#141821] text-slate-400 transition hover:border-slate-400 cursor-pointer";
             });
         }
 
+        // CARGA DESDE SUPABASE MANTENIENDO EL FORMATO DE TUS ARREGLOS
         async function cargarActividadesDesdeSupabase() {
             try {
                 const { data, error } = await supabaseClient
@@ -580,84 +597,48 @@
 
                 if (error) throw error;
 
-                const diccionarioFotos = {
-                    'L-001': { img1: 'imagen(166).jpg', label1: 'Tolva Externa', img2: 'imagen(167).jpg', label2: 'Tolva Detalle' },
-                    'L-002': { img1: 'Succionador Externo.jpg', label1: 'Succionador Externo', img2: 'Succionador Detalle.jpg', label2: 'Succionador Detalle' },
-                    'L-003': { img1: 'Filtro Externo.jpg', label1: 'Filtro Externo', img2: 'Filtro Detalle.jpg', label2: 'Filtro Detalle' },
-                    'L-004': { img1: 'Zona de boquilla externa.jpg', label1: 'Boquilla Externa', img2: 'Zona de boquilla detalle.jpg', label2: 'Boquilla Detalle' },
-                    'L-005': { img1: 'Área de Expulsion.jpg', label1: 'Área de Expulsión externa', img2: '', label2: '' },
-                    'L-006': { img1: 'Platina Fija.jpg', label1: 'Platina fija externa', img2: '', label2: '' },
-                    'L-007': { img1: 'Platina móvil.jpg', label1: 'Platina móvil externa', img2: '', label2: '' },
-                    'L-008': { img1: 'Mangueras y distribuidor de agua.jpg', label1: 'Distribuidor de agua', img2: '', label2: '' },
-                    'L-009': { img1: 'Unidad de mantenimiento (FRL) Externa.jpg', label1: 'FRL Externa', img2: 'Unidad de mantenimiento (FRL) Detalle.jpg', label2: 'FRL Detalle' },
-                    'L-010': { img1: 'Mangueras visibles Externa.jpeg', label1: 'Mangueras Externa', img2: 'Mangueras visibles Detalle.jpg', label2: 'Mangueras Detalle' },
-                    'L-011': { img1: 'Controlador de temperatura Externa.jpg', label1: 'Controlador Externo', img2: 'Controlador de temperatura Detalle.jpg', label2: 'Controlador Detalle' },
-                    'L-012': { img1: 'HMI Externo.jpg', label1: 'HMI Externo', img2: 'HMI Detalle.jpg', label2: 'HMI Detalle' },
-                    'L-013': { img1: 'Superficie tablero electrico Externo.jpg', label1: 'Tablero Externo', img2: '', label2: '' },
-                    'L-014': { img1: 'Filtros del tablero eléctrico Externo.jpg', label1: 'Filtros Tablero Ext.', img2: 'Filtros del tablero eléctrico Detalle.jpg', label2: 'Filtros Tablero Det.' },
-                    'L-015': { img1: 'Estructura Externa.jpg', label1: 'Estructura Externa', img2: 'Mangueras visibles Externa.jpeg', label2: 'Vista Lateral' },
-                    'L-016': { img1: 'Piso Perimetral.jpg', label1: 'Piso perimetral', img2: '', label2: '' },
-
-                    'I-001': { img1: 'Succionador Externo.jpg', label1: 'Monitoreo', img2: 'Succionador Detalle.jpg', label2: 'Operación' },
-                    'I-002': { img1: 'Manguera de Succion.jpg', label1: 'Manguera', img2: 'Manguera de Succión Detalle.jpg', label2: 'Conexión' },
-                    'I-003': { img1: 'Zona de boquilla externa.jpg', label1: 'Boquilla', img2: 'Zona de boquilla detalle.jpg', label2: 'Estado' },
-                    'I-004': { img1: 'Controlador de temperatura Externa.jpg', label1: 'Zonas', img2: 'Controlador de temperatura Detalle.jpg', label2: 'Temperaturas' },
-                    'I-005': { img1: 'Área de Expulsion.jpg', label1: 'Expulsor', img2: 'Área de Expulsion.jpg', label2: 'Recorrido' },
-                    'I-006': { img1: 'Área de Expulsion.jpg', label1: 'Área', img2: 'Área de Expulsion.jpg', label2: 'Libre' },
-                    'I-007': { img1: 'Platina móvil.jpg', label1: 'Placas', img2: 'Platina móvil.jpg', label2: 'Inspección' },
-                    'I-008': { img1: 'Mangueras visibles Externa.jpeg', label1: 'Nivel', img2: 'Mangueras visibles Detalle.jpg', label2: 'Apariencia' },
-                    'I-009': { img1: 'Mangueras visibles Externa.jpeg', label1: 'Mangueras', img2: 'Mangueras visibles Detalle.jpg', label2: 'Válvulas' },
-                    'I-010': { img1: 'Mangueras visibles Externa.jpeg', label1: 'Bombas', img2: 'Mangueras visibles Detalle.jpg', label2: 'Operación' },
-                    'I-011': { img1: 'Mangueras visibles Externa.jpeg', label1: 'Válvulas', img2: 'Mangueras visibles Detalle.jpg', label2: 'Banco' },
-                    'I-012': { img1: 'Mangueras y distribuidor de agua.jpg', label1: 'Enfriamiento', img2: 'Mangueras visibles Detalle.jpg', label2: 'Acoples' },
-                    'I-013': { img1: 'Controlador de temperatura Externa.jpg', label1: 'Controlador', img2: 'Controlador de temperatura Detalle.jpg', label2: 'PV / SV' },
-                    'I-014': { img1: 'Superficie tablero electrico Externo.jpg', label1: 'Cableado', img2: 'Filtros del tablero eléctrico Detalle.jpg', label2: 'Conectores' },
-                    'I-015': { img1: 'HMI Externo.jpg', label1: 'Sensores', img2: 'HMI Detalle.jpg', label2: 'Fijación' },
-                    'I-016': { img1: 'Platina móvil.jpg', label1: 'Platina móvil', img2: 'Platina móvil.jpg', label2: 'Guías' },
-                    'I-017': { img1: 'Platina Fija.jpg', label1: 'Platina fija', img2: 'Platina Fija.jpg', label2: 'Cierre' },
-                    'I-018': { img1: 'Estructura Externa.jpg', label1: 'Tornillería', img2: 'Estructura Detalle.jpg', label2: 'Pernos' },
-                    'I-019': { img1: 'Mangueras visibles Externa.jpeg', label1: 'Presión', img2: 'Mangueras visibles Detalle.jpg', label2: 'Manómetro' },
-                    'I-020': { img1: 'Estructura Externa.jpg', label1: 'Puertas', img2: 'Estructura Detalle.jpg', label2: 'Seguridad' },
-                    'I-021': { img1: 'Estructura Externa.jpg', label1: 'Guardas', img2: 'Estructura Detalle.jpg', label2: 'Fijación' },
-                    'I-022': { img1: 'Estructura Externa.jpg', label1: 'Señalética', img2: 'Estructura Detalle.jpg', label2: 'Etiquetas' }
+                const primeraImagenDisponible = (fila, claves) => {
+                    for (const clave of claves) {
+                        const valor = fila?.[clave];
+                        if (typeof valor === 'string' && valor.trim()) return valor.trim();
+                    }
+                    return '';
                 };
 
-                const mapeadas = data.map(item => {
-                    const fotosDef = diccionarioFotos[item.codigo] || { 
-                        img1: 'Estructura Externa.jpg', 
-                        label1: 'Vista general', 
-                        img2: 'Estructura Detalle.jpg', 
-                        label2: 'Detalle' 
-                    };
-
-                    return {
-                        id: item.id,
-                        codigo: item.codigo,
-                        sistema: item.sistema,
-                        componente: item.componente,
-                        periodicidad: item.frecuencia,
-                        estandar: item.estandar_ejecucion,
-                        anormal: item.condicion_anormal,
-                        material: item.material_herramienta,
-                        tiempo: `${Math.round((item.tiempo_estimado_seg || 300) / 60)} min`,
-                        img1: fotosDef.img1,
-                        label1: fotosDef.label1,
-                        img2: fotosDef.img2,
-                        label2: fotosDef.label2
-                    };
-                });
+                const mapeadas = data.map(item => ({
+                    id: item.id,
+                    codigo: item.codigo,
+                    sistema: item.sistema,
+                    componente: item.componente,
+                    periodicidad: item.frecuencia,
+                    estandar: item.estandar_ejecucion,
+                    anormal: item.condicion_anormal,
+                    material: item.material_herramienta,
+                    tiempo: `${Math.round((item.tiempo_estimado_seg || 300) / 60)} min`,
+                    // Prioriza las imágenes guardadas para cada actividad en Supabase.
+                    // No asignar una misma foto a todas las actividades por su modo.
+                    img1: primeraImagenDisponible(item, ['img1', 'imagen_1', 'imagen1', 'foto_url', 'imagen_url', 'url_imagen', 'foto_principal']),
+                    label1: item.label1 || item.etiqueta_imagen_1 || 'Vista general',
+                    img2: primeraImagenDisponible(item, ['img2', 'imagen_2', 'imagen2', 'foto_detalle_url', 'imagen_detalle_url', 'url_imagen_detalle', 'foto_secundaria']),
+                    label2: item.label2 || item.etiqueta_imagen_2 || 'Vista en detalle'
+                }));
 
                 datosLimpieza = mapeadas.filter(i => i.codigo.startsWith('L'));
                 datosMonitoreo = mapeadas.filter(i => i.codigo.startsWith('I'));
 
-                poblarFiltroSistemas();
-                actualizarInterfaz();
+                iniciarInterfazMantenimiento();
             } catch (err) {
                 console.error("Error al cargar actividades de Supabase:", err);
                 mostrarAlertaIndustrial("Error al conectar con la base de datos de Supabase.");
             }
         }
-        
+
+        function iniciarInterfazMantenimiento() {
+            poblarFiltroSistemas();
+            calcularEstadoCalendarioTPM();
+            actualizarInterfaz();
+        }
+
         let qrStream = null;
         let qrScanActive = false;
         let qrDetector = null;
@@ -678,7 +659,7 @@
             if (!modal || !video || !mensaje) return;
             modal.style.display = 'flex';
             if (!('BarcodeDetector' in window)) {
-                mensaje.textContent = 'Este navegador no permite leer códigos QR directamente desde la cámara.';
+                mensaje.textContent = 'Este navegador no permite leer códigos QR directamente desde la cámara. Puedes abrir el enlace del QR con la cámara del teléfono y luego iniciar sesión.';
                 return;
             }
             try {
@@ -687,10 +668,10 @@
                 video.srcObject = qrStream;
                 await video.play();
                 qrScanActive = true;
-                mensaje.textContent = 'Buscando código QR…';
+                mensaje.textContent = 'Buscando código QR… Mantén el código dentro del encuadre.';
                 buscarCodigoQR();
             } catch (error) {
-                mensaje.textContent = 'No se pudo acceder a la cámara.';
+                mensaje.textContent = 'No se pudo acceder a la cámara. Verifica los permisos del navegador y que la página esté publicada mediante HTTPS.';
             }
         }
 
@@ -712,8 +693,12 @@
                             return;
                         }
                     } catch (_) {}
+                    if (mensaje) mensaje.textContent = 'El QR no contiene un enlace válido de la plataforma. Comprueba el código colocado en la máquina.';
+                    qrScanActive = true;
                 }
-            } catch (error) {}
+            } catch (error) {
+                // Se continúa intentando mientras la cámara esté activa.
+            }
             if (qrScanActive) requestAnimationFrame(buscarCodigoQR);
         }
 
@@ -758,7 +743,119 @@
             cargarActividadesDesdeSupabase();
         }
 
+        // ================= CONVERSOR DE EXCEL (VISTA PREVIA SEGURA) =================
+        let excelActividadesPreview = [];
+        let excelLibroActual = null;
+        const normalizarTextoExcel = (v) => String(v ?? '').replace(/[✔️✖️🟡🔴🟢]/g, '').replace(/\s+/g, ' ').trim();
+        const leerCeldaExcel = (fila, idx) => normalizarTextoExcel(fila?.[idx]);
+        function abrirImportadorExcel() {
+            const modal = document.getElementById('importador-excel-modal');
+            if (modal) modal.style.display = 'flex';
+        }
+        function cerrarImportadorExcel() {
+            const modal = document.getElementById('importador-excel-modal');
+            if (modal) modal.style.display = 'none';
+        }
+        function obtenerValorEtiquetaExcel(ws, etiqueta) {
+            const filas = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+            for (const fila of filas.slice(0, 8)) {
+                const idx = fila.findIndex(v => normalizarTextoExcel(v).toLowerCase() === etiqueta.toLowerCase());
+                if (idx >= 0) {
+                    for (let j = idx + 1; j < Math.min(fila.length, idx + 8); j++) {
+                        const valor = normalizarTextoExcel(fila[j]);
+                        if (valor) return valor;
+                    }
+                }
+            }
+            return '';
+        }
+        function buscarFilaCodigo(filas, codigo) {
+            return filas.find(f => /^([LI]-\d{3})$/i.test(normalizarTextoExcel(f?.[1])) && normalizarTextoExcel(f?.[1]).toUpperCase() === codigo);
+        }
+        async function analizarExcelMantenimiento(file) {
+            if (!file) return;
+            const estado = document.getElementById('excel-import-status');
+            const tbody = document.getElementById('excel-preview-body');
+            const resumen = document.getElementById('excel-hojas-resumen');
+            estado.textContent = 'Leyendo el libro… En archivos con muchas imágenes puede tardar unos minutos.';
+            tbody.innerHTML = '<tr><td colspan="8" class="p-5 text-center text-slate-400">Analizando hojas y códigos…</td></tr>';
+            try {
+                if (!window.XLSX) throw new Error('No se pudo cargar el lector de Excel. Revisa la conexión y vuelve a intentar.');
+                const buffer = await file.arrayBuffer();
+                excelLibroActual = XLSX.read(buffer, { type: 'array', cellDates: true, bookVBA: false });
+                const nombres = excelLibroActual.SheetNames;
+                const hojaCartaNombre = nombres.find(n => /CARTA.*ABE/i.test(n)) || nombres.find(n => /CARTA/i.test(n));
+                const hojaGuiaNombre = nombres.find(n => /GUIA.*ACT/i.test(n)) || nombres.find(n => /GUIA/i.test(n));
+                const hojaLocalNombre = nombres.find(n => /LOCALIZACI[ÓO]N/i.test(n));
+                if (!hojaCartaNombre || !hojaGuiaNombre) throw new Error('No encuentro las hojas de Carta ABE y Guía de actividades. Verifica los nombres de las hojas.');
+                const carta = XLSX.utils.sheet_to_json(excelLibroActual.Sheets[hojaCartaNombre], { header: 1, defval: '', raw: false });
+                const guia = XLSX.utils.sheet_to_json(excelLibroActual.Sheets[hojaGuiaNombre], { header: 1, defval: '', raw: false });
+                const codigos = [...new Set(carta.map(f => normalizarTextoExcel(f?.[1]).toUpperCase()).filter(c => /^[LI]-\d{3}$/.test(c)))];
+                const filas = [];
+                for (const codigo of codigos) {
+                    const fc = buscarFilaCodigo(carta, codigo);
+                    const fg = buscarFilaCodigo(guia, codigo);
+                    if (!fc) continue;
+                    const modo = codigo.startsWith('L-') ? 'limpieza' : 'monitoreo';
+                    const sistema = leerCeldaExcel(fg, 3) || leerCeldaExcel(fc, 3) || 'Sistema por validar';
+                    const componente = leerCeldaExcel(fg, 11) || leerCeldaExcel(fc, 11) || 'Componente por validar';
+                    // Columnas según la estructura del ABE de EMPAQPLAST (índices 0-based).
+                    const frecuencia = leerCeldaExcel(fc, 26) || 'Frecuencia por validar';
+                    const estandar = leerCeldaExcel(fg, 22);
+                    const anormal = leerCeldaExcel(fg, 33) || leerCeldaExcel(fc, 58);
+                    const material = [leerCeldaExcel(fg, 43), leerCeldaExcel(fg, 49)].filter(Boolean).join(' / ');
+                    const tiempoMin = Number(String(fg?.[55] ?? '').replace(',', '.')) || 5;
+                    filas.push({ codigo, modo, sistema, componente, frecuencia, estandar, anormal, material, tiempo_estimado_seg: Math.max(60, Math.round(tiempoMin * 60)) });
+                }
+                excelActividadesPreview = filas;
+                const nombreEquipo = obtenerValorEtiquetaExcel(excelLibroActual.Sheets[hojaCartaNombre], 'Equipo') || obtenerValorEtiquetaExcel(excelLibroActual.Sheets[hojaGuiaNombre], 'Equipo');
+                const codigoActivo = obtenerValorEtiquetaExcel(excelLibroActual.Sheets[hojaCartaNombre], 'Código Activo') || obtenerValorEtiquetaExcel(excelLibroActual.Sheets[hojaGuiaNombre], 'Código Activo');
+                document.getElementById('excel-nombre-equipo').value = nombreEquipo;
+                document.getElementById('excel-codigo-equipo').value = codigoActivo;
+                resumen.innerHTML = '';
+                [{n:hojaCartaNombre,t:'Carta ABE'},{n:hojaGuiaNombre,t:'Guía de actividades'},{n:hojaLocalNombre,t:'Hoja de localización'}].forEach(x => {
+                    const existe = Boolean(x.n);
+                    const card = document.createElement('div'); card.className = 'rounded-xl border border-slate-700 bg-[#141821] p-3';
+                    const h = document.createElement('p'); h.className = 'text-xs font-bold '+(existe?'text-emerald-300':'text-amber-300'); h.textContent = x.t + (existe?' · detectada':' · no detectada');
+                    const p = document.createElement('p'); p.className = 'text-[10px] text-slate-400 mt-1'; p.textContent = x.n || 'Se requiere esta hoja para completar la conversión.';
+                    card.append(h,p); resumen.appendChild(card);
+                });
+                document.getElementById('excel-total-actividades').textContent = `${filas.length} actividades`;
+                document.getElementById('excel-export-preview').disabled = filas.length === 0;
+                tbody.innerHTML = '';
+                if (!filas.length) tbody.innerHTML = '<tr><td colspan="8" class="p-5 text-center text-amber-300">No se encontraron códigos L-### o I-### en la columna esperada.</td></tr>';
+                filas.forEach(f => {
+                    const tr = document.createElement('tr'); tr.className = 'text-slate-200 hover:bg-slate-800/50';
+                    [f.codigo, f.modo === 'limpieza' ? 'Limpieza' : 'Monitoreo', f.sistema, f.componente, f.frecuencia, f.estandar, f.anormal, f.material].forEach((v,i) => { const td = document.createElement('td'); td.className = 'p-3 align-top '+(i===0?'font-bold text-sky-300':''); td.textContent = v || '—'; td.style.whiteSpace='pre-wrap'; tr.appendChild(td); });
+                    tbody.appendChild(tr);
+                });
+                const sinGuia = filas.filter(f => !f.estandar || !f.anormal).length;
+                estado.textContent = `Análisis terminado: ${filas.length} códigos detectados. ${sinGuia} actividades tienen datos incompletos que deben revisarse antes de importar.`;
+                estado.className = 'text-xs mt-3 '+(sinGuia?'text-amber-200':'text-emerald-300');
+            } catch (err) {
+                console.error('Error al analizar Excel:', err);
+                estado.textContent = err?.message || 'No se pudo analizar el archivo.';
+                estado.className = 'text-xs mt-3 text-rose-300';
+                tbody.innerHTML = '<tr><td colspan="8" class="p-5 text-center text-rose-300">No se pudo leer el archivo. Revisa el formato y vuelve a intentarlo.</td></tr>';
+                excelActividadesPreview = [];
+                document.getElementById('excel-export-preview').disabled = true;
+            }
+        }
+        function exportarVistaPreviaCSV() {
+            if (!excelActividadesPreview.length) return;
+            const encabezados = ['codigo','modo','sistema','componente','frecuencia','estandar_ejecucion','condicion_anormal','material_herramienta','tiempo_estimado_seg'];
+            const escapar = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+            const csv = [encabezados.join(';'), ...excelActividadesPreview.map(f => encabezados.map(k => escapar(f[k])).join(';'))].join('\r\n');
+            const blob = new Blob(['\ufeff', csv], {type:'text/csv;charset=utf-8;'});
+            const url = URL.createObjectURL(blob); const a = document.createElement('a');
+            a.href = url; a.download = 'vista_previa_actividades.csv'; a.click(); URL.revokeObjectURL(url);
+        }
+        // El acceso al módulo se activa mediante ?admin=1 para pruebas visuales.
+        // No equivale a autenticación: las escrituras en Supabase permanecen bloqueadas hasta configurar RLS/rol administrador.
+
         document.addEventListener('DOMContentLoaded', () => {
+            const parametrosAdmin = new URLSearchParams(window.location.search);
+            if (parametrosAdmin.get('admin') === '1') { const adminLink = document.getElementById('acceso-admin-contenedor'); if (adminLink) adminLink.classList.remove('hidden'); }
             const codeInput = document.getElementById('operator-code');
             const passInput = document.getElementById('operator-pass');
             if(codeInput) codeInput.value = '';
@@ -769,7 +866,6 @@
             const vieneDeQR = parametrosQR.has('maquina') || parametrosQR.has('area');
             const principal = document.getElementById('pantalla-principal');
             const loginModal = document.getElementById('setup-modal');
-
             if (vieneDeQR) {
                 if (principal) principal.style.display = 'none';
                 if (loginModal) loginModal.style.display = 'flex';
@@ -830,10 +926,10 @@
             globalPuntoIdx = 0;
             if(modo === 'limpieza') {
                 document.getElementById('tab-limpieza').className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-ind-accent-gradient text-white transition shadow cursor-pointer";
-                document.getElementById('tab-monitoreo').className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-[#0f111a] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer";
+                document.getElementById('tab-monitoreo').className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer";
             } else {
                 document.getElementById('tab-monitoreo').className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-ind-accent-gradient text-white transition shadow cursor-pointer";
-                document.getElementById('tab-limpieza').className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-[#0f111a] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer";
+                document.getElementById('tab-limpieza').className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-[#141821] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer";
             }
             poblarFiltroSistemas();
             actualizarInterfaz();
@@ -885,7 +981,7 @@
             grid.innerHTML = '';
 
             if (!frecuenciaEstaHabilitada(frecuenciaSeleccionada)) {
-                grid.innerHTML = `<div class="p-5 text-xs text-slate-400 text-center industrial-border rounded-xl bg-[#0f111a]/50">ACTIVIDAD NO DISPONIBLE<br><span class="text-slate-500">Esta frecuencia todavía no está habilitada.</span></div>`;
+                grid.innerHTML = `<div class="p-5 text-xs text-slate-400 text-center industrial-border rounded-xl bg-[#141821]/50">ACTIVIDAD NO DISPONIBLE<br><span class="text-slate-500">Esta frecuencia todavía no está habilitada.</span></div>`;
                 document.getElementById('contador-filtro-badge').innerText = '0 puntos';
                 establecerBotonesActividad(false);
                 return;
@@ -947,7 +1043,7 @@
                 const estadoKey = `${globalModo}_${idxReal}`;
                 const dataEstado = globalEstados[estadoKey];
                 
-                let colorClass = "text-slate-400 bg-[#0f111a]/40 industrial-border hover:border-slate-400";
+                let colorClass = "text-slate-400 bg-[#141821]/40 industrial-border hover:border-slate-400";
                 let textState = "PENDIENTE";
 
                 if(dataEstado && dataEstado.actividadEjecutada && dataEstado.condicion === 'anomalia') {
@@ -970,7 +1066,7 @@
                     colorClass += " border-ind-accent bg-ind-accent/15";
                 }
 
-                let badgeFreqColor = "text-purple-300 bg-purple-950/30 border-purple-800/40";
+                let badgeFreqColor = "text-blue-400 bg-blue-950/30 border-blue-800/40";
                 if(item.periodicidad === "Semanal") badgeFreqColor = "text-amber-400 bg-amber-950/30 border-amber-800/40";
                 if(item.periodicidad === "Mensual") badgeFreqColor = "text-purple-400 bg-purple-950/30 border-purple-800/40";
 
@@ -985,7 +1081,7 @@
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded border ${badgeFreqColor}">${item.periodicidad}</span>
-                        <span class="text-[10px] uppercase font-sans tracking-wider px-2 py-0.5 rounded bg-[#0f111a] industrial-border font-semibold">${textState}</span>
+                        <span class="text-[10px] uppercase font-sans tracking-wider px-2 py-0.5 rounded bg-[#141821] industrial-border font-semibold">${textState}</span>
                     </div>
                 `;
                 div.onclick = () => {
@@ -1017,7 +1113,7 @@
             
             const freqBadge = document.getElementById('ficha-periodicidad-badge');
             freqBadge.innerText = `Frecuencia - ${item.periodicidad}`;
-            if(item.periodicidad === "Diaria") freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-purple-300 bg-purple-950/40 border-purple-800/60";
+            if(item.periodicidad === "Diaria") freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-blue-400 bg-blue-950/40 border-blue-800/60";
             else if(item.periodicidad === "Semanal") freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-amber-400 bg-amber-950/40 border-amber-800/60";
             else freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-purple-400 bg-purple-950/40 border-purple-800/60";
 
@@ -1084,7 +1180,7 @@
                 }
             } else if(dataEstado && dataEstado.actividadEjecutada && dataEstado.status === 'observacion') {
                 trazabilidadElem.innerHTML = `OBSERVACIÓN REGISTRADA - ${dataEstado.com}`;
-                trazabilidadElem.className = "text-xs text-purple-300 font-mono font-bold";
+                trazabilidadElem.className = "text-xs text-blue-400 font-mono font-bold";
                 if(btnVerificacion) {
                     btnVerificacion.disabled = false;
                     btnVerificacion.title = "";
@@ -1132,8 +1228,8 @@
                 estado.innerText = 'ACTIVIDAD EN EJECUCIÓN';
                 estado.className = 'block text-[10px] text-emerald-400 uppercase tracking-widest font-bold';
                 reloj.className = 'text-2xl font-black text-white font-mono';
-                fill.className = 'h-full bg-ind-accent transition-all';
-                panel.className = 'mb-5 rounded-xl border border-purple-500/40 bg-[#0f111a] p-4 shadow-inner';
+                fill.className = 'h-full bg-sky-500 transition-all';
+                panel.className = 'mb-5 rounded-xl border border-sky-500/30 bg-[#141821] p-4 shadow-inner';
             }
         }
 
@@ -1259,12 +1355,15 @@
             actualizarTemporizadorUI();
         }
 
+    // FUNCIÓN AUXILIAR PARA OBTENER LA HORA LOCAL EXACTA DE ECUADOR EN FORMATO ISO
         function obtenerHoraLocalISO(desplazamientoSegundos = 0) {
             const fecha = new Date(Date.now() - (desplazamientoSegundos * 1000));
+            // Resta el desfase de la zona horaria local para guardarla correctamente compensada
             const offsetMs = fecha.getTimezoneOffset() * 60000;
             return new Date(fecha.getTime() - offsetMs).toISOString().slice(0, -1) + '-05:00'; 
         }
 
+        // 1. MARCAR ESTADO (VERIFICACIÓN NORMAL)
         async function marcarEstado(estado) {
             const estadoKey = `${globalModo}_${globalPuntoIdx}`;
             const actual = globalEstados[estadoKey] || {};
@@ -1321,6 +1420,7 @@
             }
         }
 
+        // 2. GUARDAR ANOMALÍA (TARJETA ROJA/AZUL)
         async function guardarAnomalia() {
             const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
             const item = listaOriginal[globalPuntoIdx];
@@ -1354,7 +1454,7 @@
 
                 if (ejecError) throw ejecError;
 
-                await supabaseClient.from('anomalias').insert([{
+                const { error: anomaliaError } = await supabaseClient.from('anomalias').insert([{
                     id_ejecucion: ejecData.id,
                     tipo_dano: tipoDano,
                     sistema: item.sistema,
@@ -1362,6 +1462,7 @@
                     descripcion: com,
                     estado: 'ABIERTA'
                 }]);
+                if (anomaliaError) throw anomaliaError;
 
                 detenerTemporizador(false);
                 globalEstados[estadoKey] = { ...anterior, status: 'anomalia', actividadEjecutada: true, condicion: 'anomalia', tipo: tipoDano, sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: (anterior.ejecuciones || 0) + 1, ultimoTiempo: new Date().toLocaleTimeString(), com };
@@ -1371,10 +1472,12 @@
                 actualizarInterfaz();
             } catch (err) {
                 console.error("Error al guardar anomalía:", err);
-                mostrarAlertaIndustrial("Error al registrar la anomalía en la base de datos.");
+                const detalle = err?.message || err?.details || err?.hint || "Error desconocido";
+                mostrarAlertaIndustrial(`Error al registrar la anomalía en la base de datos.\n\nDetalle: ${detalle}`);
             }
         }
 
+        // 3. GUARDAR OBSERVACIÓN DE TURNO
         async function guardarObservacion() {
             const com = document.getElementById('texto-observacion').value.trim();
             if(!com) { mostrarAlertaIndustrial("Por favor ingrese una observación."); return; }
@@ -1418,10 +1521,10 @@
                 mostrarAlertaIndustrial("Observación guardada correctamente en Supabase.", "ok");
             } catch (err) {
                 console.error("Error al guardar observación:", err);
-                mostrarAlertaIndustrial("Error al registrar la observación.");
+                const detalle = err?.message || err?.details || err?.hint || "Error desconocido";
+                mostrarAlertaIndustrial(`Error al registrar la observación.\n\nDetalle: ${detalle}`);
             }
         }
-
         function mostrarModalCierreLimpieza(frecuencia) {
             let nombreFreq = frecuencia.toLowerCase() === 'diaria' ? 'ACTIVIDADES DIARIAS' : (frecuencia.toUpperCase() + 'S');
             document.getElementById('cierre-titulo').innerText = `¡HAS TERMINADO LA JORNADA DE ${nombreFreq}!`;
@@ -1480,7 +1583,7 @@
             document.getElementById('tipo-dano-seleccionado').value = '';
             const q = normalizarBusqueda(input.value.trim());
             const resultados = q ? tiposDanio.filter(t => normalizarBusqueda(t).includes(q)) : tiposDanio;
-            caja.innerHTML = resultados.slice(0, 40).map(t => { const idx = tiposDanio.indexOf(t); return `<button type="button" class="tipo-dano-opcion w-full text-left px-3.5 py-2.5 text-xs text-slate-200 hover:bg-ind-accent/40 hover:text-white border-b border-purple-500/30 last:border-0 cursor-pointer" data-tipo-index="${idx}">${t}</button>`; }).join('');
+            caja.innerHTML = resultados.slice(0, 40).map(t => { const idx = tiposDanio.indexOf(t); return `<button type="button" class="tipo-dano-opcion w-full text-left px-3.5 py-2.5 text-xs text-slate-200 hover:bg-ind-accent/40 hover:text-white border-b border-slate-700/40 last:border-0 cursor-pointer" data-tipo-index="${idx}">${t}</button>`; }).join('');
             caja.classList.toggle('hidden', resultados.length === 0);
         }
 
@@ -1516,8 +1619,7 @@
             const item = listaOriginal[globalPuntoIdx];
             document.getElementById('modal-anomalia-info').innerText = `${item.sistema} - ${item.codigo}`;
             document.getElementById('anomalia-sistema-auto').innerText = item.sistema;
-            document.getElementById('anomalia-componente-auto').innerText = item.componente;
-            
+            document.getElementById('anomalia-componente-auto').innerText = `${item.codigo} ${item.componente}`;
             document.getElementById('tipo-dano-input').value = '';
             document.getElementById('tipo-dano-seleccionado').value = '';
             document.getElementById('texto-anomalia').value = '';
@@ -1552,6 +1654,7 @@
             const otroInputId = input.id === 'foto-anomalia-camara' ? 'foto-anomalia' : 'foto-anomalia-camara';
             const otroInput = document.getElementById(otroInputId);
             if (input.files && input.files[0]) {
+                // Mantener una sola evidencia seleccionada: la última acción del usuario.
                 if (otroInput) otroInput.value = '';
                 document.getElementById('nombre-archivo').innerText = input.files[0].name || 'Foto capturada';
             } else {
@@ -1562,7 +1665,10 @@
             }
         }
 
-        // CARGADOR 3D
+        // No declarar aquí otra versión de guardarAnomalia/guardarObservacion:
+        // las funciones async anteriores guardan los datos en Supabase.
+
+        // CARGADOR 3D LIMPIO CON ROTACIÓN POR SISTEMA
         const container = document.getElementById('canvas-container');
         scene = new THREE.Scene();
 
