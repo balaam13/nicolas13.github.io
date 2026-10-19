@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMPAQPLAST S.A. | Panel Administrador TPM</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- SheetJS para procesar Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ind: {
+                            base: '#0f111a',
+                            panel: '#181b26',
+                            border: 'rgba(139, 92, 246, 0.4)',
+                            accent: '#8b5cf6',
+                            accentHover: '#7c3aed'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { background-color: #0f111a; color: #F3F4F6; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .industrial-border { border: 1.5px solid rgba(139, 92, 246, 0.4); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-6">
+
+    <!-- ENCABEZADO -->
+    <header class="bg-ind-panel industrial-border rounded-2xl p-5 mb-6 flex items-center justify-between shadow-lg">
+        <div class="flex items-center space-x-4">
+            <h1 class="text-xl font-black text-white uppercase tracking-wide">Panel Administrador TPM</h1>
+            <span class="text-xs bg-purple-950 text-purple-300 font-mono px-3 py-1 rounded-lg border border-purple-500/40">EMPAQPLAST S.A.</span>
+        </div>
+        <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-600 transition">
+            Ir a Vista Operario
+        </a>
+    </header>
+
+    <!-- PANEL PRINCIPAL -->
+    <main class="max-w-4xl mx-auto w-full bg-ind-panel industrial-border rounded-2xl p-8 shadow-2xl">
+        <h2 class="text-lg font-bold text-white mb-2 uppercase">Importar Excel de Máquina</h2>
+        <p class="text-xs text-slate-400 mb-6">Selecciona el archivo Excel (.xlsx) de la máquina para extraer automáticamente las actividades y cargarlas a Supabase.</p>
+
+        <!-- ZONA CARGA EXCEL -->
+        <div class="border-2 border-dashed border-purple-500/40 rounded-xl p-8 text-center bg-[#0f111a]/50 hover:border-purple-400 transition">
+            <input type="file" id="excelInput" accept=".xlsx, .xls" class="hidden" onchange="procesarArchivoExcel(event)">
+            <label for="excelInput" class="cursor-pointer bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs uppercase px-6 py-3 rounded-xl transition shadow-lg inline-block">
+                Seleccionar Excel (.xlsx)
+            </label>
+            <p id="nombreArchivo" class="text-xs text-slate-400 mt-3 font-mono">Ningún archivo seleccionado</p>
+        </div>
+
+        <!-- PREVISUALIZACIÓN -->
+        <div id="seccionPrevia" class="hidden mt-8 bg-[#0f111a] industrial-border rounded-xl p-6">
+            <h3 class="text-sm font-bold text-purple-300 uppercase mb-4 border-b border-purple-500/30 pb-2">Resumen detectado del Excel</h3>
+            
+            <div class="grid grid-cols-2 gap-4 text-xs mb-4">
+                <div><span class="text-slate-400">Total actividades leídas:</span> <strong id="totalActividades" class="text-white font-mono">0</strong></div>
+                <div><span class="text-slate-400">Frecuencias:</span> <span id="resumenFrecuencias" class="text-slate-200 font-mono">-</span></div>
+            </div>
+
+            <button onclick="subirActividadesASupabase()" class="w-full mt-4 bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg">
+                Importar actividades a Supabase
+            </button>
+        </div>
+
+        <!-- MENSAJE DE ESTADO -->
+        <div id="logEstado" class="hidden mt-6 p-4 rounded-xl text-xs font-mono bg-[#0f111a] border border-slate-700"></div>
+    </main>
+
+    <script>
+        // Mismas credenciales que tu index.html
+        const SUPABASE_URL = 'https://cwacaqewinvuyunjprwd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_E6pV0fQw-a0jhmW61X_aVg_igoPZ2G3';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let actividadesExtraidas = [];
+
+        function procesarArchivoExcel(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('nombreArchivo').innerText = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // Aquí leeremos la hoja de actividades correspondiente
+                const primeraHoja = workbook.SheetNames[0];
+                const hoja = workbook.Sheets[primeraHoja];
+                const filas = XLSX.utils.sheet_to_json(hoja);
+
+                // Ejemplo de mapeo básico
+                actividadesExtraidas = filas.map(f => ({
+                    codigo: f['Código'] || f['CODIGO'] || 'L-000',
+                    sistema: f['Sistema'] || f['SISTEMA'] || 'General',
+                    componente: f['Componente'] || f['COMPONENTE'] || 'Sin nombre',
+                    frecuencia: f['Frecuencia'] || f['FRECUENCIA'] || 'Diaria',
+                    estandar_ejecucion: f['Estándar'] || f['ESTANDAR'] || '',
+                    condicion_anormal: f['Condición Anormal'] || '',
+                    material_herramienta: f['Material'] || '',
+                    tiempo_estimado_seg: 300,
+                    activo: true
+                }));
+
+                document.getElementById('totalActividades').innerText = actividadesExtraidas.length;
+                document.getElementById('seccionPrevia').classList.remove('hidden');
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function subirActividadesASupabase() {
+            if (actividadesExtraidas.length === 0) return;
+
+            const log = document.getElementById('logEstado');
+            log.classList.remove('hidden');
+            log.innerText = "Subiendo actividades a la tabla 'actividades'...";
+
+            const { data, error } = await supabaseClient
+                .from('actividades')
+                .insert(actividadesExtraidas);
+
+            if (error) {
+                log.innerText = "Error al importar: " + error.message;
+                log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-rose-950/40 border border-rose-500/50 text-rose-300";
+            } else {
+                log.innerText = "¡Importación realizada con éxito!";
+                log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-emerald-950/40 border border-emerald-500/50 text-emerald-300";
+            }
+        }
+    </script>
+</body>
+</html>
