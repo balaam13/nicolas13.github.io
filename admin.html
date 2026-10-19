@@ -70,7 +70,7 @@
             </div>
 
             <button onclick="subirActividadesASupabase()" class="w-full mt-4 bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">
-                Importar actividades a Supabase
+                IMPORTAR ACTIVIDADES A SUPABASE
             </button>
         </div>
 
@@ -79,7 +79,6 @@
     </main>
 
     <script>
-        // Credenciales de Supabase
         const SUPABASE_URL = 'https://cwacaqewinvuyunjprwd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_E6pV0fQw-a0jhmW61X_aVg_igoPZ2G3';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -87,13 +86,23 @@
         let actividadesExtraidas = [];
         let nombreMaquinaDetectada = "HUSKY 3";
 
+        function extraerValor(fila, campos) {
+            for (let c of campos) {
+                for (let k in fila) {
+                    if (k.trim().toLowerCase() === c.toLowerCase()) {
+                        return fila[k];
+                    }
+                }
+            }
+            return '';
+        }
+
         function procesarArchivoExcel(e) {
             const file = e.target.files[0];
             if (!file) return;
 
             document.getElementById('nombreArchivo').innerText = file.name;
 
-            // Intentar obtener el nombre de la máquina desde el nombre del archivo
             const nombreLimpio = file.name.split('-')[0].split('.')[0].trim();
             if (nombreLimpio) {
                 nombreMaquinaDetectada = nombreLimpio;
@@ -102,33 +111,53 @@
 
             const reader = new FileReader();
             reader.onload = function(evt) {
-                const data = new Uint8Array(evt.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
 
-                const primeraHoja = workbook.SheetNames[0];
-                const hoja = workbook.Sheets[primeraHoja];
-                const filas = XLSX.utils.sheet_to_json(hoja);
+                    actividadesExtraidas = [];
 
-                actividadesExtraidas = filas.map(f => ({
-                    codigo: f['Código'] || f['CODIGO'] || 'L-000',
-                    sistema: f['Sistema'] || f['SISTEMA'] || 'General',
-                    componente: f['Componente'] || f['COMPONENTE'] || 'Sin nombre',
-                    frecuencia: f['Frecuencia'] || f['FRECUENCIA'] || 'Diaria',
-                    estandar_ejecucion: f['Estándar'] || f['ESTANDAR'] || '',
-                    condicion_anormal: f['Condición Anormal'] || '',
-                    material_herramienta: f['Material'] || '',
-                    tiempo_estimado_seg: 300,
-                    activo: true
-                }));
+                    // Recorrer las hojas del libro Excel
+                    workbook.SheetNames.forEach(nombreHoja => {
+                        const hoja = workbook.Sheets[nombreHoja];
+                        const filas = XLSX.utils.sheet_to_json(hoja);
 
-                document.getElementById('totalActividades').innerText = actividadesExtraidas.length;
-                document.getElementById('seccionPrevia').classList.remove('hidden');
+                        filas.forEach(f => {
+                            const codigo = extraerValor(f, ['codigo', 'código', 'cod', 'item', 'no', 'n°']);
+                            const sistema = extraerValor(f, ['sistema', 'equipo', 'area', 'área']);
+                            const componente = extraerValor(f, ['componente', 'elemento', 'punto', 'parte', 'descripcion']);
+                            const frecuencia = extraerValor(f, ['frecuencia', 'periodicidad', 'frec']);
+                            const estandar = extraerValor(f, ['estandar', 'estándar', 'estandar_ejecucion', 'actividad']);
+                            const anormal = extraerValor(f, ['condicion_anormal', 'anormal', 'anomalia', 'condicion']);
+                            const material = extraerValor(f, ['material', 'herramienta', 'material_herramienta']);
+
+                            if (codigo || componente || estandar) {
+                                actividadesExtraidas.push({
+                                    codigo: String(codigo || 'L-000').trim(),
+                                    sistema: String(sistema || 'General').trim(),
+                                    componente: String(componente || 'Sin nombre').trim(),
+                                    frecuencia: String(frecuencia || 'Diaria').trim(),
+                                    estandar_ejecucion: String(estandar || '').trim(),
+                                    condicion_anormal: String(anormal || '').trim(),
+                                    material_herramienta: String(material || '').trim(),
+                                    tiempo_estimado_seg: 300,
+                                    activo: true
+                                });
+                            }
+                        });
+                    });
+
+                    document.getElementById('totalActividades').innerText = actividadesExtraidas.length;
+                    document.getElementById('seccionPrevia').classList.remove('hidden');
+
+                } catch (err) {
+                    alert("Error al leer la estructura del Excel: " + err.message);
+                }
             };
             reader.readAsArrayBuffer(file);
         }
 
         async function obtenerOCrearMaquina(nombre) {
-            // 1. Buscar si la máquina ya existe
             let { data: maquina } = await supabaseClient
                 .from('maquinas')
                 .select('id')
@@ -139,10 +168,9 @@
                 return maquina.id;
             }
 
-            // 2. Si no existe, crear la máquina
             const { data: nuevaMaquina, error: insertError } = await supabaseClient
                 .from('maquinas')
-                .insert([{ nombre: nombre, area: 'Inyección PET', activo: true }])
+                .insert([{ nombre: nombre }])
                 .select('id')
                 .single();
 
@@ -158,33 +186,30 @@
 
             const log = document.getElementById('logEstado');
             log.classList.remove('hidden');
-            log.innerText = `Buscando o creando la máquina "${nombreMaquinaDetectada}"...`;
+            log.innerText = `Procesando máquina "${nombreMaquinaDetectada}" en Supabase...`;
             log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-[#0f111a] border border-purple-500/50 text-purple-300";
 
             try {
-                // Paso A: Obtener el ID de la máquina
                 const idMaquina = await obtenerOCrearMaquina(nombreMaquinaDetectada);
 
-                log.innerText = `Asignando ID de máquina (${idMaquina}) a las ${actividadesExtraidas.length} actividades...`;
+                log.innerText = `Vinculando ID (${idMaquina}) a las ${actividadesExtraidas.length} actividades...`;
 
-                // Paso B: Vincular id_maquina a cada registro
                 const actividadesConMaquina = actividadesExtraidas.map(act => ({
                     ...act,
                     id_maquina: idMaquina
                 }));
 
-                // Paso C: Insertar en la tabla actividades
                 const { error: errorActividades } = await supabaseClient
                     .from('actividades')
                     .insert(actividadesConMaquina);
 
                 if (errorActividades) throw errorActividades;
 
-                log.innerText = `¡Éxito! Se vinculó la máquina "${nombreMaquinaDetectada}" y se importaron las ${actividadesExtraidas.length} actividades correctamente.`;
+                log.innerText = `¡ÉXITO! Se vinculó la máquina "${nombreMaquinaDetectada}" (ID: ${idMaquina}) y se cargaron las ${actividadesExtraidas.length} actividades a la base de datos de Supabase.`;
                 log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-emerald-950/40 border border-emerald-500/50 text-emerald-300";
 
             } catch (err) {
-                log.innerText = "Error en la importación: " + err.message;
+                log.innerText = "Error al guardar en Supabase: " + err.message;
                 log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-rose-950/40 border border-rose-500/50 text-rose-300";
             }
         }
