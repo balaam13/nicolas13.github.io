@@ -5,7 +5,7 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let actividadesExtraidas = [];
-        let nombreMaquinaDetectada = "HUSKY 3"; // Valor por defecto extraído del archivo
+        let nombreMaquinaDetectada = "HUSKY 3";
 
         function procesarArchivoExcel(e) {
             const file = e.target.files[0];
@@ -13,7 +13,7 @@
 
             document.getElementById('nombreArchivo').innerText = file.name;
 
-            // Intentar detectar el nombre de la máquina desde el nombre del archivo (ej. "HUSKY 3 - ABE.xlsx")
+            // Extraer el nombre de la máquina desde el nombre del archivo (ej. "HUSKY 3 - ABE.xlsx")
             const nombreLimpio = file.name.split('-')[0].split('.')[0].trim();
             if (nombreLimpio) {
                 nombreMaquinaDetectada = nombreLimpio;
@@ -47,8 +47,8 @@
         }
 
         async function obtenerOCrearMaquina(nombre) {
-            // 1. Buscar si la máquina ya existe en Supabase
-            let { data: maquina, error: fetchError } = await supabaseClient
+            // 1. Buscar si la máquina ya existe en la tabla "maquinas"
+            let { data: maquina } = await supabaseClient
                 .from('maquinas')
                 .select('id')
                 .eq('nombre', nombre)
@@ -58,7 +58,7 @@
                 return maquina.id;
             }
 
-            // 2. Si no existe, crear la máquina automáticamente
+            // 2. Si no existe, crear la máquina en Supabase
             const { data: nuevaMaquina, error: insertError } = await supabaseClient
                 .from('maquinas')
                 .insert([{ nombre: nombre, area: 'Inyección PET', activo: true }])
@@ -66,7 +66,7 @@
                 .single();
 
             if (insertError) {
-                throw new Error("Error al crear la máquina en Supabase: " + insertError.message);
+                throw new Error("Error al crear la máquina: " + insertError.message);
             }
 
             return nuevaMaquina.id;
@@ -77,33 +77,33 @@
 
             const log = document.getElementById('logEstado');
             log.classList.remove('hidden');
-            log.innerText = `Buscando o creando la máquina "${nombreMaquinaDetectada}"...`;
+            log.innerText = `Vinculando máquina "${nombreMaquinaDetectada}"...`;
             log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-[#0f111a] border border-purple-500/50 text-purple-300";
 
             try {
-                // Paso A: Obtener el ID de la máquina
+                // Paso A: Obtener el ID numérico de la máquina
                 const idMaquina = await obtenerOCrearMaquina(nombreMaquinaDetectada);
 
-                log.innerText = `Asignando ID de máquina (${idMaquina}) y subiendo ${actividadesExtraidas.length} actividades...`;
+                log.innerText = `Asignando ID (${idMaquina}) a las ${actividadesExtraidas.length} actividades...`;
 
-                // Paso B: Asignar id_maquina a cada actividad
+                // Paso B: Incluir id_maquina en cada registro
                 const actividadesConMaquina = actividadesExtraidas.map(act => ({
                     ...act,
                     id_maquina: idMaquina
                 }));
 
-                // Paso C: Insertar las actividades
+                // Paso C: Insertar registros en la tabla actividades
                 const { error: errorActividades } = await supabaseClient
                     .from('actividades')
                     .insert(actividadesConMaquina);
 
                 if (errorActividades) throw errorActividades;
 
-                log.innerText = `¡Éxito! Se vinculó la máquina "${nombreMaquinaDetectada}" y se importaron las ${actividadesExtraidas.length} actividades.`;
+                log.innerText = `¡Éxito! Se registró la máquina "${nombreMaquinaDetectada}" y se importaron las ${actividadesExtraidas.length} actividades correctamente.`;
                 log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-emerald-950/40 border border-emerald-500/50 text-emerald-300";
 
             } catch (err) {
-                log.innerText = "Error durante la importación: " + err.message;
+                log.innerText = "Error en la importación: " + err.message;
                 log.className = "mt-6 p-4 rounded-xl text-xs font-mono bg-rose-950/40 border border-rose-500/50 text-rose-300";
             }
         }
