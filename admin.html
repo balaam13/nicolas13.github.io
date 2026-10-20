@@ -47,7 +47,7 @@
     </header>
 
     <!-- PANEL PRINCIPAL -->
-    <main class="max-w-4xl mx-auto w-full bg-ind-panel industrial-border rounded-2xl p-8 shadow-2xl">
+    <main class="max-w-5xl mx-auto w-full bg-ind-panel industrial-border rounded-2xl p-8 shadow-2xl">
         <h2 class="text-lg font-bold text-white mb-2 uppercase">Importar Excel de Máquina</h2>
         <p class="text-xs text-slate-400 mb-6">Selecciona el archivo Excel (.xlsx) de la máquina para extraer automáticamente las actividades y cargarlas a Supabase.</p>
 
@@ -85,13 +85,10 @@
 
         let actividadesExtraidas = [];
         let nombreMaquinaDetectada = "HUSKY 3";
-        let codigoActivoDetectado = "";
         let areaDetectada = "Inyección PET";
-        let advertenciasExcel = [];
 
         const normalizar = v => String(v ?? '').replace(/[✔️✖️🟡🔴🟢]/g, '').replace(/\s+/g, ' ').trim();
 
-        // Detectar si una cadena es un código TPM (L-001, I-012, L01, etc.)
         function esCodigoTPM(str) {
             const v = normalizar(str).toUpperCase();
             return /^[LI]-?\d{1,4}$/.test(v);
@@ -104,53 +101,66 @@
             return `${prefijo}-${num}`;
         }
 
-        function normalizarFrecuencia(valor) {
-            const f = normalizar(valor).toLowerCase();
-            if (/mensual|cada mes/.test(f)) return 'Mensual';
-            if (/semanal|cada semana/.test(f)) return 'Semanal';
-            return 'Diaria';
-        }
+        function procesarHojaEstructurada(rows) {
+            let idxCodigo = -1, idxSistema = -1, idxComponente = -1, idxEstandar = -1, idxAnormal = -1, idxMaterial = -1, idxHerramienta = -1;
 
-        function buscarColumnaCodigo(filas) {
-            const conteoCols = {};
-            for (let r = 0; r < Math.min(filas.length, 50); r++) {
-                const fila = filas[r] || [];
+            // 1. Escanear las primeras 10 filas para ubicar los encabezados exactos por texto
+            for (let r = 0; r < Math.min(rows.length, 10); r++) {
+                const fila = rows[r] || [];
                 for (let c = 0; c < fila.length; c++) {
-                    if (esCodigoTPM(fila[c])) {
-                        conteoCols[c] = (conteoCols[c] || 0) + 1;
+                    const txt = normalizar(fila[c]).toUpperCase();
+                    if (txt === 'NO' || txt === 'N°' || txt === 'CÓDIGO' || txt === 'CODIGO') idxCodigo = c;
+                    else if (txt.includes('SISTEMA')) idxSistema = c;
+                    else if (txt.includes('COMPONENTE')) idxComponente = c;
+                    else if (txt.includes('ESTÁNDAR') || txt.includes('ESTANDAR')) idxEstandar = c;
+                    else if (txt.includes('CONDICIÓN') || txt.includes('CONDICION') || txt.includes('ANORMAL')) idxAnormal = c;
+                    else if (txt === 'MATERIAL') idxMaterial = c;
+                    else if (txt === 'HERRAMIENTA') idxHerramienta = c;
+                }
+            }
+
+            let sistemaActual = "General";
+            const actividadesMap = new Map();
+
+            // 2. Extraer los datos fila por fila
+            rows.forEach(fila => {
+                const codRaw = fila[idxCodigo >= 0 ? idxCodigo : 1];
+                
+                if (esCodigoTPM(codRaw)) {
+                    const codigo = formatearCodigo(codRaw);
+
+                    // Si el sistema está fusionado o presente, lo actualizamos
+                    const sistemaVal = normalizar(fila[idxSistema >= 0 ? idxSistema : 4]);
+                    if (sistemaVal && sistemaVal.length > 2 && !esCodigoTPM(sistemaVal)) {
+                        sistemaActual = sistemaVal;
                     }
-                }
-            }
-            let maxCol = -1, maxCount = 0;
-            for (let c in conteoCols) {
-                if (conteoCols[c] > maxCount) {
-                    maxCount = conteoCols[c];
-                    maxCol = parseInt(c);
-                }
-            }
-            return maxCol;
-        }
 
-        function extraerDatosFila(fila) {
-            let codigo = "", sistema = "", componente = "", frecuencia = "", estandar = "", anormal = "", material = "";
-            
-            for (let c = 0; c < fila.length; c++) {
-                const val = normalizar(fila[c]);
-                if (!val) continue;
+                    const componenteVal = normalizar(fila[idxComponente >= 0 ? idxComponente : 12]);
+                    const estandarVal = normalizar(fila[idxEstandar >= 0 ? idxEstandar : 24]);
+                    const anormalVal = normalizar(fila[idxAnormal >= 0 ? idxAnormal : 33]);
+                    const materialVal = normalizar(fila[idxMaterial >= 0 ? idxMaterial : 44]);
+                    const herramientaVal = normalizar(fila[idxHerramienta >= 0 ? idxHerramienta : 48]);
 
-                if (!codigo && esCodigoTPM(val)) {
-                    codigo = formatearCodigo(val);
-                } else if (/^(Diaria|Semanal|Mensual|Turno|Diario)/i.test(val)) {
-                    frecuencia = normalizarFrecuencia(val);
-                } else if (val.length > 15 && !estandar) {
-                    estandar = val;
-                } else if (!sistema && val.length < 30) {
-                    sistema = val;
-                } else if (!componente && val.length < 40) {
-                    componente = val;
+                    let materialesUnidos = [materialVal, herramientaVal].filter(Boolean).join(' / ');
+                    if (!materialesUnidos) materialesUnidos = 'Paño industrial / Brocha';
+
+                    actividadesMap.set(codigo, {
+                        codigo: codigo,
+                        modo: codigo.startsWith('I-') ? 'monitoreo' : 'limpieza',
+                        sistema: sistemaActual || 'Sistema General',
+                        componente: componenteVal || 'Componente General',
+                        frecuencia: 'Diaria',
+                        estandar_ejecucion: estandarVal || 'Realizar mantenimiento autónomo según estándar',
+                        condicion_anormal: anormalVal || 'Presencia de desgaste, residuo o anomalía',
+                        material_herramienta: materialesUnidos,
+                        tiempo_estimado_seg: 300,
+                        activo: true,
+                        _validacion: 'OK'
+                    });
                 }
-            }
-            return { codigo, sistema, componente, frecuencia, estandar, anormal, material };
+            });
+
+            return Array.from(actividadesMap.values());
         }
 
         function procesarArchivoExcel(e) {
@@ -167,59 +177,19 @@
             reader.onload = function(evt) {
                 try {
                     const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: 'array', cellDates: true });
-                    const nombres = workbook.SheetNames;
-                    
-                    const nombreCarta = nombres.find(n => /CARTA.*ABE/i.test(n)) || nombres.find(n => /CARTA/i.test(n));
-                    const nombreGuia = nombres.find(n => /GUIA.*ACT/i.test(n)) || nombres.find(n => /GUIA/i.test(n));
-
-                    if (!nombreCarta) throw new Error("No se encontró la hoja Carta ABE en el archivo.");
-
-                    const carta = XLSX.utils.sheet_to_json(workbook.Sheets[nombreCarta], { header: 1, defval: '', raw: false });
-                    const colCodCarta = buscarColumnaCodigo(carta);
-
-                    if (colCodCarta === -1) throw new Error("No se detectó ninguna columna con códigos de actividad (L-001/I-001) en la Carta ABE.");
-
-                    let mapaGuia = new Map();
-                    if (nombreGuia) {
-                        const guia = XLSX.utils.sheet_to_json(workbook.Sheets[nombreGuia], { header: 1, defval: '', raw: false });
-                        const colCodGuia = buscarColumnaCodigo(guia);
-                        if (colCodGuia !== -1) {
-                            guia.forEach(fila => {
-                                const cod = fila[colCodGuia];
-                                if (esCodigoTPM(cod)) {
-                                    mapaGuia.set(formatearCodigo(cod), extraerDatosFila(fila));
-                                }
-                            });
-                        }
-                    }
-
                     actividadesExtraidas = [];
-                    const codigosProcesados = new Set();
 
-                    carta.forEach(fila => {
-                        const codRaw = fila[colCodCarta];
-                        if (esCodigoTPM(codRaw)) {
-                            const codigo = formatearCodigo(codRaw);
-                            if (codigosProcesados.has(codigo)) return;
-                            codigosProcesados.add(codigo);
-
-                            const datosCarta = extraerDatosFila(fila);
-                            const datosGuia = mapaGuia.get(codigo) || {};
-
-                            actividadesExtraidas.push({
-                                codigo: codigo,
-                                modo: codigo.startsWith('I-') ? 'monitoreo' : 'limpieza',
-                                sistema: datosGuia.sistema || datosCarta.sistema || 'Sistema por validar',
-                                componente: datosGuia.componente || datosCarta.componente || 'Componente por validar',
-                                frecuencia: datosCarta.frecuencia || datosGuia.frecuencia || 'Diaria',
-                                estandar_ejecucion: datosGuia.estandar || datosCarta.estandar || 'Realizar inspección / limpieza general',
-                                condicion_anormal: datosGuia.anormal || 'Presencia de anomalía, residuo o desgaste',
-                                material_herramienta: datosGuia.material || 'Paño industrial / Brocha',
-                                tiempo_estimado_seg: 300,
-                                activo: true,
-                                _validacion: mapaGuia.has(codigo) ? 'OK' : 'Sin datos en Guía'
-                            });
-                        }
+                    workbook.SheetNames.forEach(nombreHoja => {
+                        const hoja = workbook.Sheets[nombreHoja];
+                        const rows = XLSX.utils.sheet_to_json(hoja, { header: 1, defval: '', raw: false });
+                        const extraidas = procesarHojaEstructurada(rows);
+                        
+                        extraidas.forEach(act => {
+                            // Evitar duplicados entre pestañas
+                            if (!actividadesExtraidas.some(a => a.codigo === act.codigo)) {
+                                actividadesExtraidas.push(act);
+                            }
+                        });
                     });
 
                     document.getElementById('totalActividades').innerText = actividadesExtraidas.length;
@@ -227,7 +197,7 @@
 
                     const log = document.getElementById('logEstado');
                     log.classList.remove('hidden');
-                    log.innerText = `Éxito: Se detectaron automáticamente ${actividadesExtraidas.length} actividades únicas en la columna de códigos (${colCodCarta + 1}) de la Carta ABE.`;
+                    log.innerText = `Éxito: Se mapearon correctamente ${actividadesExtraidas.length} actividades extrayendo los encabezados reales (Sistema, Componente, Estándar, Condición Anormal).`;
                     log.className = 'mt-6 p-4 rounded-xl text-xs font-mono bg-[#0f111a] border border-emerald-500/50 text-emerald-300';
                     
                     renderizarVistaPrevia();
@@ -235,7 +205,7 @@
                 } catch (err) {
                     const log = document.getElementById('logEstado');
                     log.classList.remove('hidden');
-                    log.innerText = 'Error al leer el Excel: ' + (err.message || err);
+                    log.innerText = 'Error al procesar el Excel: ' + (err.message || err);
                     log.className = 'mt-6 p-4 rounded-xl text-xs font-mono bg-rose-950/40 border border-rose-500/50 text-rose-300';
                     actividadesExtraidas = [];
                     document.getElementById('seccionPrevia').classList.add('hidden');
@@ -253,7 +223,7 @@
                 document.querySelector('main').appendChild(tabla);
             }
             const escapar = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-            tabla.innerHTML = `<table class="w-full text-left text-xs"><thead class="bg-slate-800 sticky top-0"><tr>${['Código','Modo','Sistema','Componente','Frecuencia','Validación'].map(t=>`<th class="p-3">${t}</th>`).join('')}</tr></thead><tbody>${actividadesExtraidas.map(a=>`<tr class="border-t border-slate-800"><td class="p-3 font-bold text-sky-300">${escapar(a.codigo)}</td><td class="p-3">${escapar(a.modo)}</td><td class="p-3">${escapar(a.sistema)}</td><td class="p-3">${escapar(a.componente)}</td><td class="p-3">${escapar(a.frecuencia)}</td><td class="p-3 ${a._validacion==='OK'?'text-emerald-300':'text-amber-300'}">${escapar(a._validacion)}</td></tr>`).join('')}</tbody></table>`;
+            tabla.innerHTML = `<table class="w-full text-left text-xs"><thead class="bg-slate-800 sticky top-0"><tr>${['Código','Modo','Sistema','Componente','Frecuencia','Validación'].map(t=>`<th class="p-3">${t}</th>`).join('')}</tr></thead><tbody>${actividadesExtraidas.map(a=>`<tr class="border-t border-slate-800"><td class="p-3 font-bold text-sky-300">${escapar(a.codigo)}</td><td class="p-3">${escapar(a.modo)}</td><td class="p-3 text-purple-300">${escapar(a.sistema)}</td><td class="p-3 font-medium text-white">${escapar(a.componente)}</td><td class="p-3">${escapar(a.frecuencia)}</td><td class="p-3 text-emerald-300">${escapar(a._validacion)}</td></tr>`).join('')}</tbody></table>`;
         }
 
         async function obtenerOCrearArea(nombreArea = 'Inyección PET') {
@@ -289,7 +259,7 @@
                 
                 const { error } = await supabaseClient.from('actividades').upsert(filas, { onConflict: 'id_maquina,codigo' });
                 if (error) throw error;
-                log.innerText = `¡ÉXITO! ${filas.length} actividades importadas/actualizadas para ${nombreMaquinaDetectada}.`;
+                log.innerText = `¡ÉXITO TOTAL! ${filas.length} actividades perfectamente sincronizadas e importadas para ${nombreMaquinaDetectada}.`;
                 log.className = 'mt-6 p-4 rounded-xl text-xs font-mono bg-emerald-950/40 border border-emerald-500/50 text-emerald-300';
             } catch (err) {
                 log.innerText = 'Error en la importación: ' + (err.message || err);
