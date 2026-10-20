@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EMPAQPLAST S.A. | Panel Administrador TPM</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- SheetJS para procesar Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
         tailwind.config = {
@@ -36,34 +39,41 @@
         </a>
     </header>
 
-    <main class="max-w-5xl mx-auto w-full bg-ind-panel industrial-border rounded-2xl p-8 shadow-2xl">
+    <main class="max-w-6xl mx-auto w-full bg-ind-panel industrial-border rounded-2xl p-8 shadow-2xl">
         <h2 class="text-lg font-bold text-white mb-2 uppercase">Importar Excel de Máquina</h2>
-        <p class="text-xs text-slate-400 mb-6">Selecciona el archivo Excel (.xlsx) de la máquina para extraer automáticamente las actividades y cargarlas a Supabase sin afectar otras máquinas.</p>
+        <p class="text-xs text-slate-400 mb-6">Selecciona el archivo Excel (.xlsx) y la máquina de destino para verificar las actividades antes de enviarlas a la base de datos.</p>
 
-        <div class="border-2 border-dashed border-purple-500/40 rounded-xl p-8 text-center bg-[#0f111a]/50 hover:border-purple-400 transition">
+        <!-- PASO 1: SELECCIONAR MÁQUINA DESTINO -->
+        <div class="mb-6 bg-[#0f111a]/80 p-4 rounded-xl border border-purple-500/30">
+            <label class="block text-xs font-bold text-purple-300 uppercase mb-2">1. Selecciona la Máquina de Destino (OBLIGATORIO):</label>
+            <select id="selectMaquina" class="w-full bg-slate-900 border border-purple-500/50 rounded-lg p-3 text-white text-xs font-mono focus:outline-none focus:border-purple-400">
+                <option value="">-- Cargar lista de máquinas desde Supabase... --</option>
+            </select>
+        </div>
+
+        <!-- PASO 2: CARGAR EXCEL -->
+        <div class="border-2 border-dashed border-purple-500/40 rounded-xl p-8 text-center bg-[#0f111a]/50 hover:border-purple-400 transition mb-6">
             <input type="file" id="excelInput" accept=".xlsx, .xls" class="hidden" onchange="procesarArchivoExcel(event)">
             <label for="excelInput" class="cursor-pointer bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs uppercase px-6 py-3 rounded-xl transition shadow-lg inline-block">
-                Seleccionar Excel (.xlsx)
+                2. Seleccionar Excel (.xlsx)
             </label>
             <p id="nombreArchivo" class="text-xs text-slate-400 mt-3 font-mono">Ningún archivo seleccionado</p>
         </div>
 
+        <!-- PREVISUALIZACIÓN Y DETALLE DE COLUMNAS -->
         <div id="seccionPrevia" class="hidden mt-8 bg-[#0f111a] industrial-border rounded-xl p-6">
-            <h3 class="text-sm font-bold text-purple-300 uppercase mb-4 border-b border-purple-500/30 pb-2">Confirmación de Destino</h3>
-            
-            <div class="grid grid-cols-2 gap-4 text-xs mb-4">
-                <div>
-                    <label class="block text-slate-400 mb-1">Nombre / Código de la Máquina Destino:</label>
-                    <input type="text" id="inputNombreMaquina" class="w-full bg-slate-900 border border-purple-500/50 rounded-lg p-2 text-white font-mono font-bold focus:outline-none focus:border-purple-400" placeholder="Ej. HUSKY 3">
-                </div>
-                <div>
-                    <span class="block text-slate-400 mb-1">Total actividades leídas:</span>
-                    <strong id="totalActividades" class="text-white font-mono text-base">0</strong>
-                </div>
+            <div class="flex items-center justify-between border-b border-purple-500/30 pb-3 mb-4">
+                <h3 class="text-sm font-bold text-purple-300 uppercase">Previsualización Completa del Excel</h3>
+                <div class="text-xs text-slate-400">Total actividades leídas: <strong id="totalActividades" class="text-white font-mono text-sm">0</strong></div>
             </div>
 
-            <button id="btnImportar" onclick="subirActividadesASupabase()" class="w-full mt-4 bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">
-                IMPORTAR EXCLUSIVAMENTE A ESTA MÁQUINA
+            <!-- TABLA PREVIA DE VERIFICACIÓN -->
+            <div id="contenedorTablaPrevia" class="overflow-x-auto overflow-y-auto max-h-96 rounded-xl border border-slate-700 mb-6">
+                <!-- Se llena dinámicamente -->
+            </div>
+
+            <button id="btnImportar" onclick="subirActividadesASupabase()" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg cursor-pointer">
+                CONFIRMAR E IMPORTAR ACTIVIDADES A SUPABASE
             </button>
         </div>
 
@@ -76,7 +86,6 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let actividadesExtraidas = [];
-        let areaDetectada = "Inyección PET";
 
         const normalizar = v => String(v ?? '').replace(/[✔️✖️🟡🔴🟢]/g, '').replace(/\s+/g, ' ').trim();
 
@@ -90,6 +99,28 @@
             const prefijo = v.charAt(0);
             const num = v.slice(1).padStart(3, '0');
             return `${prefijo}-${num}`;
+        }
+
+        // Cargar máquinas al iniciar la página
+        async function cargarListaMaquinas() {
+            const select = document.getElementById('selectMaquina');
+            try {
+                const { data: maquinas, error } = await supabaseClient
+                    .from('maquinas')
+                    .select('id, nombre, codigo')
+                    .eq('activo', true)
+                    .order('nombre');
+
+                if (error) throw error;
+
+                select.innerHTML = '<option value="">-- Selecciona la máquina exacta de destino --</option>';
+                maquinas.forEach(m => {
+                    select.innerHTML += `<option value="${m.id}">${m.nombre} (${m.codigo})</option>`;
+                });
+            } catch (err) {
+                select.innerHTML = '<option value="">Error cargando máquinas</option>';
+                console.error("Error al cargar máquinas:", err);
+            }
         }
 
         function procesarHojaEstructurada(rows) {
@@ -138,8 +169,8 @@
                         sistema: sistemaActual || 'Sistema General',
                         componente: componenteVal || 'Componente General',
                         frecuencia: 'Diaria',
-                        estandar_ejecucion: estandarVal || 'Realizar mantenimiento autónomo según estándar',
-                        condicion_anormal: anormalVal || 'Presencia de desgaste, residuo o anomalía',
+                        estandar_ejecucion: estandarVal || 'Sin estándar registrado',
+                        condicion_anormal: anormalVal || 'Sin condición anormal registrada',
                         material_herramienta: materialesUnidos,
                         tiempo_estimado_seg: 300,
                         activo: true
@@ -155,11 +186,6 @@
             if (!file) return;
 
             document.getElementById('nombreArchivo').innerText = file.name;
-            const base = file.name.replace(/\.(xlsx|xlsm|xls)$/i, '').trim();
-            const matchMaquina = base.match(/^(.*?)(?:\s+-\s+|\s+ABE\b|$)/i);
-            const nombreMaquinaDetectada = (matchMaquina?.[1] || base).trim() || 'HUSKY 3';
-            
-            document.getElementById('inputNombreMaquina').value = nombreMaquinaDetectada;
 
             const reader = new FileReader();
             reader.onload = function(evt) {
@@ -182,10 +208,7 @@
                     document.getElementById('totalActividades').innerText = actividadesExtraidas.length;
                     document.getElementById('seccionPrevia').classList.remove('hidden');
 
-                    const log = document.getElementById('logEstado');
-                    log.classList.remove('hidden');
-                    log.innerText = `Listo: Se leyeron ${actividadesExtraidas.length} actividades del archivo Excel. Confirma el nombre de la máquina destino antes de importar.`;
-                    log.className = 'mt-6 p-4 rounded-xl text-xs font-mono bg-[#0f111a] border border-emerald-500/50 text-emerald-300';
+                    renderizarTablaCompleta();
 
                 } catch (err) {
                     const log = document.getElementById('logEstado');
@@ -199,60 +222,88 @@
             reader.readAsArrayBuffer(file);
         }
 
-        async function obtenerOCrearArea(nombreArea = 'Inyección PET') {
-            const { data, error } = await supabaseClient.from('areas').select('id').eq('nombre', nombreArea).maybeSingle();
-            if (error) throw new Error("Error al consultar áreas: " + error.message);
-            if (data) return data.id;
-            const { data: nueva, error: errorInsert } = await supabaseClient.from('areas').insert([{ nombre: nombreArea, activo: true }]).select('id').single();
-            if (errorInsert) throw new Error("Error al crear área: " + errorInsert.message);
-            return nueva.id;
-        }
+        function renderizarTablaCompleta() {
+            const contenedor = document.getElementById('contenedorTablaPrevia');
+            const escapar = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            
+            let html = `
+                <table class="w-full text-left text-xs min-w-[900px]">
+                    <thead class="bg-slate-800 sticky top-0 text-slate-300 uppercase font-mono">
+                        <tr>
+                            <th class="p-3 border-b border-slate-700">Código</th>
+                            <th class="p-3 border-b border-slate-700">Modo</th>
+                            <th class="p-3 border-b border-slate-700">Sistema</th>
+                            <th class="p-3 border-b border-slate-700">Componente</th>
+                            <th class="p-3 border-b border-slate-700">Frecuencia</th>
+                            <th class="p-3 border-b border-slate-700">Estándar (Actividad)</th>
+                            <th class="p-3 border-b border-slate-700">Condición Anormal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800">`;
 
-        async function obtenerOCrearMaquina(nombre, idArea) {
-            const codigoMaquina = nombre.toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
-            const { data, error } = await supabaseClient.from('maquinas').select('id').eq('codigo', codigoMaquina).maybeSingle();
-            if (error) throw new Error("Error al consultar máquinas: " + error.message);
-            if (data) return data.id;
-            const { data: nueva, error: errorInsert } = await supabaseClient.from('maquinas').insert([{ id_area: idArea, codigo: codigoMaquina, nombre, activo: true }]).select('id').single();
-            if (errorInsert) throw new Error("Error al crear máquina: " + errorInsert.message);
-            return nueva.id;
+            actividadesExtraidas.forEach(a => {
+                html += `
+                    <tr class="hover:bg-slate-900/50 transition">
+                        <td class="p-3 font-bold text-sky-400 font-mono">${escapar(a.codigo)}</td>
+                        <td class="p-3 font-mono text-purple-300">${escapar(a.modo)}</td>
+                        <td class="p-3 text-slate-200 font-medium">${escapar(a.sistema)}</td>
+                        <td class="p-3 text-white font-semibold">${escapar(a.componente)}</td>
+                        <td class="p-3 text-slate-300 font-mono">${escapar(a.frecuencia)}</td>
+                        <td class="p-3 text-slate-300 max-w-xs truncate" title="${escapar(a.estandar_ejecucion)}">${escapar(a.estandar_ejecucion)}</td>
+                        <td class="p-3 text-rose-300 max-w-xs truncate" title="${escapar(a.condicion_anormal)}">${escapar(a.condicion_anormal)}</td>
+                    </tr>`;
+            });
+
+            html += `</tbody></table>`;
+            contenedor.innerHTML = html;
         }
 
         async function subirActividadesASupabase() {
-            if (!actividadesExtraidas.length) return;
+            const selectMaquina = document.getElementById('selectMaquina');
+            const idMaquina = selectMaquina.value;
 
-            const nombreMaquina = document.getElementById('inputNombreMaquina').value.trim();
-            if (!nombreMaquina) {
-                alert("Por favor, ingresa un nombre o código válido para la máquina.");
+            if (!idMaquina) {
+                alert("⚠️ Debes seleccionar obligatoriamente una máquina en el desplegable superior antes de importar.");
                 return;
             }
 
+            if (!actividadesExtraidas.length) {
+                alert("No hay actividades para importar.");
+                return;
+            }
+
+            const nombreMaquinaSeleccionada = selectMaquina.options[selectMaquina.selectedIndex].text;
             const btn = document.getElementById('btnImportar');
             const log = document.getElementById('logEstado');
+
             btn.disabled = true;
             log.classList.remove('hidden');
 
             try {
-                log.innerText = `Validando la máquina "${nombreMaquina}"...`;
-                const idArea = await obtenerOCrearArea(areaDetectada);
-                const idMaquina = await obtenerOCrearMaquina(nombreMaquina, idArea);
-
-                log.innerText = `Asignando ID de máquina (${idMaquina}) y guardando ${actividadesExtraidas.length} actividades...`;
+                log.innerText = `Sincronizando ${actividadesExtraidas.length} actividades exclusivamente con "${nombreMaquinaSeleccionada}"...`;
+                log.className = 'mt-6 p-4 rounded-xl text-xs font-mono bg-[#0f111a] border border-purple-500/50 text-purple-300';
 
                 const filas = actividadesExtraidas.map(a => ({ ...a, id_maquina: idMaquina }));
                 
-                const { error } = await supabaseClient.from('actividades').upsert(filas, { onConflict: 'id_maquina,codigo' });
+                const { error } = await supabaseClient
+                    .from('actividades')
+                    .upsert(filas, { onConflict: 'id_maquina,codigo' });
+
                 if (error) throw error;
 
-                log.innerText = `¡ÉXITO TOTAL! Se registraron/actualizaron ${filas.length} actividades aisladas exclusivamente para la máquina "${nombreMaquina}" (ID: ${idMaquina}).`;
+                log.innerText = `¡ÉXITO TOTAL! Se registraron/actualizaron las ${filas.length} actividades únicamente para la máquina: ${nombreMaquinaSeleccionada}. Ninguna otra máquina fue modificada.`;
                 log.className = 'mt-6 p-4 rounded-xl text-xs font-mono bg-emerald-950/40 border border-emerald-500/50 text-emerald-300';
+
             } catch (err) {
-                log.innerText = 'Error en la importación: ' + (err.message || err);
+                log.innerText = 'Error al guardar en Supabase: ' + (err.message || err);
                 log.className = 'mt-6 p-4 rounded-xl text-xs font-mono bg-rose-950/40 border border-rose-500/50 text-rose-300';
             } finally {
                 btn.disabled = false;
             }
         }
+
+        // Cargar máquinas al iniciar
+        window.onload = cargarListaMaquinas;
     </script>
 </body>
 </html>
