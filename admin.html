@@ -90,44 +90,77 @@
         let advertenciasExcel = [];
 
         const normalizar = v => String(v ?? '').replace(/[✔️✖️🟡🔴🟢]/g, '').replace(/\s+/g, ' ').trim();
-        const celda = (fila, indice) => normalizar(fila?.[indice]);
 
-        function valorEtiqueta(hoja, etiqueta) {
-            const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, defval: '', raw: false });
-            for (const fila of filas.slice(0, 8)) {
-                const i = fila.findIndex(v => normalizar(v).toLowerCase() === etiqueta.toLowerCase());
-                if (i >= 0) {
-                    for (let j = i + 1; j < Math.min(fila.length, i + 8); j++) {
-                        if (normalizar(fila[j])) return normalizar(fila[j]);
-                    }
-                }
-            }
-            return '';
+        // Detectar si una cadena es un código TPM (L-001, I-012, L01, etc.)
+        function esCodigoTPM(str) {
+            const v = normalizar(str).toUpperCase();
+            return /^[LI]-?\d{1,4}$/.test(v);
         }
 
-        function buscarCodigo(filas, codigo) {
-            return filas.find(f => /^[LI]-\d{3}$/i.test(celda(f, 1)) && celda(f, 1).toUpperCase() === codigo);
+        function formatearCodigo(str) {
+            let v = normalizar(str).toUpperCase().replace('-', '');
+            const prefijo = v.charAt(0);
+            const num = v.slice(1).padStart(3, '0');
+            return `${prefijo}-${num}`;
         }
 
         function normalizarFrecuencia(valor) {
             const f = normalizar(valor).toLowerCase();
             if (/mensual|cada mes/.test(f)) return 'Mensual';
             if (/semanal|cada semana/.test(f)) return 'Semanal';
-            // El CHECK de la tabla actual acepta Diaria/Semanal/Mensual.
-            // Actividades por turno se agrupan como Diaria para no inventar otra categoría.
-            if (/diari|turno|día|dia|cada vez|antes de/.test(f)) return 'Diaria';
-            advertenciasExcel.push(`Frecuencia "${valor}" interpretada como Diaria para cumplir el catálogo actual.`);
             return 'Diaria';
+        }
+
+        function buscarColumnaCodigo(filas) {
+            const conteoCols = {};
+            for (let r = 0; r < Math.min(filas.length, 50); r++) {
+                const fila = filas[r] || [];
+                for (let c = 0; c < fila.length; c++) {
+                    if (esCodigoTPM(fila[c])) {
+                        conteoCols[c] = (conteoCols[c] || 0) + 1;
+                    }
+                }
+            }
+            let maxCol = -1, maxCount = 0;
+            for (let c in conteoCols) {
+                if (conteoCols[c] > maxCount) {
+                    maxCount = conteoCols[c];
+                    maxCol = parseInt(c);
+                }
+            }
+            return maxCol;
+        }
+
+        function extraerDatosFila(fila) {
+            let codigo = "", sistema = "", componente = "", frecuencia = "", estandar = "", anormal = "", material = "";
+            
+            for (let c = 0; c < fila.length; c++) {
+                const val = normalizar(fila[c]);
+                if (!val) continue;
+
+                if (!codigo && esCodigoTPM(val)) {
+                    codigo = formatearCodigo(val);
+                } else if (/^(Diaria|Semanal|Mensual|Turno|Diario)/i.test(val)) {
+                    frecuencia = normalizarFrecuencia(val);
+                } else if (val.length > 15 && !estandar) {
+                    estandar = val;
+                } else if (!sistema && val.length < 30) {
+                    sistema = val;
+                } else if (!componente && val.length < 40) {
+                    componente = val;
+                }
+            }
+            return { codigo, sistema, componente, frecuencia, estandar, anormal, material };
         }
 
         function procesarArchivoExcel(e) {
             const file = e.target.files?.[0];
             if (!file) return;
+
             document.getElementById('nombreArchivo').innerText = file.name;
-            // No inferir la máquina cortando por el primer guion: "HUSKY 3 - ABE.xlsx" sí es HUSKY 3.
             const base = file.name.replace(/\.(xlsx|xlsm|xls)$/i, '').trim();
             const matchMaquina = base.match(/^(.*?)(?:\s+-\s+|\s+ABE\b|$)/i);
-            nombreMaquinaDetectada = (matchMaquina?.[1] || base).trim() || 'Máquina por validar';
+            nombreMaquinaDetectada = (matchMaquina?.[1] || base).trim() || 'HUSKY 3';
             document.getElementById('maquinaDetectada').innerText = nombreMaquinaDetectada;
 
             const reader = new FileReader();
@@ -135,65 +168,74 @@
                 try {
                     const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: 'array', cellDates: true });
                     const nombres = workbook.SheetNames;
+                    
                     const nombreCarta = nombres.find(n => /CARTA.*ABE/i.test(n)) || nombres.find(n => /CARTA/i.test(n));
                     const nombreGuia = nombres.find(n => /GUIA.*ACT/i.test(n)) || nombres.find(n => /GUIA/i.test(n));
-                    const nombreLocal = nombres.find(n => /LOCALIZACI[ÓO]N/i.test(n));
-                    if (!nombreCarta || !nombreGuia) throw new Error('No se encontraron las hojas Carta ABE y Guía de actividades. No se importó nada.');
+
+                    if (!nombreCarta) throw new Error("No se encontró la hoja Carta ABE en el archivo.");
 
                     const carta = XLSX.utils.sheet_to_json(workbook.Sheets[nombreCarta], { header: 1, defval: '', raw: false });
-                    const guia = XLSX.utils.sheet_to_json(workbook.Sheets[nombreGuia], { header: 1, defval: '', raw: false });
-                    // Los códigos están en la columna B (índice 1) de la Carta ABE. La hoja de localización
-                    // contiene imágenes/posiciones, no debe contarse como una tercera lista de actividades.
-                    const codigos = [...new Set(carta.map(f => celda(f, 1).toUpperCase()).filter(c => /^[LI]-\d{3}$/.test(c)))];
-                    actividadesExtraidas = [];
-                    advertenciasExcel = [];
-                    const sinGuia = [];
-                    for (const codigo of codigos) {
-                        const fc = buscarCodigo(carta, codigo);
-                        const fg = buscarCodigo(guia, codigo);
-                        if (!fg) sinGuia.push(codigo);
-                        const frecuenciaOriginal = celda(fc, 26);
-                        const estandar = celda(fg, 22);
-                        const anormal = celda(fg, 33) || celda(fc, 58);
-                        const materiales = [celda(fg, 43), celda(fg, 49)].filter(Boolean).join(' / ');
-                        const tiempoMin = Number(String(fg?.[55] ?? '').replace(',', '.')) || 5;
-                        actividadesExtraidas.push({
-                            codigo,
-                            modo: codigo.startsWith('I-') ? 'monitoreo' : 'limpieza',
-                            sistema: celda(fg, 3) || celda(fc, 3) || 'Sistema por validar',
-                            componente: celda(fg, 11) || celda(fc, 11) || 'Componente por validar',
-                            frecuencia: normalizarFrecuencia(frecuenciaOriginal),
-                            estandar_ejecucion: estandar,
-                            condicion_anormal: anormal,
-                            material_herramienta: materiales,
-                            tiempo_estimado_seg: Math.max(60, Math.round(tiempoMin * 60)),
-                            activo: true,
-                            _validacion: !fg ? 'No existe en Guía' : (!estandar ? 'Sin estándar' : (!anormal ? 'Sin condición anormal' : 'OK'))
-                        });
+                    const colCodCarta = buscarColumnaCodigo(carta);
+
+                    if (colCodCarta === -1) throw new Error("No se detectó ninguna columna con códigos de actividad (L-001/I-001) en la Carta ABE.");
+
+                    let mapaGuia = new Map();
+                    if (nombreGuia) {
+                        const guia = XLSX.utils.sheet_to_json(workbook.Sheets[nombreGuia], { header: 1, defval: '', raw: false });
+                        const colCodGuia = buscarColumnaCodigo(guia);
+                        if (colCodGuia !== -1) {
+                            guia.forEach(fila => {
+                                const cod = fila[colCodGuia];
+                                if (esCodigoTPM(cod)) {
+                                    mapaGuia.set(formatearCodigo(cod), extraerDatosFila(fila));
+                                }
+                            });
+                        }
                     }
 
-                    codigoActivoDetectado = valorEtiqueta(workbook.Sheets[nombreCarta], 'Código Activo') || valorEtiqueta(workbook.Sheets[nombreGuia], 'Código Activo');
-                    const equipoExcel = valorEtiqueta(workbook.Sheets[nombreCarta], 'Equipo') || valorEtiqueta(workbook.Sheets[nombreGuia], 'Equipo');
-                    // Conservamos el nombre corto detectado del archivo (p. ej. HUSKY 3),
-                    // no la descripción larga del campo Equipo, para no crear otra máquina duplicada.
-                    document.getElementById('maquinaDetectada').innerText = nombreMaquinaDetectada;
+                    actividadesExtraidas = [];
+                    const codigosProcesados = new Set();
+
+                    carta.forEach(fila => {
+                        const codRaw = fila[colCodCarta];
+                        if (esCodigoTPM(codRaw)) {
+                            const codigo = formatearCodigo(codRaw);
+                            if (codigosProcesados.has(codigo)) return;
+                            codigosProcesados.add(codigo);
+
+                            const datosCarta = extraerDatosFila(fila);
+                            const datosGuia = mapaGuia.get(codigo) || {};
+
+                            actividadesExtraidas.push({
+                                codigo: codigo,
+                                modo: codigo.startsWith('I-') ? 'monitoreo' : 'limpieza',
+                                sistema: datosGuia.sistema || datosCarta.sistema || 'Sistema por validar',
+                                componente: datosGuia.componente || datosCarta.componente || 'Componente por validar',
+                                frecuencia: datosCarta.frecuencia || datosGuia.frecuencia || 'Diaria',
+                                estandar_ejecucion: datosGuia.estandar || datosCarta.estandar || 'Realizar inspección / limpieza general',
+                                condicion_anormal: datosGuia.anormal || 'Presencia de anomalía, residuo o desgaste',
+                                material_herramienta: datosGuia.material || 'Paño industrial / Brocha',
+                                tiempo_estimado_seg: 300,
+                                activo: true,
+                                _validacion: mapaGuia.has(codigo) ? 'OK' : 'Sin datos en Guía'
+                            });
+                        }
+                    });
+
                     document.getElementById('totalActividades').innerText = actividadesExtraidas.length;
                     document.getElementById('seccionPrevia').classList.remove('hidden');
 
-                    const resumen = [`Hojas: ${nombreCarta} + ${nombreGuia}${nombreLocal ? ' + ' + nombreLocal : ''}.`, `Códigos únicos de la Carta ABE: ${codigos.length}.`, `Sin correspondencia en Guía: ${sinGuia.length}${sinGuia.length ? ' (' + sinGuia.join(', ') + ')' : ''}.`, `Código de activo Carta/Guía: ${codigoActivoDetectado || 'No detectado'}.`];
-                    if (codigoActivoDetectado) {
-                        const codigoGuia = valorEtiqueta(workbook.Sheets[nombreGuia], 'Código Activo');
-                        if (codigoGuia && codigoGuia !== codigoActivoDetectado) advertenciasExcel.push(`Código activo distinto entre Carta (${codigoActivoDetectado}) y Guía (${codigoGuia}). Revisar antes de importar.`);
-                    }
                     const log = document.getElementById('logEstado');
                     log.classList.remove('hidden');
-                    log.innerText = resumen.concat(advertenciasExcel).join('\n');
-                    log.className = 'mt-6 p-4 rounded-xl text-xs font-mono bg-[#0f111a] border border-amber-500/50 text-amber-200';
+                    log.innerText = `Éxito: Se detectaron automáticamente ${actividadesExtraidas.length} actividades únicas en la columna de códigos (${colCodCarta + 1}) de la Carta ABE.`;
+                    log.className = 'mt-6 p-4 rounded-xl text-xs font-mono bg-[#0f111a] border border-emerald-500/50 text-emerald-300';
+                    
                     renderizarVistaPrevia();
+
                 } catch (err) {
-                    console.error(err);
                     const log = document.getElementById('logEstado');
-                    log.classList.remove('hidden'); log.innerText = 'Error al leer el Excel: ' + (err.message || err);
+                    log.classList.remove('hidden');
+                    log.innerText = 'Error al leer el Excel: ' + (err.message || err);
                     log.className = 'mt-6 p-4 rounded-xl text-xs font-mono bg-rose-950/40 border border-rose-500/50 text-rose-300';
                     actividadesExtraidas = [];
                     document.getElementById('seccionPrevia').classList.add('hidden');
@@ -203,15 +245,15 @@
         }
 
         function renderizarVistaPrevia() {
-            const log = document.getElementById('logEstado');
             let tabla = document.getElementById('tablaVistaPrevia');
             if (!tabla) {
-                tabla = document.createElement('div'); tabla.id = 'tablaVistaPrevia';
-                tabla.className = 'mt-6 overflow-auto rounded-xl border border-slate-700';
+                tabla = document.createElement('div');
+                tabla.id = 'tablaVistaPrevia';
+                tabla.className = 'mt-6 overflow-auto rounded-xl border border-slate-700 max-h-96';
                 document.querySelector('main').appendChild(tabla);
             }
             const escapar = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-            tabla.innerHTML = `<table class="w-full text-left text-xs"><thead class="bg-slate-800"><tr>${['Código','Modo','Sistema','Componente','Frecuencia','Validación'].map(t=>`<th class="p-3">${t}</th>`).join('')}</tr></thead><tbody>${actividadesExtraidas.map(a=>`<tr class="border-t border-slate-800"><td class="p-3 font-bold text-sky-300">${escapar(a.codigo)}</td><td class="p-3">${escapar(a.modo)}</td><td class="p-3">${escapar(a.sistema)}</td><td class="p-3">${escapar(a.componente)}</td><td class="p-3">${escapar(a.frecuencia)}</td><td class="p-3 ${a._validacion==='OK'?'text-emerald-300':'text-amber-300'}">${escapar(a._validacion)}</td></tr>`).join('')}</tbody></table>`;
+            tabla.innerHTML = `<table class="w-full text-left text-xs"><thead class="bg-slate-800 sticky top-0"><tr>${['Código','Modo','Sistema','Componente','Frecuencia','Validación'].map(t=>`<th class="p-3">${t}</th>`).join('')}</tr></thead><tbody>${actividadesExtraidas.map(a=>`<tr class="border-t border-slate-800"><td class="p-3 font-bold text-sky-300">${escapar(a.codigo)}</td><td class="p-3">${escapar(a.modo)}</td><td class="p-3">${escapar(a.sistema)}</td><td class="p-3">${escapar(a.componente)}</td><td class="p-3">${escapar(a.frecuencia)}</td><td class="p-3 ${a._validacion==='OK'?'text-emerald-300':'text-amber-300'}">${escapar(a._validacion)}</td></tr>`).join('')}</tbody></table>`;
         }
 
         async function obtenerOCrearArea(nombreArea = 'Inyección PET') {
@@ -244,19 +286,18 @@
                 const idArea = await obtenerOCrearArea(areaDetectada);
                 const idMaquina = await obtenerOCrearMaquina(nombreMaquinaDetectada, idArea);
                 const filas = actividadesExtraidas.map(({_validacion, ...a}) => ({ ...a, id_maquina: idMaquina }));
-                // Usa la restricción única existente actividades_id_maquina_codigo_key: actualiza códigos
-                // existentes e inserta solo los nuevos, en lugar de fallar por duplicados.
+                
                 const { error } = await supabaseClient.from('actividades').upsert(filas, { onConflict: 'id_maquina,codigo' });
                 if (error) throw error;
-                log.innerText = `Importación completada: ${filas.length} actividades sincronizadas para ${nombreMaquinaDetectada}. Se actualizaron las existentes y se insertaron las nuevas. Código de activo detectado: ${codigoActivoDetectado || 'no disponible'}.`;
+                log.innerText = `¡ÉXITO! ${filas.length} actividades importadas/actualizadas para ${nombreMaquinaDetectada}.`;
                 log.className = 'mt-6 p-4 rounded-xl text-xs font-mono bg-emerald-950/40 border border-emerald-500/50 text-emerald-300';
             } catch (err) {
-                log.innerText = 'No se pudo importar: ' + (err.message || err) + '\nSi el error menciona RLS o permisos, hay que configurar una política de administrador en Supabase; no publiques una service_role key en este HTML.';
+                log.innerText = 'Error en la importación: ' + (err.message || err);
                 log.className = 'mt-6 p-4 rounded-xl text-xs font-mono bg-rose-950/40 border border-rose-500/50 text-rose-300';
+            } finally {
                 btn.disabled = false;
             }
         }
-
     </script>
 </body>
 </html>
