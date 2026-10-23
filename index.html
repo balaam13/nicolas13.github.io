@@ -67,7 +67,7 @@
             <h2 class="text-lg font-black text-white uppercase tracking-wider mb-3">Bienvenido al Mantenimiento Autónomo</h2>
             <p class="text-xs text-slate-300 leading-relaxed mb-6">
                 Antes de iniciar, tómate unos momentos para familiarizarte con la plataforma. <br><br>
-                Aquí podrás consultar las actividades de limpieza y monitoreo, registrar observaciones y reportar anomalías cuando corresponda de acuerdo con los estándares operativos de EMPAQPLAST S.A.
+                Aquí podrás consultar las actividades de limpieza, monitoreo y lubricación, registrar observaciones y reportar anomalías cuando corresponda de acuerdo con los estándares operativos de EMPAQPLAST S.A.
             </p>
             <button type="button" onclick="cerrarFamiliarizacion()" class="w-full bg-ind-accent-gradient hover:bg-ind-accentHover text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-widest transition shadow-xl cursor-pointer">
                 ¿Ya quieres comenzar? — Iniciar Actividades
@@ -306,6 +306,12 @@
                 <div class="flex space-x-2">
                     <button type="button" onclick="cambiarModo('limpieza')" id="tab-limpieza" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-ind-accent-gradient text-white transition shadow cursor-pointer">Limpieza (16)</button>
                     <button type="button" onclick="cambiarModo('monitoreo')" id="tab-monitoreo" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#0f111a] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer">Monitoreo (22)</button>
+               <button type="button"
+        onclick="cambiarModo('lubricacion')"
+        id="tab-lubricacion"
+        class="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#0f111a] text-slate-400 hover:text-white transition industrial-border">
+    Lubricación (3)
+</button>
                 </div>
                 <div class="h-6 w-px bg-purple-500/30 hidden xl:block"></div>
                 
@@ -322,6 +328,8 @@
                         <option value="Diaria" selected>Diarias</option>
                         <option value="Semanal">Semanales</option>
                         <option value="Mensual">Mensuales</option>
+                        <option value="Trimestral">Trimestral</option>
+                        <option value="Según inspección">Según inspección</option>
                     </select>
                 </div>
             </div>
