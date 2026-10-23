@@ -325,6 +325,7 @@
                 <div class="flex items-center space-x-2 ml-2">
                     <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Frecuencia:</span>
                     <select id="select-frecuencia-filtro" onchange="filtrarPorFrecuencia()" class="bg-[#0f111a] industrial-border text-xs text-white px-3.5 py-2.5 rounded-xl font-semibold focus:outline-none focus:border-ind-accent cursor-pointer">
+                        <option value="TODAS">Todas las frecuencias</option>
                         <option value="Diaria" selected>Diarias</option>
                         <option value="Semanal">Semanales</option>
                         <option value="Mensual">Mensuales</option>
@@ -481,6 +482,8 @@
         // Arreglos que se cargarán desde Supabase
         let datosLimpieza = [];
         let datosMonitoreo = [];
+        let datosLubricacion = [];
+        let ultimasEjecuciones = {};
 
         const fechaArranqueTPM = new Date(2026, 8, 24);
         const CLAVE_FAMILIARIZACION = 'ma_familiarizado_v1';
@@ -640,6 +643,7 @@
 
                     return {
                         id: item.id,
+                        modo: item.modo,
                         codigo: item.codigo,
                         sistema: item.sistema,
                         componente: item.componente,
@@ -655,9 +659,14 @@
                     };
                 });
 
-                datosLimpieza = mapeadas.filter(i => i.codigo.startsWith('L'));
-                datosMonitoreo = mapeadas.filter(i => i.codigo.startsWith('I'));
+                datosLimpieza = mapeadas.filter(i => i.modo === 'limpieza' && i.codigo.startsWith('L-'));
+                datosMonitoreo = mapeadas.filter(i => i.modo === 'monitoreo' && i.codigo.startsWith('I-'));
+                datosLubricacion = mapeadas.filter(i => i.modo === 'lubricacion' && i.codigo.startsWith('LU-'));
 
+                await cargarUltimasEjecuciones(mapeadas.map(i => i.id));
+                document.getElementById('tab-limpieza').innerText = `Limpieza (${datosLimpieza.length})`;
+                document.getElementById('tab-monitoreo').innerText = `Monitoreo (${datosMonitoreo.length})`;
+                document.getElementById('tab-lubricacion').innerText = `Lubricación (${datosLubricacion.length})`;
                 poblarFiltroSistemas();
                 actualizarInterfaz();
             } catch (err) {
@@ -666,6 +675,77 @@
             }
         }
         
+        // Devuelve las actividades de la pestaña activa.
+        function obtenerListaModo(modo = globalModo) {
+            if (modo === 'limpieza') return datosLimpieza;
+            if (modo === 'monitoreo') return datosMonitoreo;
+            if (modo === 'lubricacion') return datosLubricacion;
+            return [];
+        }
+
+        // Carga la última ejecución normal completada de cada actividad desde Supabase.
+        async function cargarUltimasEjecuciones(idsActividades = []) {
+            ultimasEjecuciones = {};
+            if (!idsActividades.length) return;
+            const { data, error } = await supabaseClient
+                .from('ejecuciones')
+                .select('id_actividad, hora_fin, actividad_ejecutada, resultado, condicion')
+                .in('id_actividad', idsActividades)
+                .eq('actividad_ejecutada', true)
+                .eq('resultado', 'completado')
+                .eq('condicion', 'normal')
+                .order('hora_fin', { ascending: false });
+            if (error) {
+                console.error('No se pudo consultar el historial de ejecuciones:', error);
+                return;
+            }
+            (data || []).forEach(registro => {
+                if (!ultimasEjecuciones[registro.id_actividad]) {
+                    ultimasEjecuciones[registro.id_actividad] = registro.hora_fin;
+                }
+            });
+        }
+
+        function diasIntervaloFrecuencia(frecuencia) {
+            return ({ 'Diaria': 1, 'Semanal': 7, 'Mensual': 30, 'Trimestral': 90 })[frecuencia] || null;
+        }
+
+        function obtenerEstadoLubricacion(item) {
+            const ultima = ultimasEjecuciones[item.id];
+            const intervalo = diasIntervaloFrecuencia(item.periodicidad);
+            if (!ultima) return { estado: 'SIN REGISTRO', vencida: true, diasRestantes: 0, ultima: null };
+            const fechaUltima = new Date(ultima);
+            if (Number.isNaN(fechaUltima.getTime()) || !intervalo) return { estado: 'SIN FECHA', vencida: true, diasRestantes: 0, ultima: null };
+            const ahora = new Date();
+            const diasTranscurridos = Math.floor((obtenerFechaSinHora(ahora) - obtenerFechaSinHora(fechaUltima)) / 86400000);
+            const diasRestantes = intervalo - diasTranscurridos;
+            return {
+                estado: diasRestantes <= 0 ? 'VENCIDA' : 'AL DÍA',
+                vencida: diasRestantes <= 0,
+                diasRestantes: Math.max(0, diasRestantes),
+                ultima: fechaUltima
+            };
+        }
+
+        function actualizarAvisoLubricacion() {
+            const indicador = document.getElementById('tpm-estado-texto');
+            const contenedor = document.getElementById('tpm-alerta-calendario');
+            if (!indicador || !contenedor) return;
+            if (globalModo !== 'lubricacion') {
+                const estado = obtenerEstadoFrecuencias();
+                indicador.innerText = `DÍA/S PARA LAS ACTIVIDADES SEMANALES: ${estado.diasParaSemanal} | DÍA/S PARA LAS ACTIVIDADES MENSUALES: ${estado.diasParaMensual}`;
+                return;
+            }
+            const vencidas = datosLubricacion.filter(item => obtenerEstadoLubricacion(item).vencida);
+            if (vencidas.length) {
+                indicador.innerText = `AVISO DE LUBRICACIÓN: ${vencidas.length} actividad(es) pendiente(s): ${vencidas.map(i => i.codigo).join(', ')}`;
+                contenedor.className = 'bg-rose-950/50 border border-rose-500/60 px-4 py-2 rounded-xl text-xs text-rose-200 font-mono';
+            } else {
+                indicador.innerText = 'LUBRICACIÓN AL DÍA: todas las actividades están dentro de su frecuencia.';
+                contenedor.className = 'bg-emerald-950/40 border border-emerald-500/50 px-4 py-2 rounded-xl text-xs text-emerald-200 font-mono';
+            }
+        }
+
         let qrStream = null;
         let qrScanActive = false;
         let qrDetector = null;
@@ -817,7 +897,7 @@
         function cambiarOperador() { location.reload(); }
 
         function poblarFiltroSistemas() {
-            const lista = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const lista = obtenerListaModo();
             const sistemasUnicos = [...new Set(lista.map(item => item.sistema))];
             const selectFiltro = document.getElementById('select-sistema-filtro');
             
@@ -836,15 +916,23 @@
         function cambiarModo(modo) {
             globalModo = modo;
             globalPuntoIdx = 0;
-            if(modo === 'limpieza') {
-                document.getElementById('tab-limpieza').className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-ind-accent-gradient text-white transition shadow cursor-pointer";
-                document.getElementById('tab-monitoreo').className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-[#0f111a] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer";
-            } else {
-                document.getElementById('tab-monitoreo').className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-ind-accent-gradient text-white transition shadow cursor-pointer";
-                document.getElementById('tab-limpieza').className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-[#0f111a] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer";
-            }
+            const clasesActiva = "px-4 py-2.5 rounded-xl text-xs font-bold bg-ind-accent-gradient text-white transition shadow cursor-pointer";
+            const clasesInactiva = "px-4 py-2.5 rounded-xl text-xs font-bold bg-[#0f111a] text-slate-400 hover:text-white transition industrial-border font-semibold cursor-pointer";
+            document.getElementById('tab-limpieza').className = modo === 'limpieza' ? clasesActiva : clasesInactiva;
+            document.getElementById('tab-monitoreo').className = modo === 'monitoreo' ? clasesActiva : clasesInactiva;
+            document.getElementById('tab-lubricacion').className = modo === 'lubricacion' ? clasesActiva : clasesInactiva;
+            const filtroFrecuencia = document.getElementById('select-frecuencia-filtro');
+            if (filtroFrecuencia) filtroFrecuencia.value = modo === 'lubricacion' ? 'TODAS' : 'Diaria';
             poblarFiltroSistemas();
+            actualizarAvisoLubricacion();
             actualizarInterfaz();
+            if (modo === 'lubricacion') {
+                const vencidas = datosLubricacion.filter(item => obtenerEstadoLubricacion(item).vencida);
+                if (vencidas.length && !window.avisoLubricacionMostrado) {
+                    window.avisoLubricacionMostrado = true;
+                    mostrarAlertaIndustrial(`AVISO DE LUBRICACIÓN\n\nTienes ${vencidas.length} actividad(es) pendiente(s): ${vencidas.map(i => i.codigo).join(', ')}.\n\nRevisa cada ficha y registra la ejecución cuando corresponda.`);
+                }
+            }
         }
 
         function filtrarPorSistema() {
@@ -854,6 +942,7 @@
         }
 
         function frecuenciaEstaHabilitada(frecuencia) {
+            if (globalModo === 'lubricacion' || frecuencia === 'TODAS') return true;
             const estado = obtenerEstadoFrecuencias();
             if (frecuencia === 'Semanal') return estado.diasParaSemanal === 0;
             if (frecuencia === 'Mensual') return estado.diasParaMensual === 0;
@@ -876,7 +965,7 @@
         function filtrarPorFrecuencia() {
             const selector = document.getElementById('select-frecuencia-filtro');
             const frecuenciaSeleccionada = selector.value;
-            if (bloquearFrecuenciaNoHabilitada(frecuenciaSeleccionada)) {
+            if (globalModo !== 'lubricacion' && frecuenciaSeleccionada !== 'TODAS' && bloquearFrecuenciaNoHabilitada(frecuenciaSeleccionada)) {
                 selector.value = 'Diaria';
                 actualizarInterfaz();
                 return;
@@ -885,7 +974,8 @@
         }
 
         function actualizarInterfaz() {
-            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            actualizarAvisoLubricacion();
+            const listaOriginal = obtenerListaModo();
             const sistemaSeleccionado = document.getElementById('select-sistema-filtro').value;
             const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
             
@@ -901,7 +991,7 @@
 
             let listaFiltrada = listaOriginal.filter(item => {
                 const matchSistema = (sistemaSeleccionado === "TODOS" || item.sistema === sistemaSeleccionado);
-                const matchFrecuencia = (item.periodicidad === frecuenciaSeleccionada);
+                const matchFrecuencia = (frecuenciaSeleccionada === 'TODAS' || item.periodicidad === frecuenciaSeleccionada);
                 return matchSistema && matchFrecuencia;
             });
 
@@ -954,6 +1044,7 @@
                 const idxReal = listaOriginal.findIndex(el => el.codigo === item.codigo);
                 const estadoKey = `${globalModo}_${idxReal}`;
                 const dataEstado = globalEstados[estadoKey];
+                const estadoLub = globalModo === 'lubricacion' ? obtenerEstadoLubricacion(item) : null;
                 
                 let colorClass = "text-slate-400 bg-[#0f111a]/40 industrial-border hover:border-slate-400";
                 let textState = "PENDIENTE";
@@ -969,6 +1060,11 @@
                     textState = "OBSERVACIÓN";
                 }
 
+                if (estadoLub) {
+                    if (estadoLub.vencida) { colorClass = 'text-rose-300 bg-rose-950/25 border-rose-700/60'; textState = estadoLub.estado; }
+                    else { colorClass = 'text-emerald-300 bg-emerald-950/20 border-emerald-700/50'; textState = `AL DÍA · ${estadoLub.diasRestantes} D`; }
+                }
+
                 let estiloUrgencia = '';
                 if (item.periodicidad === 'Diaria' && (!dataEstado || dataEstado.actividadEjecutada !== true)) {
                     estiloUrgencia = `border-left: 4px solid ${colorUrgenciaPorHora()};`;
@@ -981,6 +1077,7 @@
                 let badgeFreqColor = "text-purple-300 bg-purple-950/30 border-purple-800/40";
                 if(item.periodicidad === "Semanal") badgeFreqColor = "text-amber-400 bg-amber-950/30 border-amber-800/40";
                 if(item.periodicidad === "Mensual") badgeFreqColor = "text-purple-400 bg-purple-950/30 border-purple-800/40";
+                if(item.periodicidad === "Trimestral") badgeFreqColor = "text-sky-300 bg-sky-950/30 border-sky-800/40";
 
                 const div = document.createElement('div');
                 div.className = `px-3.5 py-2.5 rounded-xl border-[1.5px] cursor-pointer transition flex items-center justify-between text-xs font-mono ${colorClass}`;
@@ -1012,7 +1109,7 @@
         }
 
         function mostrarFicha(idx) {
-            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const listaOriginal = obtenerListaModo();
             const item = listaOriginal[idx];
             if(!item) return;
 
@@ -1027,7 +1124,15 @@
             freqBadge.innerText = `Frecuencia - ${item.periodicidad}`;
             if(item.periodicidad === "Diaria") freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-purple-300 bg-purple-950/40 border-purple-800/60";
             else if(item.periodicidad === "Semanal") freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-amber-400 bg-amber-950/40 border-amber-800/60";
+            else if(item.periodicidad === 'Trimestral') freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-sky-300 bg-sky-950/40 border-sky-800/60";
             else freqBadge.className = "text-[11px] font-bold font-mono px-2.5 py-0.5 rounded border text-purple-400 bg-purple-950/40 border-purple-800/60";
+
+            if (globalModo === 'lubricacion') {
+                const estadoLub = obtenerEstadoLubricacion(item);
+                const ultimaTexto = estadoLub.ultima ? estadoLub.ultima.toLocaleDateString('es-EC') : 'sin registro previo';
+                document.getElementById('trazabilidad-estado').innerText = estadoLub.vencida ? `PENDIENTE DE LUBRICACIÓN · Última ejecución: ${ultimaTexto}` : `AL DÍA · Próxima actividad en ${estadoLub.diasRestantes} día(s) · Última ejecución: ${ultimaTexto}`;
+                document.getElementById('trazabilidad-estado').className = estadoLub.vencida ? 'text-xs text-rose-300 font-mono font-bold' : 'text-xs text-emerald-300 font-mono font-bold';
+            }
 
             document.getElementById('indicador-3d-texto').innerText = `${item.codigo} - ${item.componente}`;
 
@@ -1098,8 +1203,17 @@
                     btnVerificacion.title = "";
                 }
             } else {
-                trazabilidadElem.innerHTML = `Estado: Pendiente de inspección`;
-                trazabilidadElem.className = "text-xs text-slate-400 font-mono font-medium";
+                if (globalModo === 'lubricacion') {
+                    const estadoLub = obtenerEstadoLubricacion(item);
+                    const ultimaTexto = estadoLub.ultima ? estadoLub.ultima.toLocaleDateString('es-EC') : 'sin registro previo';
+                    trazabilidadElem.innerText = estadoLub.vencida
+                        ? `PENDIENTE DE LUBRICACIÓN · Última ejecución: ${ultimaTexto}`
+                        : `AL DÍA · Próxima actividad en ${estadoLub.diasRestantes} día(s) · Última ejecución: ${ultimaTexto}`;
+                    trazabilidadElem.className = estadoLub.vencida ? "text-xs text-rose-300 font-mono font-bold" : "text-xs text-emerald-300 font-mono font-bold";
+                } else {
+                    trazabilidadElem.innerHTML = `Estado: Pendiente de inspección`;
+                    trazabilidadElem.className = "text-xs text-slate-400 font-mono font-medium";
+                }
                 if(btnVerificacion) {
                     btnVerificacion.disabled = false;
                     btnVerificacion.title = "";
@@ -1278,10 +1392,10 @@
             const actual = globalEstados[estadoKey] || {};
             if (actual.actividadEjecutada && actual.condicion === 'anomalia') { mostrarAlertaIndustrial("Este punto tiene registrada una anomalía activa."); return; }
             if (actual.actividadEjecutada && actual.status === 'listo') { mostrarAlertaIndustrial("Esta actividad ya fue verificada en este ciclo."); return; }
-            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const listaOriginal = obtenerListaModo();
             const item = listaOriginal[globalPuntoIdx];
             const frecuenciaSeleccionada = document.getElementById('select-frecuencia-filtro').value;
-            if (!item || item.periodicidad !== frecuenciaSeleccionada || bloquearFrecuenciaNoHabilitada(frecuenciaSeleccionada)) return;
+            if (!item || (frecuenciaSeleccionada !== 'TODAS' && item.periodicidad !== frecuenciaSeleccionada) || (globalModo !== 'lubricacion' && bloquearFrecuenciaNoHabilitada(frecuenciaSeleccionada))) return;
 
             const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             let tiempoRealActividad = Number(globalTimer.elapsed) || 0;
@@ -1307,6 +1421,7 @@
                 if (error) throw error;
 
                 detenerTemporizador(false);
+                if (globalModo === 'lubricacion') { await cargarUltimasEjecuciones([...datosLimpieza, ...datosMonitoreo, ...datosLubricacion].map(i => i.id)); }
                 globalEstados[estadoKey] = { ...actual, status: estado, actividadEjecutada: true, condicion: 'normal', tipo: 'Normal', sistema: item.sistema, componente: item.componente, codigo: item.codigo, ejecuciones: (actual.ejecuciones || 0) + 1, ultimoTiempo: horaActual, tiempoReal: tiempoRealActividad };
                 
                 actualizarInterfaz();
@@ -1317,7 +1432,7 @@
                 for (let i = globalPuntoIdx + 1; i < listaOriginal.length; i++) {
                     const siguiente = listaOriginal[i];
                     const matchSistema = (sistemaSeleccionado === "TODOS" || siguiente.sistema === sistemaSeleccionado);
-                    const matchFrecuencia = (siguiente.periodicidad === frecuenciaSeleccionada);
+                    const matchFrecuencia = (frecuenciaSeleccionada === 'TODAS' || siguiente.periodicidad === frecuenciaSeleccionada);
                     if (matchSistema && matchFrecuencia) { siguienteIdx = i; break; }
                 }
                 if(siguienteIdx !== -1) { globalPuntoIdx = siguienteIdx; mostrarFicha(globalPuntoIdx); actualizarInterfaz(); }
@@ -1330,7 +1445,7 @@
         }
 
         async function guardarAnomalia() {
-            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const listaOriginal = obtenerListaModo();
             const item = listaOriginal[globalPuntoIdx];
             const tipoDano = document.getElementById('tipo-dano-seleccionado').value.trim();
             const com = document.getElementById('texto-anomalia').value.trim();
@@ -1395,7 +1510,7 @@
             try {
                 const { data: opData } = await supabaseClient.from('operadores').select('id').eq('codigo', globalOperador).single();
                 const operadorId = opData ? opData.id : 1;
-                const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+                const listaOriginal = obtenerListaModo();
                 const item = listaOriginal[globalPuntoIdx];
 
                 const { data: ejecData, error: ejecError } = await supabaseClient.from('ejecuciones').insert([{
@@ -1520,7 +1635,7 @@
         }
 
         function abrirFormularioAnomalia() {
-            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const listaOriginal = obtenerListaModo();
             const item = listaOriginal[globalPuntoIdx];
             document.getElementById('modal-anomalia-info').innerText = `${item.sistema} - ${item.codigo}`;
             document.getElementById('anomalia-sistema-auto').innerText = item.sistema;
@@ -1541,7 +1656,7 @@
         }
 
         function abrirModalObservacion() {
-            const listaOriginal = globalModo === 'limpieza' ? datosLimpieza : datosMonitoreo;
+            const listaOriginal = obtenerListaModo();
             const item = listaOriginal[globalPuntoIdx];
             
             document.getElementById('modal-observacion-info').innerText = `${item.sistema} - ${item.codigo}`;
